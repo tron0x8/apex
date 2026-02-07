@@ -1024,18 +1024,23 @@ class UnifiedScanner:
                         taint_info=taint_info
                     )
 
-                    # Stage 4.5: Admin-only code gets severe penalty
-                    # Code Injection in admin plugins is usually intentional functionality
+                    # Stage 4.5: Admin-only code - still report but mark as admin-only
+                    # A vulnerability is still a vulnerability (admin compromise, CSRF, etc.)
+                    admin_finding = False
                     if is_admin_only:
+                        admin_finding = True
+                        # Reduce confidence but ensure it stays above minimum
                         if vuln_type in [VulnType.CODE_INJECTION, VulnType.RCE]:
-                            confidence *= 0.3  # 70% reduction - likely plugin functionality
+                            confidence = max(0.50, confidence * 0.7)  # Min 50%
                         elif vuln_type == VulnType.UNSAFE_UPLOAD:
-                            confidence *= 0.4  # 60% reduction - admin can upload
+                            confidence = max(0.50, confidence * 0.75)
                         else:
-                            confidence *= 0.6  # 40% reduction for other types
+                            confidence = max(0.50, confidence * 0.8)
 
-                    # Stage 5: Filter low confidence - very aggressive
-                    if confidence < 0.65:
+                    # Stage 5: Filter low confidence
+                    # Admin findings have lower threshold (still want to report them)
+                    min_confidence = 0.50 if admin_finding else 0.65
+                    if confidence < min_confidence:
                         continue
 
                     # Stage 6: Adjust severity based on confidence
