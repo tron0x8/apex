@@ -150,11 +150,16 @@ class UnifiedScanner:
                 (r'\bpcntl_exec\s*\([^)]*\$', Severity.CRITICAL),
             ],
             VulnType.CODE_INJECTION: [
+                # Direct user input - CRITICAL
                 (r'\beval\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'\beval\s*\(\s*\$', Severity.HIGH),
-                (r'\bassert\s*\([^)]*\$', Severity.HIGH),
-                (r'\bcreate_function\s*\([^)]*\$', Severity.CRITICAL),
-                (r'preg_replace\s*\([^)]*[\'"][^\'"]*\/e', Severity.CRITICAL),
+                (r'\bassert\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
+                (r'\bcreate_function\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
+                (r'preg_replace\s*\([^)]*[\'"][^\'"]*\/e[\'"][^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
+                # Variable eval (lower severity - could be DB data in admin context)
+                (r'\beval\s*\(\s*\$(?!_(GET|POST|REQUEST|COOKIE|FILES|SERVER))', Severity.MEDIUM),
+                (r'\bassert\s*\(\s*\$(?!_(GET|POST|REQUEST))', Severity.MEDIUM),
+                (r'\bcreate_function\s*\(\s*[^)]*\$(?!_(GET|POST|REQUEST))', Severity.MEDIUM),
+                (r'preg_replace\s*\([^)]*[\'"][^\'"]*\/e', Severity.HIGH),
             ],
             VulnType.FILE_INCLUSION: [
                 (r'\b(?:include|require)(?:_once)?\s*\(?\s*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
@@ -235,8 +240,12 @@ class UnifiedScanner:
                 (r'display_errors.*=.*["\']?on["\']?', Severity.MEDIUM),
             ],
             VulnType.UNSAFE_UPLOAD: [
-                (r'move_uploaded_file\s*\([^,]+,\s*[^)]*\$_FILES', Severity.HIGH),
-                (r'\$_FILES\s*\[\s*["\'].*["\']\s*\]\s*\[\s*["\']name["\']\s*\]', Severity.MEDIUM),
+                # User-controlled filename in move_uploaded_file destination
+                (r'move_uploaded_file\s*\([^,]+,\s*[^)]*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]', Severity.CRITICAL),
+                # Concatenating user filename to path
+                (r'(?:move_uploaded_file|copy|rename)\s*\([^,]+,\s*[^)]*\.\s*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]', Severity.CRITICAL),
+                # Direct file write with user filename (not in echo/print context)
+                (r'(?:fopen|file_put_contents)\s*\([^)]*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]', Severity.HIGH),
             ],
             VulnType.TYPE_JUGGLING: [
                 # Only match in auth context - pattern includes auth keywords
@@ -532,12 +541,42 @@ class UnifiedScanner:
             r'[/\\]dashboard[/\\]',
             r'[/\\]panel[/\\]',
             r'[/\\]manage[/\\]',
-            r'[/\\]engine[/\\]inc[/\\]',  # DLE admin
-            r'[/\\]wp-admin[/\\]',         # WordPress
-            r'[/\\]administrator[/\\]',    # Joomla
+            r'[/\\]engine[/\\]inc[/\\]',   # DLE admin
+            r'[/\\]engine[/\\]ajax[/\\]',  # DLE ajax (admin)
+            r'[/\\]wp-admin[/\\]',          # WordPress
+            r'[/\\]administrator[/\\]',     # Joomla
+            r'[/\\]bitrix[/\\]admin[/\\]',  # Bitrix
+            r'[/\\]adm[/\\]',
+            r'[/\\]cpanel[/\\]',
         ]
         for pattern in admin_indicators:
             if re.search(pattern, filepath, re.IGNORECASE):
+                return True
+        return False
+
+    def _check_admin_code_context(self, code: str, line_num: int) -> bool:
+        """Check if code has admin-only access checks"""
+        lines = code.split('\n')
+        # Check first 50 lines for admin checks
+        header = '\n'.join(lines[:min(50, len(lines))])
+
+        admin_check_patterns = [
+            r'user_group\s*[!=]=\s*1',           # DLE admin check
+            r'user_group\s*==\s*1',
+            r'\$member_id\s*\[\s*[\'"]user_group[\'"]\s*\]\s*[!=]=\s*1',
+            r'current_user_can\s*\(\s*[\'"]manage',  # WordPress
+            r'is_admin\s*\(\s*\)',
+            r'isAdmin\s*\(\s*\)',
+            r'->isAdmin\s*\(',
+            r'check_admin\s*\(',
+            r'require_admin\s*\(',
+            r'auth.*admin',
+            r'admin.*auth',
+            r'permission.*admin',
+        ]
+
+        for pattern in admin_check_patterns:
+            if re.search(pattern, header, re.I):
                 return True
         return False
 
@@ -668,6 +707,25 @@ class UnifiedScanner:
         if vuln_type == VulnType.FILE_INCLUSION:
             # Static includes (no variable in path)
             if re.search(r'(?:include|require)[^$]+["\'][^"\'$]+\.php["\']', line, re.I):
+                return True
+
+        if vuln_type == VulnType.CODE_INJECTION:
+            # eval of DB row data (usually admin plugin functionality)
+            if re.search(r'eval\s*\(\s*\$row\s*\[', line, re.I):
+                return True
+            # eval of config/settings
+            if re.search(r'eval\s*\(\s*\$(?:config|settings|options)\s*\[', line, re.I):
+                return True
+
+        if vuln_type == VulnType.UNSAFE_UPLOAD:
+            # $_FILES in echo/print (just displaying filename, not using it)
+            if re.search(r'(?:echo|print|echo_error|die|exit)\s*[^;]*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]', line, re.I):
+                return True
+            # $_FILES in error message
+            if re.search(r'(?:error|exception|message|warning)', line, re.I) and re.search(r'\$_FILES', line):
+                return True
+            # Hardcoded destination filename (safe)
+            if re.search(r'move_uploaded_file\s*\([^,]+,\s*[^)]*md5\s*\(', line, re.I):
                 return True
 
         return False
@@ -921,6 +979,12 @@ class UnifiedScanner:
         # Detect if file is in admin path
         is_admin_path = self._check_admin_path(filepath)
 
+        # Detect if code has admin-only access checks
+        has_admin_check = self._check_admin_code_context(code, 0)
+
+        # If both admin path AND admin code check, very likely intentional admin functionality
+        is_admin_only = is_admin_path and has_admin_check
+
         # Detect custom sanitizer functions in code
         custom_sanitizers = self._detect_custom_sanitizers(code)
 
@@ -964,6 +1028,16 @@ class UnifiedScanner:
                         is_admin_path=is_admin_path,
                         taint_info=taint_info
                     )
+
+                    # Stage 4.5: Admin-only code gets severe penalty
+                    # Code Injection in admin plugins is usually intentional functionality
+                    if is_admin_only:
+                        if vuln_type in [VulnType.CODE_INJECTION, VulnType.RCE]:
+                            confidence *= 0.3  # 70% reduction - likely plugin functionality
+                        elif vuln_type == VulnType.UNSAFE_UPLOAD:
+                            confidence *= 0.4  # 60% reduction - admin can upload
+                        else:
+                            confidence *= 0.6  # 40% reduction for other types
 
                     # Stage 5: Filter low confidence - very aggressive
                     if confidence < 0.65:
