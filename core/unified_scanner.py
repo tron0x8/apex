@@ -709,13 +709,8 @@ class UnifiedScanner:
             if re.search(r'(?:include|require)[^$]+["\'][^"\'$]+\.php["\']', line, re.I):
                 return True
 
-        if vuln_type == VulnType.CODE_INJECTION:
-            # eval of DB row data (usually admin plugin functionality)
-            if re.search(r'eval\s*\(\s*\$row\s*\[', line, re.I):
-                return True
-            # eval of config/settings
-            if re.search(r'eval\s*\(\s*\$(?:config|settings|options)\s*\[', line, re.I):
-                return True
+        # NOTE: eval($row) filtering is done in main scan loop based on admin context
+        # NOT here, because non-admin eval($row) could be second-order injection
 
         if vuln_type == VulnType.UNSAFE_UPLOAD:
             # $_FILES in echo/print (just displaying filename, not using it)
