@@ -1441,7 +1441,9 @@ class UnifiedScanner:
                         kept.add(id(f))
                         final.append(f)
 
-        # Final filter - remove findings that data flow proved safe
+        # Final filter - remove findings that data flow proved safe, cap confidence
+        for f in final:
+            f.confidence = min(f.confidence, 1.0)
         final = [f for f in final if f.confidence >= 0.50]
 
         return final
@@ -1489,6 +1491,15 @@ class UnifiedScanner:
                 # TOCTOU multiline: file_exists($var) ... unlink/rename/chmod($var)
                 (re.compile(r'file_exists\s*\(\s*\$(\w+)\s*\).*?(?:unlink|rename|chmod|chown|rmdir)\s*\(\s*\$\1', re.DOTALL | re.IGNORECASE),
                  VulnType.RACE_CONDITION, Severity.HIGH),
+                # base64_decode from POST/GET → file_put_contents (content injection)
+                (re.compile(r'base64_decode\s*\(\s*\$_(GET|POST|REQUEST)\s*\[[^\]]+\]\s*\).*?file_put_contents\s*\(', re.DOTALL | re.IGNORECASE),
+                 VulnType.FILE_WRITE, Severity.CRITICAL),
+                # base64_decode from POST/GET → include/require
+                (re.compile(r'base64_decode\s*\(\s*\$_(GET|POST|REQUEST)\s*\[[^\]]+\]\s*\).*?(?:include|require)(?:_once)?\s*[\(\s]', re.DOTALL | re.IGNORECASE),
+                 VulnType.FILE_INCLUSION, Severity.CRITICAL),
+                # file_put_contents with tainted content (second param): file_put_contents($path, $_POST['content'])
+                (re.compile(r'file_put_contents\s*\([^,]+,\s*\$_(GET|POST|REQUEST)\s*\[', re.IGNORECASE),
+                 VulnType.FILE_WRITE, Severity.CRITICAL),
             ]
         return cls._MULTILINE_PATTERNS
 
@@ -1496,7 +1507,7 @@ class UnifiedScanner:
                         framework: Optional[str], is_admin_path: bool) -> List[Finding]:
         """Detect vulnerabilities spanning multiple lines using a sliding window."""
         # Quick check: skip files with no superglobal sources and no suspicious patterns
-        has_superglobal = re.search(r'\$_(GET|POST|REQUEST|COOKIE)\s*\[', code)
+        has_superglobal = re.search(r'\$_(GET|POST|REQUEST|COOKIE)\s*[\[;]', code)
         has_base64_file_op = (re.search(r'base64_decode\s*\(', code) and
                               re.search(r'(?:file_put_contents|file_get_contents|fopen|include|require)\s*\(', code))
         if not has_superglobal and not has_base64_file_op:
@@ -1565,6 +1576,9 @@ class UnifiedScanner:
 
         This catches patterns where source and sink are far apart (>15 lines),
         like bWAPP's $var = $_GET['x'] ... echo func($var) patterns.
+
+        v4.1: Enhanced with wrapper function detection, taint propagation through
+        base64_decode/array access/function calls, and content parameter sink tracking.
         """
         findings = []
 
@@ -1578,11 +1592,110 @@ class UnifiedScanner:
             line_num = code[:m.start()].count('\n') + 1
             tainted_vars[var_name] = (line_num, source)
 
+        # Whole superglobal assignments: $var = $_POST (entire array)
+        for m in re.finditer(r'\$(\w+)\s*=\s*\$_(GET|POST|REQUEST|COOKIE)\s*;', code):
+            var_name = m.group(1)
+            source = m.group(2)
+            line_num = code[:m.start()].count('\n') + 1
+            tainted_vars[var_name] = (line_num, source)
+
         # php://input assignments: $var = file_get_contents("php://input")
         for m in re.finditer(r'\$(\w+)\s*=\s*file_get_contents\s*\(\s*["\']php://input["\']', code):
             var_name = m.group(1)
             line_num = code[:m.start()].count('\n') + 1
             tainted_vars[var_name] = (line_num, 'INPUT')
+
+        # Step 1b: Detect wrapper functions that return $_POST/$_GET/$_REQUEST
+        # Pattern: function name(...) { ... return $_POST; ... }
+        wrapper_funcs = set()
+        for m in re.finditer(
+            r'function\s+(\w+)\s*\([^)]*\)\s*\{[^}]*?return\s+\$_(GET|POST|REQUEST|COOKIE)\s*;',
+            code, re.DOTALL
+        ):
+            wrapper_funcs.add((m.group(1), m.group(2)))
+
+        # Also detect functions that check & return $_POST: if ($_POST) { ... return $_POST; }
+        for m in re.finditer(
+            r'function\s+(\w+)\s*\([^)]*\)\s*\{[^}]*?\$_(GET|POST|REQUEST)\b[^}]*?return\s+\$_(GET|POST|REQUEST)\s*;',
+            code, re.DOTALL
+        ):
+            wrapper_funcs.add((m.group(1), m.group(2)))
+
+        # Mark variables assigned from wrapper function calls as tainted
+        for func_name, source_type in wrapper_funcs:
+            for m in re.finditer(rf'\$(\w+)\s*=\s*{re.escape(func_name)}\s*\(', code):
+                var_name = m.group(1)
+                line_num = code[:m.start()].count('\n') + 1
+                tainted_vars[var_name] = (line_num, source_type + '_WRAP')
+
+        # Step 1c: Taint propagation - follow taint through transformations
+        # Run multiple passes to catch chained propagation: $a=$_POST → $b=$a['x'] → $c=base64_decode($b)
+        # Sanitizer functions that BREAK taint (output is clean)
+        _sanitizer_funcs = {
+            'intval', 'floatval', 'boolval', 'abs',
+            'htmlspecialchars', 'htmlentities', 'strip_tags', 'nl2br',
+            'escapeshellarg', 'escapeshellcmd',
+            'addslashes', 'mysql_real_escape_string', 'mysqli_real_escape_string',
+            'filter_var', 'filter_input',
+            'urlencode', 'rawurlencode', 'json_encode',
+            'md5', 'sha1', 'hash', 'crc32',
+            'basename', 'realpath', 'dirname',
+            'preg_replace', 'preg_match', 'preg_quote',
+            'trim', 'ltrim', 'rtrim', 'strtolower', 'strtoupper',
+            'substr', 'mb_substr', 'str_pad',
+            'number_format', 'round', 'ceil', 'floor',
+            'date', 'strtotime', 'mktime',
+            'count', 'strlen', 'sizeof',
+            'is_numeric', 'is_int', 'is_string', 'is_array', 'is_bool',
+            'in_array', 'array_key_exists', 'isset', 'empty',
+            'esc_html', 'esc_attr', 'esc_url', 'wp_kses',
+            'e', 'clean', 'sanitize', 'escape', 'purify',
+        }
+        for _pass in range(3):
+            new_taints = {}
+            for m in re.finditer(r'\$(\w+)\s*=\s*(.+?)\s*;', code):
+                var_name = m.group(1)
+                rhs = m.group(2)
+                line_num = code[:m.start()].count('\n') + 1
+
+                # Skip if already tainted
+                if var_name in tainted_vars:
+                    continue
+
+                for tainted_var, (t_line, t_source) in list(tainted_vars.items()):
+                    # Skip if this assignment is before the taint source
+                    if line_num < t_line:
+                        continue
+
+                    # Array access: $y = $tainted['key'] or $y = $tainted[$x]
+                    if re.search(rf'\${re.escape(tainted_var)}\s*\[', rhs):
+                        new_taints[var_name] = (line_num, t_source)
+                        break
+
+                    # Function wrapping: $y = func($tainted) - but NOT sanitizers
+                    func_match = re.search(rf'(\w+)\s*\([^)]*\${re.escape(tainted_var)}\b', rhs)
+                    if func_match:
+                        func_name = func_match.group(1).lower()
+                        # Skip sanitizer functions - they break the taint chain
+                        if func_name not in _sanitizer_funcs and not any(
+                            s in func_name for s in ('sanitize', 'escape', 'clean', 'filter', 'safe', 'valid', 'protect', 'purif')
+                        ):
+                            new_taints[var_name] = (line_num, t_source)
+                            break
+
+                    # Direct assignment: $y = $tainted
+                    if re.search(rf'^\$?{re.escape(tainted_var)}\s*$', rhs.strip().lstrip('$')):
+                        new_taints[var_name] = (line_num, t_source)
+                        break
+
+                    # String concat: $y = $tainted . "something" or "something" . $tainted
+                    if re.search(rf'\${re.escape(tainted_var)}\b', rhs) and '.' in rhs:
+                        new_taints[var_name] = (line_num, t_source)
+                        break
+
+            tainted_vars.update(new_taints)
+            if not new_taints:
+                break  # No new taints found, stop early
 
         if not tainted_vars:
             return []
@@ -1610,9 +1723,20 @@ class UnifiedScanner:
             (r'DOMDocument.*loadXML\s*\(\s*\${var}', VulnType.XXE, Severity.HIGH),
             # SSRF
             (r'(?:file_get_contents|curl_init)\s*\(\s*\${var}', VulnType.SSRF, Severity.HIGH),
-            # File operations
-            (r'file_put_contents\s*\([^,]*\${var}', VulnType.FILE_WRITE, Severity.HIGH),
-            (r'file_get_contents\s*\(\s*\${var}', VulnType.FILE_READ, Severity.HIGH),
+            # File operations - path parameter
+            (r'file_put_contents\s*\(\s*\${var}\b', VulnType.FILE_WRITE, Severity.HIGH),
+            (r'file_get_contents\s*\(\s*\${var}\b', VulnType.FILE_READ, Severity.HIGH),
+            (r'fopen\s*\(\s*\${var}\b', VulnType.FILE_READ, Severity.HIGH),
+            (r'fwrite\s*\(\s*\${var}\b', VulnType.FILE_WRITE, Severity.HIGH),
+            (r'copy\s*\([^,]*\${var}', VulnType.FILE_WRITE, Severity.HIGH),
+            (r'rename\s*\([^,]*\${var}', VulnType.FILE_WRITE, Severity.HIGH),
+            (r'unlink\s*\(\s*\${var}\b', VulnType.PATH_TRAVERSAL, Severity.HIGH),
+            (r'readfile\s*\(\s*\${var}\b', VulnType.FILE_READ, Severity.HIGH),
+            # File operations - content parameter (tainted data written to file)
+            (r'file_put_contents\s*\([^,]+,\s*\${var}\b', VulnType.FILE_WRITE, Severity.CRITICAL),
+            (r'file_put_contents\s*\([^,]+,\s*[^)]*\${var}', VulnType.FILE_WRITE, Severity.HIGH),
+            (r'fwrite\s*\([^,]+,\s*\${var}\b', VulnType.FILE_WRITE, Severity.HIGH),
+            (r'fwrite\s*\([^,]+,\s*[^)]*\${var}', VulnType.FILE_WRITE, Severity.HIGH),
             # Unserialize
             (r'unserialize\s*\(\s*\${var}', VulnType.DESERIALIZATION, Severity.CRITICAL),
             # Header injection
@@ -1652,12 +1776,16 @@ class UnifiedScanner:
                         confidence = 0.75
                         if source_type in ('GET', 'POST', 'REQUEST'):
                             confidence += 0.10
+                        elif source_type.endswith('_WRAP'):
+                            confidence += 0.08  # wrapper functions that return $_POST
                         if sanitizers:
                             confidence -= 0.25
                         if framework:
                             confidence -= 0.10
                         if is_admin_path:
                             confidence -= 0.10
+                        # Cap confidence at 100%
+                        confidence = min(confidence, 1.0)
 
                         # For generic concat pattern (MEDIUM), require SQL context
                         if severity == Severity.MEDIUM and vuln_type == VulnType.SQL_INJECTION:
@@ -1665,6 +1793,10 @@ class UnifiedScanner:
                             nearby = '\n'.join(lines[max(0, sink_line-3):min(len(lines), sink_line+2)])
                             if not re.search(r'(?:SELECT|INSERT|UPDATE|DELETE|WHERE|FROM)\b', nearby, re.I):
                                 continue
+
+                        # File write/read with content from tainted source = high severity
+                        if vuln_type in (VulnType.FILE_WRITE, VulnType.FILE_READ) and severity == Severity.CRITICAL:
+                            confidence = max(confidence, 0.85)
 
                         if confidence < 0.50:
                             continue

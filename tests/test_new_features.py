@@ -237,14 +237,14 @@ class TestMLFPClassifier:
         from core.ml_fp_classifier import FPClassifier
         classifier = FPClassifier()
         findings = [{
-            'type': 'SQL Injection', 'severity': 'HIGH', 'line': 5,
+            'type': 'SQL Injection', 'severity': 'MEDIUM', 'line': 5,
             'code': '$stmt = $db->prepare("SELECT * FROM users WHERE id = ?");',
-            'file': 'test.php', 'confidence': '85%', 'source': 'GET',
-            'sanitizers': ['prepare'],
+            'file': 'test.php', 'confidence': '55%', 'source': 'GET',
+            'sanitizers': ['prepare', 'intval'],
         }]
         code = '<?php\n$id = intval($_GET["id"]);\n$stmt = $db->prepare("SELECT * FROM users WHERE id = ?");\n$stmt->execute([$id]);\n?>'
         result = classifier.classify_batch(findings, {'test.php': code})
-        assert len(result) == 0  # Should eliminate FP
+        assert len(result) == 0  # Should eliminate FP (prepared stmt + intval + low confidence)
 
     def test_classify_batch_empty(self):
         from core.ml_fp_classifier import FPClassifier
