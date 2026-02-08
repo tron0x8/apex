@@ -391,6 +391,10 @@ MIT License - see LICENSE file for details.
 
 - GitHub: [@tron0x8](https://github.com/tron0x8)
 
+## Acknowledgements
+
+Documentation and README written with the assistance of [Claude](https://claude.ai) by Anthropic.
+
 ## Disclaimer
 
 This tool is intended for authorized security testing and research purposes only. Users are responsible for ensuring they have proper authorization before scanning any systems or applications.
