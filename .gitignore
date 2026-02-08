@@ -1,0 +1,73 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+.venv
+env/
+venv/
+ENV/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.log
+output/
+reports/
+
+# SSH/credentials - NEVER commit
+ssh_shell.py
+ssh_remote.py
+
+# Temp test/debug scripts
+test_debug.py
+test_full_scan.py
+test_full_with_vendor.py
+test_quick.py
+test_quick2.py
+nul
+
+# Scan result files
+dle_scan_report*.json
+maxsite_scan*.json
+*.scan.json
+
+# Old ML directory (replaced by models/)
+ml/
+
+# Old dead code
+core/php_parser.py
+
+# DLE-specific scan scripts
+scan_dle*.py
+
+# Exploits
+exploits/
+
+# Analysis docs (local only)
+maxsite_analysis.md
+
+# Temp test files
+tests/interprocedural_test.php
+tests/test_vulns.php
+tests/run_test.py
+tests/test_context.py
