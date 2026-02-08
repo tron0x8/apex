@@ -17,6 +17,7 @@ from collections import defaultdict
 import hashlib
 import re
 from .ts_adapter import TSNode, parse_php_ts
+from .rule_engine import get_rule_engine
 
 
 class TaintLevel(Enum):
@@ -151,6 +152,22 @@ class SourceDefinitions:
         'HTTP_X_REQUESTED_WITH', 'HTTP_ORIGIN', 'HTTP_AUTHORIZATION'
     }
 
+    @classmethod
+    def from_rule_engine(cls, rule_engine=None):
+        """Build source definitions from YAML rules."""
+        rules = rule_engine or get_rule_engine()
+        # Superglobals from YAML
+        for name, src in rules.get_sources().items():
+            if src.category == 'superglobals' and name.startswith('$_'):
+                if name not in cls.SUPERGLOBALS:
+                    level = TaintLevel[src.taint_level] if src.taint_level in TaintLevel.__members__ else TaintLevel.HIGH
+                    taint_types = cls.ALL_TAINT_TYPES  # default all types for superglobals
+                    cls.SUPERGLOBALS[name] = TaintSource(name, level, taint_types, 0)
+        # Tainted server keys from YAML
+        for name, src in rules.get_sources().items():
+            if src.category == 'tainted_server_keys':
+                cls.TAINTED_SERVER_KEYS.add(src.name)
+
 
 class SinkDefinitions:
     # Sinks that require FIRST argument to be tainted (pattern-based)
@@ -204,6 +221,29 @@ class SinkDefinitions:
         # LDAP
         'ldap_search': (TaintType.LDAP, 'HIGH'), 'ldap_bind': (TaintType.LDAP, 'HIGH'),
     }
+
+    @classmethod
+    def from_rule_engine(cls, rule_engine=None):
+        """Extend sink definitions from YAML rules."""
+        rules = rule_engine or get_rule_engine()
+        taint_type_map = {t.name: t for t in TaintType}
+        # Map YAML vuln_type to TaintType
+        vuln_to_taint = {
+            'SQL_INJECTION': TaintType.SQL, 'COMMAND_INJECTION': TaintType.COMMAND,
+            'CODE_INJECTION': TaintType.CODE, 'XSS': TaintType.XSS,
+            'FILE_INCLUDE': TaintType.FILE_INCLUDE, 'FILE_PATH': TaintType.FILE_PATH,
+            'SSRF': TaintType.SSRF, 'XXE': TaintType.XXE,
+            'SERIALIZATION': TaintType.SERIALIZATION, 'DESERIALIZATION': TaintType.SERIALIZATION,
+            'REDIRECT': TaintType.REDIRECT, 'EMAIL': TaintType.EMAIL,
+            'NOSQL': TaintType.NOSQL, 'LDAP': TaintType.LDAP,
+            'XPATH': TaintType.XPATH, 'TEMPLATE_INJECTION': TaintType.TEMPLATE,
+            'REGEX_DOS': TaintType.REGEX,
+        }
+        for name, sink in rules.get_sinks().items():
+            if name not in cls.SINKS:
+                taint_type = vuln_to_taint.get(sink.vuln_type)
+                if taint_type:
+                    cls.SINKS[name] = (taint_type, sink.severity)
 
 
 class SanitizerDefinitions:
@@ -266,6 +306,33 @@ class SanitizerDefinitions:
     ]
 
     @classmethod
+    def from_rule_engine(cls, rule_engine=None):
+        """Extend sanitizer definitions from YAML rules."""
+        rules = rule_engine or get_rule_engine()
+        taint_type_map = {
+            'SQL_INJECTION': TaintType.SQL, 'XSS': TaintType.XSS,
+            'COMMAND_INJECTION': TaintType.COMMAND, 'CODE_INJECTION': TaintType.CODE,
+            'RCE': TaintType.COMMAND, 'FILE_INCLUSION': TaintType.FILE_INCLUDE,
+            'FILE_READ': TaintType.FILE_PATH, 'FILE_WRITE': TaintType.FILE_PATH,
+            'FILE_PATH': TaintType.FILE_PATH, 'PATH_TRAVERSAL': TaintType.FILE_PATH,
+            'SSRF': TaintType.SSRF, 'XXE': TaintType.XXE,
+            'DESERIALIZATION': TaintType.SERIALIZATION, 'OPEN_REDIRECT': TaintType.REDIRECT,
+            'EMAIL_INJECTION': TaintType.EMAIL, 'NOSQL': TaintType.NOSQL,
+            'LDAP': TaintType.LDAP, 'XPATH': TaintType.XPATH,
+            'TEMPLATE_INJECTION': TaintType.TEMPLATE, 'REGEX_DOS': TaintType.REGEX,
+            'IDOR': TaintType.SQL,  # IDOR often SQL related
+        }
+        for name, san in rules.get_sanitizers().items():
+            if name not in cls.SANITIZERS:
+                types = set()
+                for vt_name in san.protects_against:
+                    tt = taint_type_map.get(vt_name)
+                    if tt:
+                        types.add(tt)
+                if types:
+                    cls.SANITIZERS[name] = types
+
+    @classmethod
     def get_whitelist_sanitization(cls, line: str) -> Set:
         """Check if line contains whitelist sanitization pattern"""
         result = set()
@@ -312,6 +379,26 @@ class PreSinkSanitizationChecker:
         # DLEPlugins::Check - DLE path sanitizer
         (r'DLEPlugins::Check\s*\(', {TaintType.FILE_INCLUDE}),
     ]
+
+    @classmethod
+    def from_rule_engine(cls, rule_engine=None):
+        """Extend sanitizer patterns from YAML rules."""
+        rules = rule_engine or get_rule_engine()
+        taint_type_map = {
+            'SQL_INJECTION': TaintType.SQL, 'XSS': TaintType.XSS,
+            'COMMAND_INJECTION': TaintType.COMMAND, 'CODE_INJECTION': TaintType.CODE,
+            'FILE_INCLUSION': TaintType.FILE_INCLUDE, 'FILE_PATH': TaintType.FILE_PATH,
+        }
+        existing_patterns = {p for p, _ in cls.SANITIZER_PATTERNS}
+        for name, san in rules.get_sanitizers().items():
+            if san.pattern not in existing_patterns and san.strength == 'strong':
+                types = set()
+                for vt_name in san.protects_against:
+                    tt = taint_type_map.get(vt_name)
+                    if tt:
+                        types.add(tt)
+                if types:
+                    cls.SANITIZER_PATTERNS.append((san.pattern, types))
 
     def __init__(self, code: str):
         self.code = code
@@ -566,6 +653,14 @@ class TaintAnalyzer:
         self.findings: List[TaintFinding] = []
         self.pre_sink_checker: Optional[PreSinkSanitizationChecker] = None
         self.code: str = ""
+        # In TaintAnalyzer.__init__, add after self initialization:
+        try:
+            rule_engine = get_rule_engine()
+            SourceDefinitions.from_rule_engine(rule_engine)
+            SinkDefinitions.from_rule_engine(rule_engine)
+            SanitizerDefinitions.from_rule_engine(rule_engine)
+        except Exception:
+            pass  # Fallback to hardcoded
 
     def analyze_file(self, code: str) -> List[TaintFinding]:
         self.code = code
@@ -585,11 +680,31 @@ class TaintAnalyzer:
         return self._filter_sanitized_findings()
 
     def _analyze_cfg_functions(self, root: TSNode):
-        """Run CFG-based worklist analysis on each function/method."""
+        """Run CFG-based analysis on each function/method.
+
+        Uses SSA conversion + abstract interpretation for precise taint tracking:
+        - SSA ensures each variable assigned exactly once (phi nodes at join points)
+        - Abstract interpreter uses lattice-based analysis with widening for loops
+        Falls back to simple worklist if SSA/AI modules unavailable.
+        """
         from .cfg import CFGBuilder
         from collections import deque
 
+        # Try to use SSA + AbstractInterpreter for enhanced analysis
+        try:
+            from .ssa import build_ssa
+            from .abstract_interp import AbstractInterpreter, AbstractState, TaintInfo, TaintLattice
+            has_ssa_ai = True
+        except ImportError:
+            has_ssa_ai = False
+
         builder = CFGBuilder()
+        rule_engine = None
+        try:
+            rule_engine = get_rule_engine()
+        except Exception:
+            pass
+
         for node in root.walk_descendants():
             if node.type not in ('function_definition', 'method_declaration'):
                 continue
@@ -601,71 +716,149 @@ class TaintAnalyzer:
             if len(cfg_blocks) < 3:  # entry + exit + at least 1 real block
                 continue
 
-            # Initialize entry environment with parameter taint
-            entry_env = TaintEnvironment()
-            params = node.child_by_field('parameters')
-            if params:
-                for param in params.named_children:
-                    if param.type == 'simple_parameter':
-                        for c in param.named_children:
-                            if c.type == 'variable_name':
-                                entry_env.set(c.text, TaintState(sources={TaintSource(
-                                    f'param:{c.text}', TaintLevel.MEDIUM,
-                                    SourceDefinitions.ALL_TAINT_TYPES,
-                                    node.line, self.file_path
-                                )}))
+            if has_ssa_ai:
+                self._analyze_cfg_ssa(node, cfg_blocks, rule_engine,
+                                       build_ssa, AbstractInterpreter,
+                                       AbstractState, TaintInfo, TaintLattice)
+            else:
+                self._analyze_cfg_legacy(node, cfg_blocks)
 
-            # Worklist-based fixed-point iteration
-            block_envs_in: Dict[int, TaintEnvironment] = {}
-            block_envs_out: Dict[int, TaintEnvironment] = {}
-            entry_block = cfg_blocks[0]
-            block_envs_in[entry_block.id] = entry_env
+    def _analyze_cfg_ssa(self, func_node, cfg_blocks, rule_engine,
+                          build_ssa, AbstractInterpreter,
+                          AbstractState, TaintInfo, TaintLattice):
+        """Enhanced CFG analysis using SSA + Abstract Interpretation."""
+        # Convert CFG to SSA form
+        try:
+            ssa_blocks = build_ssa(cfg_blocks)
+        except Exception:
+            # SSA conversion failed - fall back to legacy
+            self._analyze_cfg_legacy(func_node, cfg_blocks)
+            return
 
-            worklist = deque([entry_block.id])
-            block_map = {b.id: b for b in cfg_blocks}
-            iterations = 0
-            MAX_ITER = 50
+        # Build entry state with parameter taint
+        entry_state = AbstractState()
+        params = func_node.child_by_field('parameters')
+        if params:
+            for param in params.named_children:
+                if param.type == 'simple_parameter':
+                    for c in param.named_children:
+                        if c.type == 'variable_name':
+                            entry_state.set(c.text, TaintInfo(
+                                level=TaintLattice.WEAK,
+                                taint_types={'SQL', 'XSS', 'COMMAND', 'CODE'},
+                                sources={f'param:{c.text}'},
+                            ))
 
-            while worklist and iterations < MAX_ITER:
-                bid = worklist.popleft()
-                block = block_map[bid]
-                iterations += 1
+        # Run abstract interpretation over SSA blocks
+        interp = AbstractInterpreter(rule_engine=rule_engine)
+        try:
+            _, ai_findings = interp.analyze(ssa_blocks, entry_state, self.file_path)
+        except Exception:
+            self._analyze_cfg_legacy(func_node, cfg_blocks)
+            return
 
-                # Merge predecessor outputs
-                if block.predecessors:
-                    merged = TaintEnvironment()
-                    for pred_id in block.predecessors:
-                        if pred_id in block_envs_out:
-                            merged = merged.merge(block_envs_out[pred_id])
-                    block_envs_in[bid] = merged
-                elif bid not in block_envs_in:
-                    block_envs_in[bid] = TaintEnvironment()
+        # Convert AbstractInterpreter findings to TaintFindings
+        vuln_to_taint = {
+            'SQL_INJECTION': TaintType.SQL, 'COMMAND_INJECTION': TaintType.COMMAND,
+            'CODE_INJECTION': TaintType.CODE, 'XSS': TaintType.XSS,
+            'FILE_INCLUSION': TaintType.FILE_INCLUDE, 'FILE_READ': TaintType.FILE_PATH,
+            'FILE_WRITE': TaintType.FILE_PATH, 'PATH_TRAVERSAL': TaintType.FILE_PATH,
+            'SSRF': TaintType.SSRF, 'DESERIALIZATION': TaintType.SERIALIZATION,
+            'XXE': TaintType.XXE, 'OPEN_REDIRECT': TaintType.REDIRECT,
+            'LDAP_INJECTION': TaintType.LDAP, 'XPATH_INJECTION': TaintType.XPATH,
+            'EMAIL_INJECTION': TaintType.EMAIL, 'NOSQL_INJECTION': TaintType.NOSQL,
+            'TEMPLATE_INJECTION': TaintType.TEMPLATE,
+        }
+        for f in ai_findings:
+            taint_type = vuln_to_taint.get(f.vuln_type, TaintType.SQL)
+            source = TaintSource(
+                name=f.source_name,
+                level=TaintLevel.HIGH if f.confidence > 0.7 else TaintLevel.MEDIUM,
+                types=frozenset({taint_type}),
+                line=f.sink_line,
+                file=f.sink_file or self.file_path,
+            )
+            self.findings.append(TaintFinding(
+                sink_name=f.sink_name,
+                sink_line=f.sink_line,
+                sink_file=f.sink_file or self.file_path,
+                source=source,
+                taint_type=taint_type,
+                path=[],
+                sanitizers=f.sanitizers if f.sanitizers else set(),
+                confidence=f.confidence,
+                severity=f.severity,
+            ))
 
-                # Process statements
-                env = block_envs_in[bid].copy()
-                for stmt in block.statements:
-                    self._analyze(stmt, env)
+    def _analyze_cfg_legacy(self, func_node, cfg_blocks):
+        """Legacy CFG worklist analysis (fallback when SSA/AI unavailable)."""
+        from collections import deque
 
-                # Check if output changed
-                old_out = block_envs_out.get(bid)
-                block_envs_out[bid] = env
+        # Initialize entry environment with parameter taint
+        entry_env = TaintEnvironment()
+        params = func_node.child_by_field('parameters')
+        if params:
+            for param in params.named_children:
+                if param.type == 'simple_parameter':
+                    for c in param.named_children:
+                        if c.type == 'variable_name':
+                            entry_env.set(c.text, TaintState(sources={TaintSource(
+                                f'param:{c.text}', TaintLevel.MEDIUM,
+                                SourceDefinitions.ALL_TAINT_TYPES,
+                                func_node.line, self.file_path
+                            )}))
 
-                changed = old_out is None or set(env.variables.keys()) != set(old_out.variables.keys())
-                if not changed and old_out:
-                    for var in env.variables:
-                        if var not in old_out.variables:
-                            changed = True
-                            break
-                        new_state = env.get(var)
-                        old_state = old_out.get(var)
-                        if new_state.is_tainted != old_state.is_tainted:
-                            changed = True
-                            break
+        # Worklist-based fixed-point iteration
+        block_envs_in: Dict[int, TaintEnvironment] = {}
+        block_envs_out: Dict[int, TaintEnvironment] = {}
+        entry_block = cfg_blocks[0]
+        block_envs_in[entry_block.id] = entry_env
 
-                if changed:
-                    for succ_id in block.successors:
-                        if succ_id not in worklist:
-                            worklist.append(succ_id)
+        worklist = deque([entry_block.id])
+        block_map = {b.id: b for b in cfg_blocks}
+        iterations = 0
+        MAX_ITER = 50
+
+        while worklist and iterations < MAX_ITER:
+            bid = worklist.popleft()
+            block = block_map[bid]
+            iterations += 1
+
+            # Merge predecessor outputs
+            if block.predecessors:
+                merged = TaintEnvironment()
+                for pred_id in block.predecessors:
+                    if pred_id in block_envs_out:
+                        merged = merged.merge(block_envs_out[pred_id])
+                block_envs_in[bid] = merged
+            elif bid not in block_envs_in:
+                block_envs_in[bid] = TaintEnvironment()
+
+            # Process statements
+            env = block_envs_in[bid].copy()
+            for stmt in block.statements:
+                self._analyze(stmt, env)
+
+            # Check if output changed
+            old_out = block_envs_out.get(bid)
+            block_envs_out[bid] = env
+
+            changed = old_out is None or set(env.variables.keys()) != set(old_out.variables.keys())
+            if not changed and old_out:
+                for var in env.variables:
+                    if var not in old_out.variables:
+                        changed = True
+                        break
+                    new_state = env.get(var)
+                    old_state = old_out.get(var)
+                    if new_state.is_tainted != old_state.is_tainted:
+                        changed = True
+                        break
+
+            if changed:
+                for succ_id in block.successors:
+                    if succ_id not in worklist:
+                        worklist.append(succ_id)
 
     def _filter_sanitized_findings(self) -> List[TaintFinding]:
         """Remove findings where the source was sanitized before the sink"""

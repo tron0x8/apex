@@ -19,6 +19,11 @@ from typing import Dict, List, Set, Tuple, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
+try:
+    from .rule_engine import get_rule_engine
+except ImportError:
+    get_rule_engine = None
+
 
 @dataclass
 class WhitelistCheck:
@@ -214,15 +219,43 @@ class ORMDetector:
         (r'->query\s*\(\s*[\'"].*\$', 'raw_query', False),
     ]
 
-    def __init__(self, code: str):
+    def __init__(self, code: str, rule_engine=None):
         self.code = code
         self.lines = code.split('\n')
         self.orm_usages: List[ORMUsage] = []
+        self._effective_orm_patterns = list(self.ORM_PATTERNS)
+        self._load_orm_patterns_from_engine(rule_engine)
         self._analyze()
+
+    def _load_orm_patterns_from_engine(self, rule_engine=None):
+        """Extend ORM_PATTERNS from RuleEngine fp_rules orm_patterns category."""
+        try:
+            if rule_engine is None and get_rule_engine is not None:
+                rule_engine = get_rule_engine()
+            if rule_engine is None:
+                return
+
+            fp_rules = rule_engine.get_fp_rules()
+            if not fp_rules:
+                return
+
+            orm_rules = fp_rules.get('orm_patterns', []) + fp_rules.get('orm', []) + fp_rules.get('prepared_stmt', [])
+            existing_patterns = {p[0] for p in self._effective_orm_patterns}
+
+            for rule in orm_rules:
+                if rule.pattern and rule.pattern not in existing_patterns:
+                    # Determine orm_type from rule name or default
+                    orm_type = rule.name if rule.name else 'rule_engine'
+                    self._effective_orm_patterns.append(
+                        (rule.pattern, orm_type, True)
+                    )
+        except Exception:
+            # If RuleEngine fails, fall back to hardcoded patterns silently
+            pass
 
     def _analyze(self):
         for i, line in enumerate(self.lines, 1):
-            for pattern, orm_type, is_safe in self.ORM_PATTERNS:
+            for pattern, orm_type, is_safe in self._effective_orm_patterns:
                 if re.search(pattern, line, re.I):
                     var_match = re.search(r'(\$\w+)', line)
                     var = var_match.group(1) if var_match else ''

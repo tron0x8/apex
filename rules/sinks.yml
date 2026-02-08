@@ -1,0 +1,496 @@
+# APEX Security Scanner - Sink Definitions
+# All sink definitions extracted from the APEX codebase
+# Organized by vulnerability type with severity levels and CWE mappings
+
+SQL_INJECTION:
+  - name: mysql_query
+    pattern: 'mysql_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "MySQL query execution"
+
+  - name: mysqli_query
+    pattern: 'mysqli_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "MySQLi query execution"
+
+  - name: mysqli_multi_query
+    pattern: 'mysqli_multi_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "MySQLi multi-query execution"
+
+  - name: pg_query
+    pattern: 'pg_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "PostgreSQL query execution"
+
+  - name: pg_send_query
+    pattern: 'pg_send_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "PostgreSQL async query execution"
+
+  - name: sqlite_query
+    pattern: 'sqlite_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "SQLite query execution"
+
+  - name: sqlite_exec
+    pattern: 'sqlite_exec\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "SQLite query execution"
+
+  - name: odbc_exec
+    pattern: 'odbc_exec\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "ODBC query execution"
+
+  - name: mssql_query
+    pattern: 'mssql_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "MS SQL query execution"
+
+  - name: sqlsrv_query
+    pattern: 'sqlsrv_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "SQL Server query execution"
+
+  - name: query
+    pattern: 'query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "Generic database query execution"
+
+  - name: PDO::query
+    pattern: 'PDO::query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "PDO query execution"
+
+  - name: PDO::exec
+    pattern: 'PDO::exec\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "PDO statement execution"
+
+COMMAND_INJECTION:
+  - name: exec
+    pattern: 'exec\s*\('
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Execute external command"
+
+  - name: system
+    pattern: 'system\s*\('
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Execute system command"
+
+  - name: shell_exec
+    pattern: 'shell_exec\s*\('
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Execute shell command"
+
+  - name: passthru
+    pattern: 'passthru\s*\('
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Execute command and pass output"
+
+  - name: popen
+    pattern: 'popen\s*\('
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Open process file pointer"
+
+  - name: proc_open
+    pattern: 'proc_open\s*\('
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Execute command and open file pointers"
+
+  - name: pcntl_exec
+    pattern: 'pcntl_exec\s*\('
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Execute program in current process space"
+
+  - name: backtick
+    pattern: '`[^`]*`'
+    severity: CRITICAL
+    cwe: CWE-78
+    description: "Backtick operator for shell execution"
+
+CODE_INJECTION:
+  - name: eval
+    pattern: 'eval\s*\('
+    severity: CRITICAL
+    cwe: CWE-94
+    description: "Evaluate arbitrary code"
+
+  - name: assert
+    pattern: 'assert\s*\('
+    severity: CRITICAL
+    cwe: CWE-94
+    description: "Assert with string evaluation"
+
+  - name: create_function
+    pattern: 'create_function\s*\('
+    severity: CRITICAL
+    cwe: CWE-94
+    description: "Create anonymous function from strings"
+
+  - name: call_user_func
+    pattern: 'call_user_func\s*\('
+    severity: CRITICAL
+    cwe: CWE-94
+    description: "Call user function by name"
+
+  - name: call_user_func_array
+    pattern: 'call_user_func_array\s*\('
+    severity: CRITICAL
+    cwe: CWE-94
+    description: "Call user function with array parameters"
+
+  - name: array_map
+    pattern: 'array_map\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Apply callback to array elements"
+
+  - name: array_filter
+    pattern: 'array_filter\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Filter array elements with callback"
+
+  - name: usort
+    pattern: 'usort\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Sort array with user-defined comparison"
+
+  - name: uasort
+    pattern: 'uasort\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Sort array with user-defined comparison maintaining keys"
+
+FILE_INCLUDE:
+  - name: include
+    pattern: 'include\s*\('
+    severity: CRITICAL
+    cwe: CWE-98
+    description: "Include and evaluate file"
+    context_sensitive: true
+
+  - name: include_once
+    pattern: 'include_once\s*\('
+    severity: CRITICAL
+    cwe: CWE-98
+    description: "Include and evaluate file once"
+    context_sensitive: true
+
+  - name: require
+    pattern: 'require\s*\('
+    severity: CRITICAL
+    cwe: CWE-98
+    description: "Require and evaluate file"
+    context_sensitive: true
+
+  - name: require_once
+    pattern: 'require_once\s*\('
+    severity: CRITICAL
+    cwe: CWE-98
+    description: "Require and evaluate file once"
+    context_sensitive: true
+
+FILE_PATH:
+  - name: file_get_contents
+    pattern: 'file_get_contents\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Read entire file into string"
+    context_sensitive: true
+
+  - name: file_put_contents
+    pattern: 'file_put_contents\s*\('
+    severity: CRITICAL
+    cwe: CWE-73
+    description: "Write data to file"
+
+  - name: fopen
+    pattern: 'fopen\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Open file or URL"
+
+  - name: fread
+    pattern: 'fread\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Binary-safe file read"
+
+  - name: fwrite
+    pattern: 'fwrite\s*\('
+    severity: CRITICAL
+    cwe: CWE-73
+    description: "Binary-safe file write"
+
+  - name: unlink
+    pattern: 'unlink\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Delete file"
+
+  - name: copy
+    pattern: 'copy\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Copy file"
+
+  - name: rename
+    pattern: 'rename\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Rename file or directory"
+
+  - name: move_uploaded_file
+    pattern: 'move_uploaded_file\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Move uploaded file to new location"
+
+  - name: readfile
+    pattern: 'readfile\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Output file contents"
+
+  - name: file
+    pattern: 'file\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Read entire file into array"
+
+  - name: mkdir
+    pattern: 'mkdir\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Create directory"
+
+  - name: rmdir
+    pattern: 'rmdir\s*\('
+    severity: HIGH
+    cwe: CWE-73
+    description: "Remove directory"
+
+XSS:
+  - name: echo
+    pattern: 'echo\s+'
+    severity: HIGH
+    cwe: CWE-79
+    description: "Output data to browser"
+
+  - name: print
+    pattern: 'print\s+'
+    severity: HIGH
+    cwe: CWE-79
+    description: "Output data to browser"
+
+  - name: printf
+    pattern: 'printf\s*\('
+    severity: HIGH
+    cwe: CWE-79
+    description: "Output formatted string"
+
+  - name: vprintf
+    pattern: 'vprintf\s*\('
+    severity: HIGH
+    cwe: CWE-79
+    description: "Output formatted string with array"
+
+  - name: die
+    pattern: 'die\s*\('
+    severity: MEDIUM
+    cwe: CWE-79
+    description: "Output message and terminate"
+
+  - name: exit
+    pattern: 'exit\s*\('
+    severity: MEDIUM
+    cwe: CWE-79
+    description: "Output message and terminate"
+
+SERIALIZATION:
+  - name: unserialize
+    pattern: 'unserialize\s*\('
+    severity: CRITICAL
+    cwe: CWE-502
+    description: "Deserialize data (object injection risk)"
+
+  - name: yaml_parse
+    pattern: 'yaml_parse\s*\('
+    severity: CRITICAL
+    cwe: CWE-502
+    description: "Parse YAML string (code execution risk)"
+
+XXE:
+  - name: simplexml_load_string
+    pattern: 'simplexml_load_string\s*\('
+    severity: HIGH
+    cwe: CWE-611
+    description: "Parse XML string"
+
+  - name: simplexml_load_file
+    pattern: 'simplexml_load_file\s*\('
+    severity: HIGH
+    cwe: CWE-611
+    description: "Parse XML file"
+
+  - name: DOMDocument::loadXML
+    pattern: 'DOMDocument::loadXML\s*\('
+    severity: HIGH
+    cwe: CWE-611
+    description: "Load XML document"
+
+  - name: XMLReader::open
+    pattern: 'XMLReader::open\s*\('
+    severity: HIGH
+    cwe: CWE-611
+    description: "Open XML reader"
+
+SSRF:
+  - name: curl_setopt
+    pattern: 'curl_setopt\s*\('
+    severity: HIGH
+    cwe: CWE-918
+    description: "Set cURL option (URL manipulation)"
+
+  - name: curl_exec
+    pattern: 'curl_exec\s*\('
+    severity: HIGH
+    cwe: CWE-918
+    description: "Execute cURL session"
+
+  - name: fsockopen
+    pattern: 'fsockopen\s*\('
+    severity: HIGH
+    cwe: CWE-918
+    description: "Open socket connection"
+
+  - name: socket_connect
+    pattern: 'socket_connect\s*\('
+    severity: HIGH
+    cwe: CWE-918
+    description: "Initiate socket connection"
+
+REDIRECT:
+  - name: header
+    pattern: 'header\s*\('
+    severity: MEDIUM
+    cwe: CWE-601
+    description: "Send HTTP header (open redirect risk)"
+
+EMAIL:
+  - name: mail
+    pattern: 'mail\s*\('
+    severity: HIGH
+    cwe: CWE-88
+    description: "Send email (header injection risk)"
+
+NOSQL:
+  - name: find
+    pattern: 'find\s*\('
+    severity: HIGH
+    cwe: CWE-943
+    description: "NoSQL query operation"
+
+  - name: findOne
+    pattern: 'findOne\s*\('
+    severity: HIGH
+    cwe: CWE-943
+    description: "NoSQL single document query"
+
+  - name: aggregate
+    pattern: 'aggregate\s*\('
+    severity: HIGH
+    cwe: CWE-943
+    description: "NoSQL aggregation operation"
+
+LDAP:
+  - name: ldap_search
+    pattern: 'ldap_search\s*\('
+    severity: HIGH
+    cwe: CWE-90
+    description: "LDAP search operation"
+
+  - name: ldap_bind
+    pattern: 'ldap_bind\s*\('
+    severity: HIGH
+    cwe: CWE-90
+    description: "LDAP bind operation"
+
+PATTERN_ARG_SINKS:
+  - name: preg_replace
+    pattern: 'preg_replace\s*\('
+    severity: CRITICAL
+    cwe: CWE-94
+    description: "Regular expression replace (code execution with /e modifier)"
+    arg_position: 0
+
+  - name: preg_match
+    pattern: 'preg_match\s*\('
+    severity: HIGH
+    cwe: CWE-185
+    description: "Regular expression match (ReDoS risk)"
+    arg_position: 0
+
+  - name: preg_match_all
+    pattern: 'preg_match_all\s*\('
+    severity: HIGH
+    cwe: CWE-185
+    description: "Regular expression match all (ReDoS risk)"
+    arg_position: 0
+
+  - name: preg_grep
+    pattern: 'preg_grep\s*\('
+    severity: HIGH
+    cwe: CWE-185
+    description: "Regular expression grep (ReDoS risk)"
+    arg_position: 0
+
+  - name: preg_split
+    pattern: 'preg_split\s*\('
+    severity: HIGH
+    cwe: CWE-185
+    description: "Regular expression split (ReDoS risk)"
+    arg_position: 0
+
+VARIABLE_MANIPULATION:
+  - name: extract
+    pattern: 'extract\s*\('
+    severity: HIGH
+    cwe: CWE-621
+    description: "Extract variables from array (variable overwrite)"
+
+  - name: parse_str
+    pattern: 'parse_str\s*\('
+    severity: HIGH
+    cwe: CWE-621
+    description: "Parse query string into variables"
+
+  - name: setcookie
+    pattern: 'setcookie\s*\('
+    severity: MEDIUM
+    cwe: CWE-565
+    description: "Set cookie (injection risk)"

@@ -114,7 +114,8 @@ def generate_html_report(results: Dict, target: str, output_path: Optional[str] 
     html_parts = []
     html_parts.append(_html_header(target, scan_date))
     html_parts.append(_html_summary(results, risk_score, risk_level, risk_color,
-                                    total, total_files, skipped, ml_eliminated, llm_eliminated))
+                                    total, total_files, skipped, ml_eliminated, llm_eliminated,
+                                    findings=findings))
     html_parts.append(_html_severity_chart(results))
     html_parts.append(_html_type_breakdown(by_type))
     html_parts.append(_html_findings_table(findings, by_file))
@@ -213,7 +214,8 @@ footer {{ text-align: center; padding: 20px; color: #94a3b8; font-size: 0.8em; }
 
 def _html_summary(results: Dict, risk_score: int, risk_level: str, risk_color: str,
                   total: int, total_files: int, skipped: int,
-                  ml_eliminated: int, llm_eliminated: int) -> str:
+                  ml_eliminated: int, llm_eliminated: int,
+                  findings: Optional[List[Dict]] = None) -> str:
     crit = results.get('critical', 0)
     high = results.get('high', 0)
     med = results.get('medium', 0)
@@ -254,6 +256,14 @@ def _html_summary(results: Dict, risk_score: int, risk_level: str, risk_color: s
 </div>'''
 
     cards += '</div>'
+
+    # ML classification summary
+    if findings:
+        ml_tp = sum(1 for f in findings if f.get('ml_is_tp', True))
+        ml_fp = sum(1 for f in findings if f.get('ml_score') is not None and not f.get('ml_is_tp', True))
+        if ml_tp + ml_fp > 0:
+            cards += f'<p style="margin-top:12px;font-size:0.9em;color:#475569">ML Classification: {ml_tp} likely real, {ml_fp} likely false positive</p>'
+
     return cards
 
 
@@ -381,12 +391,30 @@ def _html_findings_table(findings: List[Dict], by_file: Dict) -> str:
         if source:
             source_str = f'<span style="font-size:0.75em;color:#6366f1">Source: {html.escape(str(source))}</span>'
 
+        # ML score display
+        ml_score = f.get('ml_score', None)
+        ml_method = f.get('ml_method', '')
+        if ml_score is not None:
+            if ml_score > 0.7:
+                ml_color = '#dc3545'  # Red - likely real vulnerability
+                ml_label = 'TP'
+            elif ml_score > 0.4:
+                ml_color = '#ffc107'  # Yellow - uncertain
+                ml_label = '?'
+            else:
+                ml_color = '#28a745'  # Green - likely false positive
+                ml_label = 'FP'
+            ml_cell = f'<td><span style="color:{ml_color};font-weight:bold" title="{ml_method}: {ml_score:.2f}">{ml_label} ({ml_score:.0%})</span></td>'
+        else:
+            ml_cell = '<td>-</td>'
+
         rows.append(f'''<tr class="finding-row" data-severity="{sev}">
 <td><span class="sev-badge sev-{sev}">{sev}</span></td>
 <td><strong>{html.escape(vtype)}</strong><br><span style="font-size:0.75em;color:#94a3b8">{cwe}</span></td>
 <td title="{html.escape(filepath)}"><strong>{html.escape(short_file)}</strong>:{line}</td>
 <td><div class="code-snippet"><span class="vuln-line">{code_escaped}</span></div>{source_str}{san_str}</td>
 <td><div class="confidence"><div class="conf-bar" style="width:{conf_val*50}px;background:{conf_color}"></div></div>{confidence}</td>
+{ml_cell}
 </tr>''')
 
     return f'''
@@ -403,6 +431,7 @@ def _html_findings_table(findings: List[Dict], by_file: Dict) -> str:
 <th onclick="sortTable(2)">Location</th>
 <th>Code</th>
 <th onclick="sortTable(4)">Confidence</th>
+<th>ML Score</th>
 </tr>
 </thead>
 <tbody>

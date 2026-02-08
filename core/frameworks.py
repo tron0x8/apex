@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from typing import Dict, Set, List, Optional
 from enum import Enum, auto
 
+try:
+    from .rule_engine import get_rule_engine
+except ImportError:
+    get_rule_engine = None
+
 
 class Framework(Enum):
     LARAVEL = auto()
@@ -595,8 +600,92 @@ class FrameworkDetector:
         ],
     }
 
+    _rule_engine_loaded = False
+
+    @classmethod
+    def _load_from_rule_engine(cls):
+        """Load additional framework configs from RuleEngine. Hardcoded entries are kept as fallback."""
+        if cls._rule_engine_loaded:
+            return
+        cls._rule_engine_loaded = True
+        try:
+            if get_rule_engine is None:
+                return
+            engine = get_rule_engine()
+            if engine is None:
+                return
+
+            re_frameworks = engine.frameworks
+            if not re_frameworks:
+                return
+
+            # Map framework names to Framework enum values
+            _name_to_enum = {
+                'laravel': Framework.LARAVEL,
+                'symfony': Framework.SYMFONY,
+                'codeigniter': Framework.CODEIGNITER,
+                'wordpress': Framework.WORDPRESS,
+                'drupal': Framework.DRUPAL,
+                'yii': Framework.YII,
+                'cakephp': Framework.CAKEPHP,
+                'slim': Framework.SLIM,
+            }
+
+            for fw_name, fw_def in re_frameworks.items():
+                fw_key = fw_name.lower()
+                fw_enum = _name_to_enum.get(fw_key)
+
+                # Extend SIGNATURES for known frameworks
+                if fw_enum and fw_def.detect_patterns:
+                    existing_sigs = set(cls.SIGNATURES.get(fw_enum, []))
+                    for sig in fw_def.detect_patterns:
+                        if sig not in existing_sigs:
+                            cls.SIGNATURES.setdefault(fw_enum, []).append(sig)
+
+                # Extend FRAMEWORKS config for known frameworks
+                if fw_enum and fw_enum in FRAMEWORKS:
+                    config = FRAMEWORKS[fw_enum]
+
+                    # Extend sanitizers
+                    if fw_def.sanitizers:
+                        for vuln_type, sanitizer_set in fw_def.sanitizers.items():
+                            vuln_key = vuln_type.upper().replace('_INJECTION', '').replace('CROSS_SITE_SCRIPTING', 'XSS')
+                            if vuln_key not in config.sanitizers:
+                                config.sanitizers[vuln_key] = set()
+                            if isinstance(sanitizer_set, (list, set)):
+                                for s in sanitizer_set:
+                                    config.sanitizers[vuln_key].add(s)
+                            elif isinstance(sanitizer_set, dict):
+                                for s in sanitizer_set.values():
+                                    if isinstance(s, str):
+                                        config.sanitizers[vuln_key].add(s)
+
+                    # Extend sources
+                    if fw_def.sources:
+                        for src, src_type in fw_def.sources.items():
+                            if src not in config.sources:
+                                config.sources[src] = src_type
+
+                    # Extend sinks
+                    if fw_def.sinks:
+                        for sink, sink_type in fw_def.sinks.items():
+                            if sink not in config.sinks:
+                                config.sinks[sink] = sink_type
+
+                    # Extend safe_patterns
+                    if fw_def.safe_patterns:
+                        existing_safe = set(config.safe_patterns)
+                        for pat in fw_def.safe_patterns:
+                            if pat not in existing_safe:
+                                config.safe_patterns.append(pat)
+
+        except Exception:
+            # If RuleEngine fails, fall back to hardcoded configs silently
+            pass
+
     @classmethod
     def detect_from_code(cls, code: str) -> Framework:
+        cls._load_from_rule_engine()
         scores = {fw: 0 for fw in Framework}
 
         for fw, signatures in cls.SIGNATURES.items():
@@ -614,6 +703,7 @@ class FrameworkDetector:
 
     @classmethod
     def detect_from_files(cls, files: List[str]) -> Framework:
+        cls._load_from_rule_engine()
         for fw, signatures in cls.SIGNATURES.items():
             for sig in signatures:
                 for f in files:

@@ -1,0 +1,69 @@
+name: CakePHP
+detect_patterns:
+  - "cakephp"
+  - "Cake\\"
+  - "CakePHP"
+  - "src/Controller"
+  - "config/routes.php"
+  - "composer.json:cakephp/cakephp"
+  - "Cake\\Controller\\Controller"
+sanitizers:
+  SQL:
+    - "->find"
+    - "->get"
+    - "->save"
+    - "->query()->where"
+    - "->newEntity"
+    - "->patchEntity"
+    - "->contain"
+    - "ConnectionManager"
+    - "TableRegistry"
+    - "->matching"
+    - "->innerJoinWith"
+    - "->setConditions"
+    - "->bind"
+  XSS:
+    - "h("
+    - "<?= h("
+    - "$this->Html->"
+    - "htmlspecialchars"
+    - "Cake\\View\\Helper"
+    - "->element("
+    - "->render("
+    - "Text::truncate"
+    - "Text::excerpt"
+  CSRF:
+    - "csrf_token"
+    - "CsrfComponent"
+    - "->getParam('_Token')"
+    - "FormProtector"
+  AUTH:
+    - "AuthComponent"
+    - "$this->Auth->user"
+    - "->isAuthorized"
+    - "->authorize"
+    - "IdentityInterface"
+    - "->getIdentity"
+sources:
+  "$this->request->getData": POST
+  "$this->request->getQuery": GET
+  "$this->request->getParam": REQUEST
+  "$this->request->input": REQUEST
+  "$this->request->getCookie": COOKIE
+  "$this->request->getUploadedFile": FILES
+sinks:
+  "->query(": SQL_INJECTION
+  "Connection::execute": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "system": COMMAND_INJECTION
+  "->redirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "HttpClient": SSRF
+  "unserialize": DESERIALIZATION
+safe_patterns:
+  - '->find\s*\(\s*[''"]'
+  - 'h\s*\('
+  - '->newEntity\s*\('
+  - '->patchEntity\s*\('

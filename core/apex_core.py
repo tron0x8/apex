@@ -13,6 +13,38 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from .taint_engine import TaintAnalyzer, TaintFinding, analyze_php_file
 from .symbolic_executor import SymbolicExecutor, symbolic_execute_file
 from .interprocedural import InterproceduralAnalyzer
+from .rule_engine import get_rule_engine, RuleEngine
+
+# v4.0 modules - imported with fallback for graceful degradation
+try:
+    from .interprocedural_v2 import InterproceduralEngine
+    _HAS_INTERPROC_V2 = True
+except ImportError:
+    _HAS_INTERPROC_V2 = False
+
+try:
+    from .incremental import IncrementalAnalyzer
+    _HAS_INCREMENTAL = True
+except ImportError:
+    _HAS_INCREMENTAL = False
+
+try:
+    from .fp_filter_v2 import FPFilterV2, AnalysisContext
+    _HAS_FP_V2 = True
+except ImportError:
+    _HAS_FP_V2 = False
+
+try:
+    from .framework_models import FrameworkModelEngine
+    _HAS_FRAMEWORK_MODELS = True
+except ImportError:
+    _HAS_FRAMEWORK_MODELS = False
+
+try:
+    from .ml_fp_classifier import FPClassifier, FileAnalysisResults, build_file_analysis
+    _HAS_ML = True
+except ImportError:
+    _HAS_ML = False
 
 
 @dataclass
@@ -46,33 +78,11 @@ class VulnerabilityReport:
 
 
 class APEXCore:
-    CWE_MAP = {
-        'SQL_INJECTION': ('CWE-89', 'SQL Injection'),
-        'COMMAND_INJECTION': ('CWE-78', 'OS Command Injection'),
-        'CODE_INJECTION': ('CWE-94', 'Code Injection'),
-        'XSS': ('CWE-79', 'Cross-site Scripting'),
-        'FILE_INCLUSION': ('CWE-98', 'PHP File Inclusion'),
-        'PATH_TRAVERSAL': ('CWE-22', 'Path Traversal'),
-        'SSRF': ('CWE-918', 'Server-Side Request Forgery'),
-        'DESERIALIZATION': ('CWE-502', 'Deserialization of Untrusted Data'),
-        'XXE': ('CWE-611', 'XML External Entity'),
-    }
 
-    REMEDIATION = {
-        'SQL_INJECTION': 'Use parameterized queries or prepared statements. Never concatenate user input into SQL queries.',
-        'COMMAND_INJECTION': 'Use escapeshellarg() and escapeshellcmd() for shell arguments. Avoid shell commands when possible.',
-        'CODE_INJECTION': 'Never use eval() with user input. Use safer alternatives like json_decode() for data parsing.',
-        'XSS': 'Use htmlspecialchars() or htmlentities() with ENT_QUOTES flag for all user output.',
-        'FILE_INCLUSION': 'Use basename() to strip directory components. Validate against a whitelist of allowed files.',
-        'PATH_TRAVERSAL': 'Use realpath() and validate the resolved path is within expected directory.',
-        'SSRF': 'Validate and whitelist allowed URLs/hosts. Disable unnecessary URL schemes.',
-        'DESERIALIZATION': 'Avoid unserialize() with user input. Use JSON for data serialization.',
-        'XXE': 'Disable external entity loading with libxml_disable_entity_loader(true).',
-    }
-
-    def __init__(self, workers: int = 4, verbose: bool = False, **kwargs):
+    def __init__(self, workers: int = 4, verbose: bool = False, rule_engine=None, **kwargs):
         self.workers = workers
         self.verbose = verbose
+        self.rules = rule_engine or get_rule_engine()
         self.findings: List[VulnerabilityReport] = []
         self.stats = {
             'files_scanned': 0,
@@ -80,7 +90,95 @@ class APEXCore:
             'paths_explored': 0,
             'time_elapsed': 0,
         }
-        self._file_cache: Dict[str, str] = {}  # Cache for file contents
+        self._file_cache: Dict[str, str] = {}
+        self._init_cwe_remediation()
+
+        # v4.0: incremental analysis cache
+        self._incremental = None
+        if _HAS_INCREMENTAL:
+            cache_dir = kwargs.get('cache_dir', '.')
+            try:
+                self._incremental = IncrementalAnalyzer(cache_dir=cache_dir)
+            except Exception:
+                pass
+
+        # v4.0: consolidated FP filter
+        self._fp_filter = None
+        if _HAS_FP_V2:
+            try:
+                self._fp_filter = FPFilterV2(self.rules)
+            except Exception:
+                pass
+
+        # v4.0: framework model engine
+        self._framework_engine = None
+        if _HAS_FRAMEWORK_MODELS:
+            try:
+                self._framework_engine = FrameworkModelEngine(self.rules)
+            except Exception:
+                pass
+
+        # v4.0: ML FP classifier with real analysis integration
+        self._ml_classifier = None
+        if _HAS_ML:
+            try:
+                self._ml_classifier = FPClassifier(use_ml=True)
+            except Exception:
+                pass
+
+    def _init_cwe_remediation(self):
+        """Initialize CWE mapping and remediation from rules."""
+        # Start with hardcoded defaults
+        self.cwe_map = {
+            'SQL_INJECTION': ('CWE-89', 'SQL Injection'),
+            'COMMAND_INJECTION': ('CWE-78', 'OS Command Injection'),
+            'CODE_INJECTION': ('CWE-94', 'Code Injection'),
+            'XSS': ('CWE-79', 'Cross-site Scripting'),
+            'FILE_INCLUSION': ('CWE-98', 'PHP File Inclusion'),
+            'PATH_TRAVERSAL': ('CWE-22', 'Path Traversal'),
+            'SSRF': ('CWE-918', 'Server-Side Request Forgery'),
+            'DESERIALIZATION': ('CWE-502', 'Deserialization of Untrusted Data'),
+            'XXE': ('CWE-611', 'XML External Entity'),
+            'RCE': ('CWE-94', 'Remote Code Execution'),
+            'OPEN_REDIRECT': ('CWE-601', 'Open Redirect'),
+            'IDOR': ('CWE-639', 'Insecure Direct Object Reference'),
+            'WEAK_CRYPTO': ('CWE-327', 'Weak Cryptography'),
+            'HARDCODED_CREDS': ('CWE-798', 'Hardcoded Credentials'),
+            'INFO_DISCLOSURE': ('CWE-200', 'Information Disclosure'),
+            'UNSAFE_UPLOAD': ('CWE-434', 'Unsafe File Upload'),
+            'TYPE_JUGGLING': ('CWE-843', 'Type Juggling'),
+            'HEADER_INJECTION': ('CWE-113', 'HTTP Header Injection'),
+            'MASS_ASSIGNMENT': ('CWE-915', 'Mass Assignment'),
+            'INSECURE_RANDOM': ('CWE-330', 'Insecure Randomness'),
+            'RACE_CONDITION': ('CWE-362', 'Race Condition'),
+            'LOG_INJECTION': ('CWE-117', 'Log Injection'),
+            'REGEX_DOS': ('CWE-1333', 'Regular Expression DoS'),
+            'AUTH_BYPASS': ('CWE-287', 'Authentication Bypass'),
+            'CSRF': ('CWE-352', 'Cross-Site Request Forgery'),
+            'LDAP_INJECTION': ('CWE-90', 'LDAP Injection'),
+            'XPATH_INJECTION': ('CWE-643', 'XPath Injection'),
+            'TEMPLATE_INJECTION': ('CWE-1336', 'Template Injection'),
+            'FILE_WRITE': ('CWE-73', 'Arbitrary File Write'),
+            'FILE_READ': ('CWE-22', 'Arbitrary File Read'),
+            'NOSQL': ('CWE-943', 'NoSQL Injection'),
+        }
+        self.remediation_map = {
+            'SQL_INJECTION': 'Use parameterized queries or prepared statements.',
+            'COMMAND_INJECTION': 'Use escapeshellarg() and escapeshellcmd().',
+            'CODE_INJECTION': 'Never use eval() with user input.',
+            'XSS': 'Use htmlspecialchars() with ENT_QUOTES flag.',
+            'FILE_INCLUSION': 'Use basename() and validate against whitelist.',
+            'PATH_TRAVERSAL': 'Use realpath() and validate path is within expected directory.',
+            'SSRF': 'Validate and whitelist allowed URLs/hosts.',
+            'DESERIALIZATION': 'Avoid unserialize() with user input. Use JSON.',
+            'XXE': 'Disable external entity loading.',
+        }
+        # Extend from YAML rules (patterns have remediation)
+        for vuln_name, pats in self.rules.get_patterns().items():
+            if pats and pats[0].remediation and vuln_name not in self.remediation_map:
+                self.remediation_map[vuln_name] = pats[0].remediation
+            if pats and pats[0].cwe and vuln_name not in self.cwe_map:
+                self.cwe_map[vuln_name] = (pats[0].cwe, vuln_name.replace('_', ' ').title())
 
     def analyze(self, target: str, mode: str = 'full') -> List[VulnerabilityReport]:
         start_time = time.time()
@@ -140,14 +238,45 @@ class APEXCore:
                 print("[*] Phase 3: Inter-procedural Analysis")
 
             try:
-                interprocedural = InterproceduralAnalyzer()
-                findings = interprocedural.analyze_directory(directory)
-                self._add_interprocedural_findings(findings)
-
-                self.stats['functions_analyzed'] = interprocedural.get_call_graph_stats()['total_functions']
+                if _HAS_INTERPROC_V2:
+                    engine = InterproceduralEngine(k=2)
+                    findings = engine.analyze_directory(directory)
+                    self._add_interprocedural_findings(findings)
+                    self.stats['functions_analyzed'] = engine.get_summary().get('total_functions', 0)
+                else:
+                    interprocedural = InterproceduralAnalyzer()
+                    findings = interprocedural.analyze_directory(directory)
+                    self._add_interprocedural_findings(findings)
+                    self.stats['functions_analyzed'] = interprocedural.get_call_graph_stats()['total_functions']
             except Exception as e:
                 if self.verbose:
                     print(f"[!] Error in inter-procedural analysis: {e}")
+
+        # Apply ML scoring to all findings
+        if self.findings and self._ml_classifier:
+            file_codes = {}
+            for f in self.findings:
+                fp = f.file if hasattr(f, 'file') else f.get('file', '')
+                if fp and fp not in file_codes:
+                    try:
+                        with open(fp, 'r', encoding='utf-8', errors='ignore') as fh:
+                            file_codes[fp] = fh.read()
+                    except Exception:
+                        file_codes[fp] = ''
+            # Convert VulnerabilityReport objects to dicts for ML scoring
+            finding_dicts = [fi.to_dict() for fi in self.findings]
+            finding_dicts = self._apply_ml_scoring(finding_dicts, file_codes)
+            # Update findings with ML metadata
+            for fi, fd in zip(self.findings, finding_dicts):
+                if 'ml_score' in fd:
+                    fi.confidence = fd.get('confidence', fi.confidence)
+
+        # v4.0: Save incremental cache
+        if self._incremental:
+            try:
+                self._incremental.save_cache()
+            except Exception:
+                pass
 
     def _analyze_file(self, file_path: str, mode: str):
         self.stats['files_scanned'] = 1
@@ -166,6 +295,23 @@ class APEXCore:
             except Exception as e:
                 if self.verbose:
                     print(f"[!] Symbolic execution error: {e}")
+
+        # Apply ML scoring to findings from single file
+        if self.findings and self._ml_classifier:
+            file_codes = {}
+            for f in self.findings:
+                fp = f.file if hasattr(f, 'file') else f.get('file', '')
+                if fp and fp not in file_codes:
+                    try:
+                        with open(fp, 'r', encoding='utf-8', errors='ignore') as fh:
+                            file_codes[fp] = fh.read()
+                    except Exception:
+                        file_codes[fp] = ''
+            finding_dicts = [fi.to_dict() for fi in self.findings]
+            finding_dicts = self._apply_ml_scoring(finding_dicts, file_codes)
+            for fi, fd in zip(self.findings, finding_dicts):
+                if 'ml_score' in fd:
+                    fi.confidence = fd.get('confidence', fi.confidence)
 
     def _run_taint_analysis(self, file_path: str) -> List[TaintFinding]:
         try:
@@ -200,7 +346,7 @@ class APEXCore:
     def _add_taint_findings(self, findings: List[TaintFinding]):
         for f in findings:
             vuln_type = f.taint_type.name if hasattr(f.taint_type, 'name') else str(f.taint_type)
-            cwe, _ = self.CWE_MAP.get(vuln_type, ('', ''))
+            cwe, _ = self.cwe_map.get(vuln_type, ('', ''))
 
             report = VulnerabilityReport(
                 vuln_type=vuln_type,
@@ -212,7 +358,7 @@ class APEXCore:
                 description=f"Tainted data from {f.source} flows to {f.sink_name}",
                 confidence=f.confidence,
                 path=[str(p) for p in f.path],
-                remediation=self.REMEDIATION.get(vuln_type, ''),
+                remediation=self.remediation_map.get(vuln_type, ''),
                 cwe=cwe
             )
             self.findings.append(report)
@@ -220,7 +366,7 @@ class APEXCore:
     def _add_symbolic_findings(self, findings: List[Dict]):
         for f in findings:
             vuln_type = f.get('type', 'UNKNOWN')
-            cwe, _ = self.CWE_MAP.get(vuln_type.replace('_INJECTION', ''), ('', ''))
+            cwe, _ = self.cwe_map.get(vuln_type.replace('_INJECTION', ''), ('', ''))
 
             report = VulnerabilityReport(
                 vuln_type=vuln_type,
@@ -232,7 +378,7 @@ class APEXCore:
                 description=f"Symbolic execution found path from {f.get('source')} to {f.get('sink')}",
                 confidence=0.7,
                 path=f.get('operations', []),
-                remediation=self.REMEDIATION.get(vuln_type.replace('_INJECTION', ''), ''),
+                remediation=self.remediation_map.get(vuln_type.replace('_INJECTION', ''), ''),
                 cwe=cwe
             )
             self.findings.append(report)
@@ -240,7 +386,7 @@ class APEXCore:
     def _add_interprocedural_findings(self, findings: List[Dict]):
         for f in findings:
             vuln_type = f.get('type', 'UNKNOWN')
-            cwe, _ = self.CWE_MAP.get(vuln_type.replace('_INJECTION', ''), ('', ''))
+            cwe, _ = self.cwe_map.get(vuln_type.replace('_INJECTION', ''), ('', ''))
 
             desc = f"Inter-procedural taint flow through {f.get('function', f.get('vulnerable_function', ''))} "
             desc += f"from parameter {f.get('param_name', f.get('param_index', '?'))}"
@@ -254,10 +400,69 @@ class APEXCore:
                 source=f"param:{f.get('param_name', f.get('param_index', '?'))}",
                 description=desc,
                 confidence=0.8,
-                remediation=self.REMEDIATION.get(vuln_type.replace('_INJECTION', ''), ''),
+                remediation=self.remediation_map.get(vuln_type.replace('_INJECTION', ''), ''),
                 cwe=cwe
             )
             self.findings.append(report)
+
+    def _build_analysis_results(self, filepath: str, code: str) -> Optional['FileAnalysisResults']:
+        """Run v4.0 analysis modules on a file for ML feature extraction."""
+        if not _HAS_ML:
+            return None
+        try:
+            return build_file_analysis(filepath, code, self.rules)
+        except Exception:
+            return None
+
+    def _apply_ml_scoring(self, findings: list, file_codes: dict) -> list:
+        """Apply ML FP classifier to findings, adjusting confidence scores.
+        
+        This integrates ML scoring INTO the pipeline (not just post-filter).
+        ML score adjusts finding confidence rather than removing findings outright.
+        """
+        if not self._ml_classifier:
+            return findings
+        
+        try:
+            # Build analysis results for each file
+            file_analyses = {}
+            for filepath, code in file_codes.items():
+                ar = self._build_analysis_results(filepath, code)
+                if ar:
+                    file_analyses[filepath] = ar
+            
+            # Classify each finding
+            for f in findings:
+                filepath = f.get('file', '')
+                code = file_codes.get(filepath, '')
+                file_lines = code.splitlines() if code else []
+                analysis = file_analyses.get(filepath)
+                
+                result = self._ml_classifier.classify(f, code, file_lines, analysis)
+                
+                # Add ML metadata to finding
+                f['ml_is_tp'] = result.is_tp
+                f['ml_score'] = round(result.score, 3)
+                f['ml_confidence'] = round(result.confidence, 2)
+                f['ml_reasoning'] = result.reasoning
+                f['ml_method'] = result.method
+                
+                # Adjust finding confidence based on ML score
+                original_conf = f.get('confidence', 50)
+                if isinstance(original_conf, str) and '%' in original_conf:
+                    original_conf = float(original_conf.replace('%', ''))
+                original_conf = float(original_conf)
+                
+                # Blend original confidence with ML score
+                # ML score influences final confidence (30% weight)
+                ml_adjustment = (result.score - 0.5) * 60  # -30 to +30
+                adjusted = max(5, min(100, original_conf + ml_adjustment))
+                f['confidence'] = f'{int(adjusted)}%'
+                f['original_confidence'] = f'{int(original_conf)}%'
+            
+            return findings
+        except Exception:
+            return findings
 
     def _deduplicate_findings(self):
         seen = set()
@@ -322,12 +527,12 @@ class APEXCore:
         rules_added = set()
         for f in self.findings:
             if f.vuln_type not in rules_added:
-                cwe, desc = self.CWE_MAP.get(f.vuln_type, ('', f.vuln_type))
+                cwe, desc = self.cwe_map.get(f.vuln_type, ('', f.vuln_type))
                 sarif['runs'][0]['tool']['driver']['rules'].append({
                     'id': f.vuln_type,
                     'name': desc,
                     'shortDescription': {'text': desc},
-                    'help': {'text': self.REMEDIATION.get(f.vuln_type, '')}
+                    'help': {'text': self.remediation_map.get(f.vuln_type, '')}
                 })
                 rules_added.add(f.vuln_type)
 

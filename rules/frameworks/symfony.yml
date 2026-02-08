@@ -1,0 +1,66 @@
+name: Symfony
+detect_patterns:
+  - "bin/console"
+  - "Symfony\\"
+  - "config/bundles.php"
+  - "src/Controller"
+  - "composer.json:symfony/"
+sanitizers:
+  SQL:
+    - "->createQueryBuilder"
+    - "->prepare"
+    - "->executeQuery"
+    - "->setParameter"
+    - "->getRepository"
+    - "DQL"
+    - "Doctrine\\ORM"
+    - "EntityManager"
+    - "->find("
+    - "->findBy"
+    - "->findOneBy"
+    - "->findAll"
+    - "ParamConverter"
+    - "->expr()->"
+  XSS:
+    - "{{ "
+    - "{% "
+    - "|escape"
+    - "|e"
+    - "Twig"
+    - "->render("
+    - "->renderView("
+    - "|raw"
+    - "htmlspecialchars"
+    - "Response::create"
+  CSRF:
+    - "csrf_token"
+    - "isCsrfTokenValid"
+    - "CsrfToken"
+sources:
+  "$request->query->get": GET
+  "$request->request->get": POST
+  "$request->get": REQUEST
+  "$request->getContent": REQUEST
+  "$request->files->get": FILES
+  "$request->cookies->get": COOKIE
+  "Request::createFromGlobals": REQUEST
+  "->getClientIp": SERVER
+sinks:
+  "->query(": SQL_INJECTION
+  "->exec(": SQL_INJECTION
+  "createQuery": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "Process(": COMMAND_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "|raw": XSS
+  "RedirectResponse": OPEN_REDIRECT
+  "->redirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "HttpClient": SSRF
+  "unserialize": DESERIALIZATION
+safe_patterns:
+  - '->setParameter\('
+  - 'ParamConverter'
+  - '@Assert\\'
+  - '#\[Assert\\'

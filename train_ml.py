@@ -30,6 +30,7 @@ from core.ml_fp_classifier import (
     TrainingDataGenerator, FPClassifier
 )
 from core.unified_scanner import UnifiedScanner
+from training_data_extended import get_extended_fp_examples, get_extended_tp_examples
 
 
 def load_scan_json(filepath):
@@ -153,6 +154,30 @@ def generate_augmented_fp_data(extractor):
         {'type': 'HTTP Header Injection', 'severity': 'HIGH', 'confidence': '65%',
          'code': 'header("Content-Type: application/json");',
          'line': 1, 'file': 'api.php'},
+        # Type narrowed to int (safe for SQLi)
+        {'type': 'SQL Injection', 'severity': 'HIGH', 'confidence': '70%',
+         'code': '$id = (int)$_GET["id"]; if (is_int($id)) { $db->query("SELECT * FROM items WHERE id=" . $id); }',
+         'line': 10, 'file': 'item.php'},
+        # Framework validation applied (safe)
+        {'type': 'SQL Injection', 'severity': 'HIGH', 'confidence': '60%',
+         'code': '$validated = $request->validate(["id" => "required|integer"]); DB::table("users")->find($validated["id"]);',
+         'line': 15, 'file': 'app/Http/Controllers/UserController.php'},
+        # Custom sanitizer wrapper function
+        {'type': 'Cross-Site Scripting', 'severity': 'HIGH', 'confidence': '65%',
+         'code': '$clean = sanitize_html($input); echo $clean;',
+         'line': 8, 'file': 'output.php'},
+        # Inter-procedural sanitizer wrapper
+        {'type': 'SQL Injection', 'severity': 'MEDIUM', 'confidence': '60%',
+         'code': '$safe = escape_sql_input($raw); $db->query("SELECT * FROM t WHERE id=" . $safe);',
+         'line': 12, 'file': 'data.php'},
+        # String context safe: variable in FROM position (table name)
+        {'type': 'SQL Injection', 'severity': 'MEDIUM', 'confidence': '55%',
+         'code': '$db->query("SELECT * FROM " . $table_name . " WHERE active=1");',
+         'line': 10, 'file': 'model.php'},
+        # Branch sanitized + used raw
+        {'type': 'Cross-Site Scripting', 'severity': 'MEDIUM', 'confidence': '55%',
+         'code': 'if ($safe) { $out = htmlspecialchars($name); } else { $out = $name; } echo $out;',
+         'line': 5, 'file': 'template.php'},
         # Info disclosure FPs
         {'type': 'Information Disclosure', 'severity': 'MEDIUM', 'confidence': '50%',
          'code': 'error_log("User login: " . $username);',
@@ -209,6 +234,18 @@ def generate_augmented_fp_data(extractor):
         {'type': 'HTTP Header Injection', 'severity': 'HIGH', 'confidence': '85%',
          'code': 'header("X-Custom: " . $_POST["value"]);',
          'line': 8, 'file': 'api.php'},
+        # Cross-function taint flow (inter-procedural)
+        {'type': 'SQL Injection', 'severity': 'HIGH', 'confidence': '80%',
+         'code': '$result = get_user_input(); $db->query("SELECT * FROM users WHERE id=" . $result);',
+         'line': 15, 'file': 'handler.php'},
+        # Alias-based taint propagation
+        {'type': 'SQL Injection', 'severity': 'HIGH', 'confidence': '75%',
+         'code': '$b = &$input; $db->query("SELECT * FROM t WHERE x=" . $b);',
+         'line': 20, 'file': 'process.php'},
+        # High tainted ratio (entire query is user-controlled)
+        {'type': 'SQL Injection', 'severity': 'CRITICAL', 'confidence': '95%',
+         'code': '$db->query($_POST["query"]);',
+         'line': 5, 'file': 'admin.php'},
     ]
 
     for pattern in fp_examples:
@@ -355,7 +392,7 @@ def train_optimized(features, labels, model_dir, verbose=True):
     # Save model
     import pickle
     os.makedirs(model_dir, exist_ok=True)
-    model_path = os.path.join(model_dir, "fp_classifier_model.pkl")
+    model_path = os.path.join(model_dir, "apex_fp_classifier_v4.pkl")
     with open(model_path, 'wb') as f:
         pickle.dump({
             'model': best_model,
@@ -391,7 +428,12 @@ def train_optimized(features, labels, model_dir, verbose=True):
 def main():
     parser = argparse.ArgumentParser(description='APEX ML FP Classifier Training')
     parser.add_argument('--verbose', '-v', action='store_true', default=True)
-    parser.add_argument('--data-dir', default='C:/Users/User/Desktop/vuln_datasets',
+    # Auto-detect data dir: local Windows path or remote/relative path
+    default_data_dir = 'C:/Users/User/Desktop/vuln_datasets'
+    if not os.path.exists(default_data_dir):
+        # Try relative path (for remote server)
+        default_data_dir = str(Path(__file__).parent / 'vuln_datasets')
+    parser.add_argument('--data-dir', default=default_data_dir,
                         help='Directory with scan JSON files')
     parser.add_argument('--model-dir', default=None,
                         help='Output directory for model (default: apex/models/)')
@@ -461,7 +503,21 @@ def main():
         n_aug_fp = sum(1 for l in aug_labs if not l)
         print(f"  [MX] Augmented: {len(aug_feats)} ({n_aug_tp} TP, {n_aug_fp} FP)")
 
-    # === Source 5: CMS scan results (mixed labels from heuristic) ===
+    # === Source 5: Extended FP/TP data (160+ FP, 20 TP) ===
+    ext_fp = get_extended_fp_examples()
+    ext_tp = get_extended_tp_examples()
+    for pattern in ext_fp:
+        fv = extractor.extract(pattern, pattern['code'])
+        all_features.append(fv)
+        all_labels.append(False)
+    for pattern in ext_tp:
+        fv = extractor.extract(pattern, pattern['code'])
+        all_features.append(fv)
+        all_labels.append(True)
+    if verbose:
+        print(f"  [MX] Extended: {len(ext_fp) + len(ext_tp)} ({len(ext_tp)} TP, {len(ext_fp)} FP)")
+
+    # === Source 6: CMS scan results (mixed labels from heuristic) ===
     cms_scans = {
         'MaxSiteCMS': ('scan_maxsite_v2.json', data_dir),
     }

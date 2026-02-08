@@ -21,6 +21,11 @@ except ImportError:
     AdvancedContextAnalyzer = None
     analyze_context = None
 
+try:
+    from .rule_engine import get_rule_engine
+except ImportError:
+    get_rule_engine = None
+
 
 class SanitizationType(Enum):
     SQL = auto()
@@ -96,6 +101,71 @@ SANITIZERS: List[SanitizerInfo] = [
     SanitizerInfo("totranslit", r"totranslit\s*\(", {SanitizationType.SQL, SanitizationType.XSS, SanitizationType.COMMAND, SanitizationType.FILE}),
     SanitizerInfo("dle_strtolower", r"dle_strtolower\s*\(", {SanitizationType.XSS}),
 ]
+
+
+def _extend_sanitizers_from_rule_engine():
+    """Extend the SANITIZERS list with entries from RuleEngine. Hardcoded entries are kept as fallback."""
+    try:
+        if get_rule_engine is None:
+            return
+        engine = get_rule_engine()
+        if engine is None:
+            return
+
+        all_sanitizers = engine.get_sanitizers()
+        if not all_sanitizers:
+            return
+
+        # Build set of existing sanitizer names to avoid duplicates
+        existing_names = {s.name for s in SANITIZERS}
+
+        # Map RuleEngine protects_against strings to SanitizationType
+        _type_map = {
+            'SQL_INJECTION': SanitizationType.SQL,
+            'SQL': SanitizationType.SQL,
+            'XSS': SanitizationType.XSS,
+            'CROSS_SITE_SCRIPTING': SanitizationType.XSS,
+            'COMMAND_INJECTION': SanitizationType.COMMAND,
+            'COMMAND': SanitizationType.COMMAND,
+            'FILE_INCLUSION': SanitizationType.FILE,
+            'FILE': SanitizationType.FILE,
+            'PATH_TRAVERSAL': SanitizationType.FILE,
+            'CODE_INJECTION': SanitizationType.CODE,
+            'CODE': SanitizationType.CODE,
+            'SSRF': SanitizationType.SSRF,
+            'NOSQL_INJECTION': SanitizationType.NOSQL,
+            'NOSQL': SanitizationType.NOSQL,
+        }
+
+        for san_name, san_def in all_sanitizers.items():
+            if san_name in existing_names:
+                continue
+            if not san_def.pattern:
+                continue
+
+            removes = set()
+            for prot in san_def.protects_against:
+                mapped = _type_map.get(prot.upper())
+                if mapped:
+                    removes.add(mapped)
+
+            if not removes:
+                continue
+
+            is_method = san_def.pattern.startswith(r'->')
+            SANITIZERS.append(SanitizerInfo(
+                name=san_name,
+                pattern=san_def.pattern,
+                removes=removes,
+                is_method=is_method,
+            ))
+    except Exception:
+        # If RuleEngine fails, fall back to hardcoded sanitizers silently
+        pass
+
+
+# Extend sanitizers from RuleEngine at module load time
+_extend_sanitizers_from_rule_engine()
 
 
 @dataclass

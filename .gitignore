@@ -71,3 +71,11 @@ tests/interprocedural_test.php
 tests/test_vulns.php
 tests/run_test.py
 tests/test_context.py
+
+# Temp assembly/patch scripts
+_assemble.py
+_patch_fp.py
+_new_fp_block.txt
+
+# Incremental analysis cache
+.apex_cache.json

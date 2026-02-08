@@ -1,0 +1,53 @@
+name: Slim
+detect_patterns:
+  - "Slim\\"
+  - "slim/slim"
+  - "Slim\\App"
+  - "composer.json:slim/slim"
+  - "Slim\\Factory\\AppFactory"
+  - "Slim\\Routing\\RouteCollectorProxy"
+sanitizers:
+  SQL:
+    - "->prepare"
+    - "->execute"
+    - "PDO::prepare"
+    - "->bindParam"
+    - "->bindValue"
+    - "Illuminate\\Database"
+    - "Eloquent"
+    - "QueryBuilder"
+  XSS:
+    - "htmlspecialchars"
+    - "htmlentities"
+    - "->withJson"
+    - "Twig_Environment"
+    - "|escape"
+    - "|e"
+    - "{{ "
+  CSRF:
+    - "csrf_token"
+    - "Guard::class"
+    - "CsrfMiddleware"
+    - "csrf"
+sources:
+  "$request->getQueryParams": GET
+  "$request->getParsedBody": POST
+  "$request->getCookieParams": COOKIE
+  "$request->getUploadedFiles": FILES
+  "$request->getAttribute": REQUEST
+  "$args": REQUEST
+sinks:
+  "->query(": SQL_INJECTION
+  "->exec(": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "system": COMMAND_INJECTION
+  "->withRedirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "GuzzleHttp": SSRF
+  "unserialize": DESERIALIZATION
+safe_patterns:
+  - '->prepare\s*\('
+  - '->withJson\s*\('
+  - 'ResponseInterface'

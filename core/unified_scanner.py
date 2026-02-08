@@ -15,6 +15,8 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
+from .rule_engine import get_rule_engine
+
 # Add paths
 sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -129,8 +131,9 @@ class UnifiedScanner:
     3. Final decision
     """
 
-    def __init__(self, enable_ast: bool = True, **kwargs):
+    def __init__(self, enable_ast: bool = True, rule_engine=None, **kwargs):
         self.enable_ast = enable_ast and HAS_AST_PARSER
+        self.rules = rule_engine or get_rule_engine()
         self._init_patterns()
         self._compile_patterns()
         self._init_sources_sinks()
@@ -139,257 +142,13 @@ class UnifiedScanner:
         self._init_ast_parser()
 
     def _init_patterns(self):
-        """Initialize vulnerability patterns"""
-        self.patterns = {
-            VulnType.SQL_INJECTION: [
-                # Direct injection
-                (r'(?:mysql_query|mysqli_query|pg_query|sqlite_query|oci_parse)\s*\([^)]*\$_(GET|POST|REQUEST|COOKIE)', Severity.CRITICAL),
-                # String concat with user input
-                (r'["\'](?:SELECT|INSERT|UPDATE|DELETE)\s+.*?\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                # Variable in query (interpolation)
-                (r'(?:mysql_query|mysqli_query|pg_query|sqlite_query)\s*\([^)]*\$\w+', Severity.HIGH),
-                # Variable in query method (interpolated string)
-                (r'->query\s*\(\s*["\'][^"\']*\$\w+', Severity.HIGH),
-                # Variable passed to query (e.g., ->query($sql) where $sql built via concat)
-                (r'->query\s*\(\s*\$\w+\s*\)', Severity.MEDIUM),
-                # PDO exec with string interpolation (NOT prepare)
-                (r'->exec\s*\(\s*["\'][^"\']*\$\w+', Severity.HIGH),
-                # Variable passed to exec
-                (r'->exec\s*\(\s*\$\w+\s*\)', Severity.MEDIUM),
-                # LIKE injection (partial match bypass)
-                (r'LIKE\s+[\'"]%?\s*\.\s*\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-                # ORDER BY injection
-                (r'ORDER\s+BY\s+[^;]*\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-            ],
-            VulnType.COMMAND_INJECTION: [
-                (r'\b(?:exec|system|passthru|shell_exec|popen)\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'\b(?:exec|system|passthru|shell_exec)\s*\(\s*["\'][^"\']*\.\s*\$', Severity.HIGH),
-                (r'\b(?:exec|system|passthru|shell_exec|popen)\s*\(\s*\$\w+', Severity.HIGH),
-                # Backtick execution with superglobals (real shell execution)
-                (r'`[^`]*\$_(GET|POST|REQUEST)[^`]*`', Severity.CRITICAL),
-                (r'\bproc_open\s*\([^)]*\$', Severity.HIGH),
-                (r'\bpcntl_exec\s*\([^)]*\$', Severity.CRITICAL),
-            ],
-            VulnType.CODE_INJECTION: [
-                # Direct user input - CRITICAL
-                (r'\beval\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'\bassert\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'\bcreate_function\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'preg_replace\s*\([^)]*[\'"][^\'"]*\/e[\'"][^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                # Variable eval (lower severity - could be DB data in admin context)
-                (r'\beval\s*\(\s*\$(?!_(GET|POST|REQUEST|COOKIE|FILES|SERVER))', Severity.MEDIUM),
-                (r'\bassert\s*\(\s*\$(?!_(GET|POST|REQUEST))', Severity.MEDIUM),
-                (r'\bcreate_function\s*\(\s*[^)]*\$(?!_(GET|POST|REQUEST))', Severity.MEDIUM),
-                (r'preg_replace\s*\([^)]*[\'"][^\'"]*\/e', Severity.HIGH),
-            ],
-            VulnType.FILE_INCLUSION: [
-                (r'\b(?:include|require)(?:_once)?\s*\(?\s*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'\b(?:include|require)(?:_once)?\s*\(?\s*\$\w+', Severity.HIGH),
-            ],
-            VulnType.FILE_WRITE: [
-                (r'file_put_contents\s*\([^,]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'file_put_contents\s*\(\s*\$\w+\s*,\s*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'fwrite\s*\([^,]+,\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                # base64_decode in file path (obfuscated file write - common exploit pattern)
-                (r'file_put_contents\s*\([^,]*base64_decode\s*\(', Severity.HIGH),
-                # Variable path from array access + variable content (indirect write via wrapper)
-                (r'file_put_contents\s*\(\s*\$\w+\s*,\s*\$\w+\s*\[', Severity.MEDIUM),
-                # fwrite with base64_decode path
-                (r'fwrite\s*\([^,]*base64_decode\s*\(', Severity.HIGH),
-            ],
-            VulnType.FILE_READ: [
-                (r'file_get_contents\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'\breadfile\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'show_source\s*\(\s*\$', Severity.HIGH),
-                # base64_decode in file path (obfuscated file read)
-                (r'file_get_contents\s*\([^)]*base64_decode\s*\(', Severity.HIGH),
-                # highlight_file with variable (source disclosure)
-                (r'highlight_file\s*\(\s*\$', Severity.HIGH),
-                # fopen in read mode with variable path
-                (r'fopen\s*\(\s*\$\w+\s*,\s*[\'"]r[b\'"]?\s*[\'"]?\s*\)', Severity.MEDIUM),
-            ],
-            VulnType.XSS: [
-                # Direct echo/print of user input
-                (r'\becho\s+[^;]*\$_(GET|POST|REQUEST|COOKIE)', Severity.HIGH),
-                (r'\bprint\s+[^;]*\$_(GET|POST|REQUEST|COOKIE)', Severity.HIGH),
-                # User input in HTML attribute value (value="...{$_REQUEST}...")
-                (r'value\s*=\s*["\'][^"\']*\{\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                # Direct output in HTML attribute
-                (r'(?:href|src|action)\s*=\s*["\'][^"\']*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                # Variable interpolation with superglobal in any string
-                (r'["\'][^"\']*\{\s*\$_(GET|POST|REQUEST)\s*\[[^\]]+\]\s*\}[^"\']*["\']', Severity.MEDIUM),
-            ],
-            VulnType.SSRF: [
-                (r'file_get_contents\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'file_get_contents\s*\(\s*\$\w+\s*\)', Severity.MEDIUM),
-                (r'curl_setopt[^;]+CURLOPT_URL[^;]+\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'curl_init\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'curl_init\s*\(\s*\$\w+\s*\)', Severity.MEDIUM),
-                (r'fsockopen\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'fopen\s*\(\s*["\']https?://[^"\']*\$', Severity.MEDIUM),
-                (r'get_headers\s*\(\s*\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-            ],
-            VulnType.DESERIALIZATION: [
-                (r'\bunserialize\s*\(\s*\$_(GET|POST|REQUEST|COOKIE)', Severity.CRITICAL),
-                (r'\bunserialize\s*\(\s*\$\w+', Severity.HIGH),
-                (r'\bunserialize\s*\(\s*base64_decode', Severity.CRITICAL),
-                (r'\bunserialize\s*\(\s*gzuncompress', Severity.CRITICAL),
-                (r'\bunserialize\s*\(\s*file_get_contents', Severity.HIGH),
-                (r'phar://[^"\']*\$', Severity.CRITICAL),
-                (r'Phar::loadPhar\s*\(\s*\$', Severity.CRITICAL),
-            ],
-            VulnType.PATH_TRAVERSAL: [
-                (r'(?:file_get_contents|fopen|include|require)[^;]*\.\.\/', Severity.HIGH),
-                # base64_decode used to construct file paths (path obfuscation)
-                (r'(?:include|require|include_once|require_once)\s*[\(]?\s*base64_decode\s*\(', Severity.CRITICAL),
-                # str_replace on path separators (weak path sanitization, easily bypassed)
-                (r'str_replace\s*\([^)]*(?:\\\\|\/)[^)]*\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-            ],
-            VulnType.RCE: [
-                (r'call_user_func\s*\(\s*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'call_user_func_array\s*\(\s*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                # Variable function call - only when variable comes from user input
-                (r'\$_(GET|POST|REQUEST|COOKIE)\s*\[[^\]]+\]\s*\(', Severity.CRITICAL),
-                (r'array_map\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'array_filter\s*\([^,]+,\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'usort\s*\([^,]+,\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'\bnew\s+\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'::\$_(GET|POST|REQUEST)\s*\(', Severity.CRITICAL),
-            ],
-            VulnType.OPEN_REDIRECT: [
-                (r'header\s*\(\s*["\']Location:\s*["\']?\s*\.\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'header\s*\(\s*["\']Location:\s*\$', Severity.MEDIUM),
-            ],
-            VulnType.IDOR: [
-                (r'\$_(GET|POST)\s*\[\s*["\'](?:id|user_id|order_id|file_id)["\']', Severity.MEDIUM),
-            ],
-            VulnType.WEAK_CRYPTO: [
-                # Only in password/auth context
-                (r'password\s*=\s*md5\s*\(', Severity.HIGH),
-                (r'password\s*=\s*sha1\s*\(', Severity.HIGH),
-                (r'(?:token|secret|hash|key)\s*=\s*md5\s*\(', Severity.HIGH),
-                (r'(?:token|secret|hash|key)\s*=\s*sha1\s*\(', Severity.HIGH),
-                # rand/mt_rand only when used for tokens/passwords
-                (r'(?:password|token|secret|key|salt)\s*=\s*.*\brand\s*\(', Severity.HIGH),
-                (r'(?:password|token|secret|key|salt)\s*=\s*.*\bmt_rand\s*\(', Severity.HIGH),
-            ],
-            VulnType.HARDCODED_CREDS: [
-                # Direct variable assignment (not in SQL or array)
-                # Must be: $password = "hardcoded" or define('PASSWORD', 'value')
-                (r'\$(?:password|passwd|pwd|pass)\s*=\s*["\'][a-zA-Z0-9@#$%^&*!]{4,}["\']', Severity.HIGH),
-                (r'\$(?:api_key|apikey|secret|secret_key|token|auth_token)\s*=\s*["\'][a-zA-Z0-9_-]{8,}["\']', Severity.HIGH),
-                # define() constants
-                (r'define\s*\(\s*["\'](?:PASSWORD|API_KEY|SECRET|TOKEN)["\'].*["\'][^"\']{8,}["\']', Severity.HIGH),
-            ],
-            VulnType.INFO_DISCLOSURE: [
-                (r'var_dump\s*\(\s*\$', Severity.LOW),
-                (r'print_r\s*\(\s*\$', Severity.LOW),
-                (r'debug_backtrace\s*\(', Severity.MEDIUM),
-                (r'phpinfo\s*\(\s*\)', Severity.HIGH),
-                (r'display_errors.*=.*["\']?on["\']?', Severity.MEDIUM),
-            ],
-            VulnType.UNSAFE_UPLOAD: [
-                # User-controlled filename in move_uploaded_file destination
-                (r'move_uploaded_file\s*\([^,]+,\s*[^)]*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]', Severity.CRITICAL),
-                # Concatenating user filename to path
-                (r'(?:move_uploaded_file|copy|rename)\s*\([^,]+,\s*[^)]*\.\s*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]', Severity.CRITICAL),
-                # Direct file write with user filename (not in echo/print context)
-                (r'(?:fopen|file_put_contents)\s*\([^)]*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]', Severity.HIGH),
-            ],
-            VulnType.TYPE_JUGGLING: [
-                # Match loose == comparison in auth context (variable or string)
-                # Strict === and !== exclusion handled in FP filter
-                (r'\$\w*(?:password|passwd|pwd|token|hash|secret)\w*\s*==\s', Severity.HIGH),
-                (r'==\s*\$\w*(?:password|passwd|pwd|token|hash|secret)', Severity.HIGH),
-            ],
-            VulnType.XXE: [
-                # XML External Entity - direct superglobal
-                (r'simplexml_load_string\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'DOMDocument.*loadXML\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'xml_parse\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                # XML functions with any variable (common: $body from php://input)
-                (r'simplexml_load_string\s*\(\s*\$\w+', Severity.HIGH),
-                (r'DOMDocument.*loadXML\s*\(\s*\$\w+', Severity.HIGH),
-                (r'XMLReader.*xml\s*\(\s*\$\w+', Severity.HIGH),
-                (r'LIBXML_NOENT', Severity.MEDIUM),  # Dangerous flag
-                # php://input → XML parsing (raw POST body)
-                (r'file_get_contents\s*\(\s*["\']php://input["\']', Severity.MEDIUM),
-            ],
-            VulnType.LDAP_INJECTION: [
-                (r'ldap_search\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'ldap_bind\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'ldap_\w+\s*\([^)]*\$\w+', Severity.MEDIUM),
-            ],
-            VulnType.XPATH_INJECTION: [
-                (r'xpath\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'->query\s*\([^)]*xpath[^)]*\$', Severity.HIGH),
-            ],
-            VulnType.TEMPLATE_INJECTION: [
-                # Twig/Blade/Smarty SSTI
-                (r'Twig.*render\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'eval\s*\(\s*\$\w+\s*\.\s*["\']<\?', Severity.CRITICAL),
-                (r'Smarty.*(?:assign|display)\s*\([^)]*\$_(GET|POST|REQUEST)', Severity.HIGH),
-            ],
-            VulnType.CSRF: [
-                (r'\$_POST\s*\[\s*["\'](?:delete|remove|update|edit|add)["\']', Severity.LOW),
-            ],
-            VulnType.AUTH_BYPASS: [
-                # Direct admin access without auth check
-                (r'(?:is_admin|isAdmin|admin)\s*=\s*\$_(GET|POST|REQUEST|COOKIE)', Severity.CRITICAL),
-                # Role/privilege from user input
-                (r'(?:role|privilege|permission|access_level|user_type)\s*=\s*\$_(GET|POST|REQUEST|COOKIE)', Severity.CRITICAL),
-                # Auth bypass via cookie manipulation
-                (r'\$_COOKIE\s*\[\s*["\'](?:admin|auth|logged|role|is_admin)', Severity.HIGH),
-                # JWT/session without verification
-                (r'(?:jwt|token)\s*=\s*\$_(GET|POST|REQUEST|COOKIE).*?(?:decode|base64_decode)', Severity.HIGH),
-            ],
-            VulnType.HEADER_INJECTION: [
-                # header() with user input (HTTP response splitting)
-                (r'header\s*\(\s*[^)]*\$_(GET|POST|REQUEST|COOKIE)', Severity.HIGH),
-                (r'header\s*\(\s*[^)]*\.\s*\$\w+', Severity.MEDIUM),
-                # setcookie with user input in name or value
-                (r'setcookie\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'setcookie\s*\([^,]+,\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-            ],
-            VulnType.MASS_ASSIGNMENT: [
-                # ORM fill/update/create from raw user input
-                (r'->fill\s*\(\s*\$_(POST|REQUEST|GET)', Severity.HIGH),
-                (r'->update\s*\(\s*\$_(POST|REQUEST|GET)', Severity.HIGH),
-                (r'::create\s*\(\s*\$_(POST|REQUEST|GET)', Severity.HIGH),
-                (r'->(?:fill|update|create)\s*\(\s*\$request->all\(\)', Severity.HIGH),
-                (r'extract\s*\(\s*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-                (r'extract\s*\(\s*\$_COOKIE', Severity.HIGH),
-            ],
-            VulnType.INSECURE_RANDOM: [
-                # rand()/mt_rand() for security-sensitive operations
-                (r'(?:token|nonce|csrf|secret|key|salt|password)\s*=\s*.*?\b(?:rand|mt_rand|array_rand)\s*\(', Severity.HIGH),
-                (r'\bmd5\s*\(\s*(?:rand|mt_rand|uniqid|microtime)\s*\(', Severity.HIGH),
-                (r'\bsha1\s*\(\s*(?:rand|mt_rand|uniqid|microtime)\s*\(', Severity.HIGH),
-                (r'\buniqid\s*\(\s*\)\s*(?:;|\))', Severity.MEDIUM),  # uniqid() without prefix is predictable
-            ],
-            VulnType.RACE_CONDITION: [
-                # TOCTOU: file_exists then modifying operation on SAME LINE
-                (r'if\s*\(\s*file_exists\s*\(\s*\$\w+\s*\)\s*\)\s*\{?\s*(?:unlink|rename|chmod|chown|rmdir|copy|move_uploaded_file)\s*\(', Severity.HIGH),
-                # Check-then-create (mkdir after !file_exists)
-                (r'if\s*\(\s*!\s*file_exists.*?mkdir\s*\(', Severity.LOW),
-                # fopen in write/append mode without flock (concurrent writes)
-                (r'fopen\s*\([^)]+,\s*[\'"][wa]\+?[\'"]', Severity.LOW),
-            ],
-            VulnType.LOG_INJECTION: [
-                # User input directly in log messages
-                (r'error_log\s*\(.*?\$_(GET|POST|REQUEST|COOKIE)', Severity.MEDIUM),
-                (r'(?:fwrite|file_put_contents)\s*\(.*?log.*?,.*?\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-                (r'->(?:log|info|warning|error|debug)\s*\(.*?\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-                (r'syslog\s*\(.*?\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-            ],
-            VulnType.REGEX_DOS: [
-                # Nested quantifiers in preg_match with user input (e.g. (a+)+, (x*)*,  (\d+){2,})
-                (r'preg_match\s*\(\s*[\'"].*?(?:[\+\*]\)[\+\*]|[\+\*]\)\{|\{\d+,\}\)[\+\*])[^\']*[\'"][^)]*\$_(GET|POST|REQUEST)', Severity.MEDIUM),
-                # User-controlled regex pattern
-                (r'preg_match\s*\(\s*\$_(GET|POST|REQUEST)', Severity.HIGH),
-                (r'preg_replace\s*\(\s*\$_(GET|POST|REQUEST)', Severity.CRITICAL),
-            ],
-        }
+        """Initialize vulnerability patterns from YAML rules"""
+        vuln_type_map = {name: member for name, member in VulnType.__members__.items()}
+        self.patterns = {}
+        for vuln_name, pats in self.rules.get_patterns().items():
+            vt = vuln_type_map.get(vuln_name)
+            if vt:
+                self.patterns[vt] = [(p.regex, Severity[p.severity]) for p in pats]
 
     def _compile_patterns(self):
         """Pre-compile all regex patterns for performance"""
@@ -401,161 +160,68 @@ class UnifiedScanner:
             self.compiled_patterns[vuln_type] = compiled
 
     def _init_sources_sinks(self):
-        """Initialize taint sources and sinks"""
-        self.sources = {
-            'GET': r'\$_GET\s*\[',
-            'POST': r'\$_POST\s*\[',
-            'REQUEST': r'\$_REQUEST\s*\[',
-            'COOKIE': r'\$_COOKIE\s*\[',
-            'FILES': r'\$_FILES\s*\[',
-            'SERVER': r'\$_SERVER\s*\[\s*[\'"](?:REQUEST_URI|QUERY_STRING|HTTP_)',
-            'INPUT': r'file_get_contents\s*\(\s*[\'"]php://input',
-        }
+        """Initialize taint sources and sinks from YAML rules"""
+        # Build sources from rule engine
+        self.sources = {}
+        for name, src in self.rules.get_sources().items():
+            if src.category == 'superglobals':
+                self.sources[name.replace('$_', '')] = src.pattern
+            elif src.category == 'input_functions':
+                self.sources[name] = src.pattern
 
-        self.sinks = {
-            VulnType.SQL_INJECTION: [
-                r'mysql_query', r'mysqli_query', r'pg_query', r'->query\s*\(',
-                r'->exec\s*\(', r'->execute\s*\(',
-            ],
-            VulnType.COMMAND_INJECTION: [
-                r'\bexec\s*\(', r'\bsystem\s*\(', r'\bpassthru\s*\(',
-                r'\bshell_exec\s*\(', r'\bpopen\s*\(', r'`',
-            ],
-            VulnType.XSS: [
-                r'\becho\b', r'\bprint\b', r'\bprintf\b',
-            ],
-            VulnType.FILE_INCLUSION: [
-                r'\binclude\b', r'\brequire\b',
-            ],
-        }
+        # Fallback if YAML not loaded
+        if not self.sources:
+            self.sources = {
+                'GET': r'\$_GET\s*\[',
+                'POST': r'\$_POST\s*\[',
+                'REQUEST': r'\$_REQUEST\s*\[',
+                'COOKIE': r'\$_COOKIE\s*\[',
+                'FILES': r'\$_FILES\s*\[',
+                'SERVER': r'\$_SERVER\s*\[\s*[\'"](?:REQUEST_URI|QUERY_STRING|HTTP_)',
+                'INPUT': r'file_get_contents\s*\(\s*[\'"]php://input',
+            }
+
+        # Build sinks from rule engine
+        vuln_type_map = {name: member for name, member in VulnType.__members__.items()}
+        self.sinks = {}
+        for name, sink in self.rules.get_sinks().items():
+            vt = vuln_type_map.get(sink.vuln_type)
+            if vt and vt not in self.sinks:
+                self.sinks[vt] = []
+            if vt:
+                self.sinks[vt].append(sink.pattern)
+
+        # Fallback if YAML not loaded
+        if not self.sinks:
+            self.sinks = {
+                VulnType.SQL_INJECTION: [
+                    r'mysql_query', r'mysqli_query', r'pg_query', r'->query\s*\(',
+                    r'->exec\s*\(', r'->execute\s*\(',
+                ],
+                VulnType.COMMAND_INJECTION: [
+                    r'\bexec\s*\(', r'\bsystem\s*\(', r'\bpassthru\s*\(',
+                    r'\bshell_exec\s*\(', r'\bpopen\s*\(', r'`',
+                ],
+                VulnType.XSS: [
+                    r'\becho\b', r'\bprint\b', r'\bprintf\b',
+                ],
+                VulnType.FILE_INCLUSION: [
+                    r'\binclude\b', r'\brequire\b',
+                ],
+            }
 
     def _init_sanitizers(self):
-        """Initialize sanitizer patterns - comprehensive list"""
-        self.sanitizers = {
-            # SQL sanitizers
-            'intval': {'pattern': r'intval\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.XSS, VulnType.COMMAND_INJECTION, VulnType.IDOR]},
-            '(int)': {'pattern': r'\(int\)\s*\$', 'protects': [VulnType.SQL_INJECTION, VulnType.XSS, VulnType.COMMAND_INJECTION, VulnType.IDOR]},
-            '(float)': {'pattern': r'\(float\)\s*\$', 'protects': [VulnType.SQL_INJECTION]},
-            'escape_string': {'pattern': r'(?:real_)?escape_string\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'safesql': {'pattern': r'safesql\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.XSS, VulnType.IDOR]},
-            'addslashes': {'pattern': r'addslashes\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'prepare': {'pattern': r'->prepare\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'bindParam': {'pattern': r'->bind(?:Param|Value)\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'quote': {'pattern': r'->quote\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'pdo_placeholder': {'pattern': r'\?\s*,|\:\w+', 'protects': [VulnType.SQL_INJECTION]},
-
-            # XSS sanitizers
-            'htmlspecialchars': {'pattern': r'htmlspecialchars\s*\(', 'protects': [VulnType.XSS]},
-            'htmlentities': {'pattern': r'htmlentities\s*\(', 'protects': [VulnType.XSS]},
-            'strip_tags': {'pattern': r'strip_tags\s*\(', 'protects': [VulnType.XSS]},
-            'esc_html': {'pattern': r'esc_html\s*\(', 'protects': [VulnType.XSS]},
-            'esc_attr': {'pattern': r'esc_attr\s*\(', 'protects': [VulnType.XSS]},
-            'e_helper': {'pattern': r'\be\s*\(\s*\$', 'protects': [VulnType.XSS]},
-            'purify': {'pattern': r'(?:purify|clean|sanitize)\s*\(', 'protects': [VulnType.XSS]},
-
-            # Command sanitizers
-            'escapeshellarg': {'pattern': r'escapeshellarg\s*\(', 'protects': [VulnType.COMMAND_INJECTION, VulnType.RCE]},
-            'escapeshellcmd': {'pattern': r'escapeshellcmd\s*\(', 'protects': [VulnType.COMMAND_INJECTION, VulnType.RCE]},
-
-            # Path sanitizers
-            'basename': {'pattern': r'basename\s*\(', 'protects': [VulnType.FILE_INCLUSION, VulnType.PATH_TRAVERSAL, VulnType.FILE_READ, VulnType.FILE_WRITE]},
-            'realpath': {'pattern': r'realpath\s*\(', 'protects': [VulnType.FILE_INCLUSION, VulnType.PATH_TRAVERSAL]},
-            'pathinfo': {'pattern': r'pathinfo\s*\(', 'protects': [VulnType.FILE_INCLUSION]},
-
-            # Validation - comprehensive
-            'in_array_strict': {'pattern': r'in_array\s*\([^)]*,\s*true\s*\)', 'protects': [VulnType.FILE_INCLUSION, VulnType.COMMAND_INJECTION, VulnType.RCE, VulnType.OPEN_REDIRECT, VulnType.CODE_INJECTION]},
-            'in_array': {'pattern': r'in_array\s*\(', 'protects': [VulnType.FILE_INCLUSION, VulnType.OPEN_REDIRECT]},
-            'is_numeric': {'pattern': r'is_numeric\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.IDOR, VulnType.COMMAND_INJECTION]},
-            'ctype_digit': {'pattern': r'ctype_digit\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.IDOR, VulnType.COMMAND_INJECTION]},
-            'ctype_alnum': {'pattern': r'ctype_alnum\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.COMMAND_INJECTION, VulnType.CODE_INJECTION]},
-            'ctype_alpha': {'pattern': r'ctype_alpha\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.COMMAND_INJECTION]},
-            'preg_match': {'pattern': r'preg_match\s*\(\s*[\'"][/^]', 'protects': [VulnType.SQL_INJECTION, VulnType.COMMAND_INJECTION, VulnType.XSS, VulnType.CODE_INJECTION]},
-            'filter_var': {'pattern': r'filter_var\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.XSS, VulnType.SSRF, VulnType.OPEN_REDIRECT]},
-            'filter_input': {'pattern': r'filter_input\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.XSS, VulnType.COMMAND_INJECTION]},
-            'abs': {'pattern': r'\babs\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.IDOR]},
-            'floor': {'pattern': r'\bfloor\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'ceil': {'pattern': r'\bceil\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'round': {'pattern': r'\bround\s*\(', 'protects': [VulnType.SQL_INJECTION]},
-            'min': {'pattern': r'\bmin\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.IDOR]},
-            'max': {'pattern': r'\bmax\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.IDOR]},
-
-            # URL sanitizers
-            'urlencode': {'pattern': r'urlencode\s*\(', 'protects': [VulnType.XSS, VulnType.OPEN_REDIRECT]},
-            'rawurlencode': {'pattern': r'rawurlencode\s*\(', 'protects': [VulnType.XSS, VulnType.OPEN_REDIRECT]},
-            'filter_validate_url': {'pattern': r'FILTER_VALIDATE_URL', 'protects': [VulnType.SSRF, VulnType.OPEN_REDIRECT]},
-            'parse_url': {'pattern': r'parse_url\s*\(', 'protects': [VulnType.SSRF, VulnType.OPEN_REDIRECT]},
-
-            # Security functions
-            'password_hash': {'pattern': r'password_hash\s*\(', 'protects': [VulnType.WEAK_CRYPTO]},
-            'password_verify': {'pattern': r'password_verify\s*\(', 'protects': [VulnType.WEAK_CRYPTO, VulnType.TYPE_JUGGLING]},
-            'random_bytes': {'pattern': r'random_bytes\s*\(', 'protects': [VulnType.WEAK_CRYPTO]},
-            'random_int': {'pattern': r'random_int\s*\(', 'protects': [VulnType.WEAK_CRYPTO]},
-            'hash_equals': {'pattern': r'hash_equals\s*\(', 'protects': [VulnType.TYPE_JUGGLING]},
-            'openssl': {'pattern': r'openssl_\w+\s*\(', 'protects': [VulnType.WEAK_CRYPTO]},
-
-            # Auth checks
-            'isAuthenticated': {'pattern': r'(?:isAuthenticated|is_authenticated|checkAuth|isLoggedIn)\s*\(', 'protects': [VulnType.AUTH_BYPASS, VulnType.IDOR]},
-            'hasPermission': {'pattern': r'(?:hasPermission|has_permission|checkPermission|can)\s*\(', 'protects': [VulnType.AUTH_BYPASS, VulnType.IDOR]},
-            'session_check': {'pattern': r'\$_SESSION\s*\[\s*[\'"](?:user|admin|logged)', 'protects': [VulnType.AUTH_BYPASS, VulnType.IDOR]},
-            'member_id': {'pattern': r'\$member_id\s*\[\s*[\'"]user_group', 'protects': [VulnType.AUTH_BYPASS, VulnType.IDOR]},
-            'is_admin': {'pattern': r'(?:is_admin|isAdmin|user_group\s*==\s*1)', 'protects': [VulnType.AUTH_BYPASS]},
-
-            # CSRF tokens
-            'csrf_token': {'pattern': r'(?:csrf_token|_token|csrfToken|csrf)', 'protects': [VulnType.CSRF]},
-            'verify_nonce': {'pattern': r'(?:verify_nonce|check_nonce|wp_verify_nonce)', 'protects': [VulnType.CSRF]},
-
-            # Strict comparison
-            'strict_compare': {'pattern': r'===', 'protects': [VulnType.TYPE_JUGGLING]},
-            'strcmp': {'pattern': r'strcmp\s*\(', 'protects': [VulnType.TYPE_JUGGLING]},
-
-            # JSON response (not XSS)
-            'json_encode': {'pattern': r'json_encode\s*\(', 'protects': [VulnType.XSS]},
-            'json_header': {'pattern': r'application/json', 'protects': [VulnType.XSS]},
-            'api_response': {'pattern': r'(?:return|echo)\s+(?:json_|Response::json)', 'protects': [VulnType.XSS]},
-
-            # File upload
-            'allowed_extensions': {'pattern': r'(?:allowed_ext|valid_ext|mime_types|whitelist)', 'protects': [VulnType.UNSAFE_UPLOAD]},
-            'getimagesize': {'pattern': r'getimagesize\s*\(', 'protects': [VulnType.UNSAFE_UPLOAD]},
-            'finfo': {'pattern': r'finfo_(?:open|file)\s*\(', 'protects': [VulnType.UNSAFE_UPLOAD]},
-            'mime_check': {'pattern': r'mime_content_type\s*\(', 'protects': [VulnType.UNSAFE_UPLOAD]},
-
-            # Serialization
-            'allowed_classes': {'pattern': r'allowed_classes', 'protects': [VulnType.DESERIALIZATION]},
-            'json_decode': {'pattern': r'json_decode\s*\(', 'protects': [VulnType.DESERIALIZATION]},
-
-            # Header injection
-            'header_remove': {'pattern': r'header_remove\s*\(', 'protects': [VulnType.HEADER_INJECTION]},
-            'str_replace_newline': {'pattern': r'str_replace\s*\([^)]*(?:\\r|\\n)', 'protects': [VulnType.HEADER_INJECTION]},
-
-            # Mass assignment protection
-            'fillable': {'pattern': r'\$fillable\s*=', 'protects': [VulnType.MASS_ASSIGNMENT]},
-            'guarded': {'pattern': r'\$guarded\s*=', 'protects': [VulnType.MASS_ASSIGNMENT]},
-            'only': {'pattern': r'->only\s*\(', 'protects': [VulnType.MASS_ASSIGNMENT]},
-
-            # Secure randomness
-            'random_bytes_san': {'pattern': r'random_bytes\s*\(', 'protects': [VulnType.INSECURE_RANDOM]},
-            'random_int_san': {'pattern': r'random_int\s*\(', 'protects': [VulnType.INSECURE_RANDOM]},
-            'openssl_random': {'pattern': r'openssl_random_pseudo_bytes\s*\(', 'protects': [VulnType.INSECURE_RANDOM]},
-
-            # XXE protection
-            'disable_entities': {'pattern': r'(?:LIBXML_NOENT|libxml_disable_entity_loader)', 'protects': [VulnType.XXE]},
-
-            # Log injection sanitizers
-            'log_sanitize': {'pattern': r'(?:preg_replace|str_replace)\s*\([^)]*(?:\\r|\\n|[\r\n])', 'protects': [VulnType.LOG_INJECTION]},
-            'log_filter': {'pattern': r'(?:filter_var|htmlspecialchars|addslashes)\s*\(', 'protects': [VulnType.LOG_INJECTION]},
-
-            # Race condition mitigation
-            'flock': {'pattern': r'flock\s*\(', 'protects': [VulnType.RACE_CONDITION]},
-            'mutex': {'pattern': r'(?:mutex|lock|semaphore|synchronized)\s*\(', 'protects': [VulnType.RACE_CONDITION]},
-
-            # Regex DoS mitigation
-            'preg_timeout': {'pattern': r'(?:pcre\.backtrack_limit|set_time_limit|ini_set)', 'protects': [VulnType.REGEX_DOS]},
-
-            # Generic custom sanitizers (auto-detect by naming pattern)
-            # These REDUCE confidence but don't eliminate findings (potential bypass)
-            'custom_safe_method': {'pattern': r'->\w*(?:safe|escape|clean|sanitize|filter|validate|secure|protect)\w*\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.XSS, VulnType.COMMAND_INJECTION, VulnType.IDOR, VulnType.CODE_INJECTION]},
-            'custom_safe_func': {'pattern': r'\b\w*(?:safe|escape|clean|sanitize|filter|validate|secure|protect|purify)\w*\s*\(', 'protects': [VulnType.SQL_INJECTION, VulnType.XSS, VulnType.COMMAND_INJECTION, VulnType.IDOR, VulnType.CODE_INJECTION]},
-        }
+        """Initialize sanitizer patterns from YAML rules"""
+        vuln_type_map = {name: member for name, member in VulnType.__members__.items()}
+        self.sanitizers = {}
+        for name, san in self.rules.get_sanitizers().items():
+            protects = []
+            for vt_name in san.protects_against:
+                vt = vuln_type_map.get(vt_name)
+                if vt:
+                    protects.append(vt)
+            if protects:
+                self.sanitizers[name] = {'pattern': san.pattern, 'protects': protects}
 
     def _detect_custom_sanitizer_usage(self, code: str, line_num: int) -> List[str]:
         """
@@ -585,15 +251,17 @@ class UnifiedScanner:
         return sanitizers_found
 
     def _init_frameworks(self):
-        """Initialize framework detection - generic patterns only"""
-        self.frameworks = {
-            # Detect by namespace/class patterns (generic)
-            'laravel': [r'Illuminate\\', r'->where\s*\([^,]+,\s*\$', r'Route::', r'Eloquent'],
-            'symfony': [r'Symfony\\', r'->setParameter\(', r'Doctrine\\'],
-            'codeigniter': [r'\$this->db->escape', r'CI_Controller'],
-            # Generic ORM/Framework detection
-            'orm_protected': [r'->prepare\s*\(', r'->bind(?:Param|Value)\s*\(', r'\?\s*,\s*\['],
-        }
+        """Initialize framework detection from YAML rules"""
+        self.frameworks = {}
+        for name, fw in self.rules.frameworks.items():
+            # detect_patterns are literal strings (PHP namespaces, file paths, etc.)
+            # Always re.escape them for safe regex matching
+            patterns = [re.escape(p) for p in fw.detect_patterns]
+            self.frameworks[name] = patterns
+
+        # Always keep generic ORM detection
+        if 'orm_protected' not in self.frameworks:
+            self.frameworks['orm_protected'] = [r'->prepare\s*\(', r'->bind(?:Param|Value)\s*\(', r'\?\s*,\s*\[']
 
     def _init_ast_parser(self):
         """Initialize AST parser and data flow analyzer"""

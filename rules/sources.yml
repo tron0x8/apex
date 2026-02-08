@@ -1,0 +1,100 @@
+# APEX Rule Engine - Taint Sources
+# All PHP input sources that can introduce tainted data
+
+superglobals:
+  - name: "$_GET"
+    pattern: '\$_GET\s*\['
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, CODE, FILE_PATH, FILE_INCLUDE, SSRF, XXE, SERIALIZATION, REDIRECT, EMAIL, REGEX, NOSQL, TEMPLATE, LDAP, XPATH]
+
+  - name: "$_POST"
+    pattern: '\$_POST\s*\['
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, CODE, FILE_PATH, FILE_INCLUDE, SSRF, XXE, SERIALIZATION, REDIRECT, EMAIL, REGEX, NOSQL, TEMPLATE, LDAP, XPATH]
+
+  - name: "$_REQUEST"
+    pattern: '\$_REQUEST\s*\['
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, CODE, FILE_PATH, FILE_INCLUDE, SSRF, XXE, SERIALIZATION, REDIRECT, EMAIL, REGEX, NOSQL, TEMPLATE, LDAP, XPATH]
+
+  - name: "$_COOKIE"
+    pattern: '\$_COOKIE\s*\['
+    taint_level: MEDIUM
+    taint_types: [SQL, XSS, COMMAND, SERIALIZATION]
+
+  - name: "$_FILES"
+    pattern: '\$_FILES\s*\['
+    taint_level: HIGH
+    taint_types: [FILE_PATH, CODE, FILE_INCLUDE]
+
+  - name: "$_SERVER"
+    pattern: '\$_SERVER\s*\[\s*[''"](?:REQUEST_URI|QUERY_STRING|HTTP_)'
+    taint_level: MEDIUM
+    taint_types: [SQL, XSS, COMMAND, SSRF, REDIRECT]
+
+  - name: "$_ENV"
+    pattern: '\$_ENV\s*\['
+    taint_level: LOW
+    taint_types: [COMMAND, SQL]
+
+input_functions:
+  - name: "php://input"
+    pattern: 'file_get_contents\s*\(\s*[''"]php://input'
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, CODE, XXE, SERIALIZATION]
+
+  - name: "getenv"
+    pattern: 'getenv\s*\('
+    taint_level: LOW
+    taint_types: [COMMAND, SQL]
+
+  - name: "fgets_stdin"
+    pattern: 'fgets\s*\(\s*STDIN'
+    taint_level: MEDIUM
+    taint_types: [SQL, XSS, COMMAND]
+
+weak_sources:
+  - name: "$post"
+    pattern: '\$post\b'
+    taint_level: LOW
+    taint_types: [SQL, XSS]
+
+  - name: "$data"
+    pattern: '\$data\b'
+    taint_level: LOW
+    taint_types: [SQL, XSS]
+
+  - name: "$input"
+    pattern: '\$input\b'
+    taint_level: LOW
+    taint_types: [SQL, XSS]
+
+  - name: "$request"
+    pattern: '\$request\b'
+    taint_level: LOW
+    taint_types: [SQL, XSS]
+
+  - name: "$params"
+    pattern: '\$params\b'
+    taint_level: LOW
+    taint_types: [SQL, XSS]
+
+tainted_server_keys:
+  - HTTP_HOST
+  - HTTP_USER_AGENT
+  - HTTP_REFERER
+  - HTTP_X_FORWARDED_FOR
+  - REQUEST_URI
+  - QUERY_STRING
+  - PATH_INFO
+  - PHP_SELF
+  - HTTP_ACCEPT
+  - HTTP_ACCEPT_LANGUAGE
+  - HTTP_ACCEPT_ENCODING
+  - HTTP_CONNECTION
+  - HTTP_COOKIE
+  - CONTENT_TYPE
+  - CONTENT_LENGTH
+  - HTTP_X_REQUESTED_WITH
+  - HTTP_ORIGIN
+  - HTTP_AUTHORIZATION

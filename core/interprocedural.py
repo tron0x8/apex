@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Set, Optional, Tuple
 from pathlib import Path
 from .ts_adapter import TSNode, parse_php_ts
+from .rule_engine import get_rule_engine
 
 
 @dataclass
@@ -71,6 +72,50 @@ class InterproceduralAnalyzer:
         self.call_graph: Dict[str, Set[str]] = {}
         self.reverse_graph: Dict[str, Set[str]] = {}
         self.file_functions: Dict[str, List[str]] = {}
+
+        # Extend from YAML rules
+        try:
+            self._extend_from_rules()
+        except Exception:
+            pass  # Fallback to hardcoded
+
+    def _extend_from_rules(self):
+        """Extend hardcoded source/sink/sanitizer sets from YAML rules."""
+        global SOURCES, SINKS, SANITIZERS
+        rules = get_rule_engine()
+
+        # Extend sources
+        for name, src in rules.get_sources().items():
+            if src.category == 'superglobals':
+                SOURCES.add(name)
+
+        # Extend sinks - map vuln_type to category
+        vuln_to_cat = {
+            'SQL_INJECTION': 'SQL', 'COMMAND_INJECTION': 'CMD',
+            'CODE_INJECTION': 'CODE', 'XSS': 'XSS',
+            'FILE_INCLUDE': 'FILE', 'FILE_PATH': 'FILE',
+            'SERIALIZATION': 'DESER', 'DESERIALIZATION': 'DESER',
+        }
+        for name, sink in rules.get_sinks().items():
+            cat = vuln_to_cat.get(sink.vuln_type)
+            if cat:
+                if cat not in SINKS:
+                    SINKS[cat] = set()
+                SINKS[cat].add(name)
+
+        # Extend sanitizers
+        vuln_to_san_cat = {
+            'SQL_INJECTION': 'SQL', 'XSS': 'XSS',
+            'COMMAND_INJECTION': 'CMD', 'RCE': 'CMD',
+            'FILE_INCLUSION': 'FILE', 'CODE_INJECTION': 'CODE',
+        }
+        for name, san in rules.get_sanitizers().items():
+            for vt_name in san.protects_against:
+                cat = vuln_to_san_cat.get(vt_name)
+                if cat:
+                    if cat not in SANITIZERS:
+                        SANITIZERS[cat] = set()
+                    SANITIZERS[cat].add(name)
 
     def analyze_file(self, filepath: str, content: str):
         """Extract and analyze all functions from a file using tree-sitter."""

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Test scanner with known vulnerable code samples"""
 import sys
-sys.path.insert(0, 'C:/Users/User/Desktop/apex')
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.unified_scanner import UnifiedScanner
 
 scanner = UnifiedScanner(enable_ml=False, enable_ast=False)

@@ -27,6 +27,192 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Set
 from pathlib import Path
 
+from dataclasses import field as dataclass_field
+
+try:
+    from .rule_engine import get_rule_engine
+except ImportError:
+    get_rule_engine = None
+
+# Optional v4.0 module imports - used when real analysis results available
+try:
+    from .type_inference import TypeInference, PHPType, TypeState
+    _HAS_TYPE_INFERENCE = True
+except ImportError:
+    _HAS_TYPE_INFERENCE = False
+
+try:
+    from .alias_analysis import AliasAnalyzer
+    _HAS_ALIAS = True
+except ImportError:
+    _HAS_ALIAS = False
+
+try:
+    from .string_domain import StringAnalyzer, StringValue
+    _HAS_STRING_DOMAIN = True
+except ImportError:
+    _HAS_STRING_DOMAIN = False
+
+try:
+    from .abstract_interp import AbstractInterpreter, AbstractState, TaintLattice
+    _HAS_ABSTRACT_INTERP = True
+except ImportError:
+    _HAS_ABSTRACT_INTERP = False
+
+try:
+    from .framework_models import FrameworkModelEngine
+    _HAS_FRAMEWORK_MODELS = True
+except ImportError:
+    _HAS_FRAMEWORK_MODELS = False
+
+try:
+    from .interprocedural_v2 import InterproceduralEngine, FunctionSummary
+    _HAS_INTERPROC_V2 = True
+except ImportError:
+    _HAS_INTERPROC_V2 = False
+
+try:
+    from .ts_adapter import parse_php_ts
+    from .cfg import CFGBuilder
+    _HAS_CFG = True
+except ImportError:
+    _HAS_CFG = False
+
+
+# =========================================================================
+# Pre-computed v4.0 Analysis Results (passed to FeatureExtractor)
+# =========================================================================
+
+@dataclass
+class FileAnalysisResults:
+    """Pre-computed v4.0 analysis results for a single file.
+
+    Built by apex_core.py after running v4.0 modules. Passed to
+    FeatureExtractor.extract() so ML features use REAL analysis
+    instead of regex heuristics.
+
+    All types are basic Python types (no v4.0 module imports required).
+    """
+    file_path: str = ""
+    # TypeInference: var -> set of type strings ('INT', 'STRING', 'BOOL', etc.)
+    type_map: Dict[str, Set[str]] = dataclass_field(default_factory=dict)
+    # AliasAnalyzer: var -> set of alias variable names
+    alias_sets: Dict[str, Set[str]] = dataclass_field(default_factory=dict)
+    # StringAnalyzer: line_num -> {safe: bool, ratio: float, context: str}
+    string_contexts: Dict[int, Dict] = dataclass_field(default_factory=dict)
+    # AbstractInterpreter: var -> taint level (0=BOTTOM, 1=UNTAINTED, 2=WEAK, 3=TAINTED, 4=TOP)
+    taint_levels: Dict[str, int] = dataclass_field(default_factory=dict)
+    # AbstractInterpreter: var -> set of sanitized vuln types
+    sanitized_types: Dict[str, Set[str]] = dataclass_field(default_factory=dict)
+    # InterproceduralEngine: func -> {params_to_sink: Set[str], sanitizer_for: Set[str]}
+    func_summaries: Dict[str, Dict] = dataclass_field(default_factory=dict)
+    # FrameworkModelEngine: validated variable names
+    validated_vars: Set[str] = dataclass_field(default_factory=set)
+    framework: str = ""
+    middleware: Set[str] = dataclass_field(default_factory=set)
+    orm_vars: Set[str] = dataclass_field(default_factory=set)
+
+
+def build_file_analysis(file_path: str, code: str,
+                         rule_engine=None) -> Optional['FileAnalysisResults']:
+    """Run v4.0 analysis modules on a file and return results.
+
+    This is the bridge between v4.0 analysis and ML feature extraction.
+    Returns None if essential modules are not available.
+    """
+    if not _HAS_CFG:
+        return None
+
+    results = FileAnalysisResults(file_path=file_path)
+
+    try:
+        root = parse_php_ts(code)
+    except Exception:
+        return None
+
+    # Find function bodies for CFG analysis
+    cfg_blocks_all = []
+    func_bodies = {}
+    for node in root.walk_descendants():
+        if node.type in ('function_definition', 'method_declaration'):
+            fname_node = node.child_by_field('name')
+            fname = fname_node.text if fname_node else ''
+            body = node.child_by_field('body')
+            if body:
+                try:
+                    blocks = CFGBuilder().build(body)
+                    cfg_blocks_all.extend(blocks)
+                    if fname:
+                        func_bodies[fname] = blocks
+                except Exception:
+                    pass
+
+    # Also try top-level code
+    if not cfg_blocks_all:
+        try:
+            cfg_blocks_all = CFGBuilder().build(root)
+        except Exception:
+            pass
+
+    if not cfg_blocks_all:
+        return results
+
+    # TypeInference
+    if _HAS_TYPE_INFERENCE:
+        try:
+            re_arg = rule_engine or (get_rule_engine() if get_rule_engine else None)
+            if re_arg:
+                ti = TypeInference(re_arg)
+                type_map = ti.infer(cfg_blocks_all)
+                for var, types in type_map.items():
+                    results.type_map[var] = {t.value if hasattr(t, 'value') else str(t) for t in types}
+        except Exception:
+            pass
+
+    # AliasAnalyzer
+    if _HAS_ALIAS:
+        try:
+            aa = AliasAnalyzer()
+            aa.analyze(cfg_blocks_all)
+            for var in list(aa._points_to.keys()):
+                if var.startswith('$'):
+                    aliases = aa.get_aliases(var)
+                    if len(aliases) > 1:
+                        results.alias_sets[var] = aliases
+        except Exception:
+            pass
+
+    # FrameworkModelEngine
+    if _HAS_FRAMEWORK_MODELS:
+        try:
+            re_arg = rule_engine or (get_rule_engine() if get_rule_engine else None)
+            if re_arg:
+                fme = FrameworkModelEngine(re_arg)
+                results.middleware = fme.detect_route_middleware(code)
+                results.orm_vars = fme.detect_orm_usage(code)
+                # Detect framework validation
+                from .abstract_interp import AbstractState, TaintLattice, TaintInfo
+                dummy_state = AbstractState()
+                # Make common input variables tainted in dummy state
+                for var in ['$id', '$name', '$email', '$input', '$data',
+                            '$request', '$value', '$param', '$query']:
+                    dummy_state.set(var, TaintInfo(
+                        level=TaintLattice.TAINTED,
+                        taint_types={'SQL', 'XSS', 'COMMAND'},
+                        sources={var}
+                    ))
+                new_state = fme.apply_validation_constraints('laravel', code, dummy_state)
+                # Find which variables got sanitized
+                for var in ['$id', '$name', '$email', '$input', '$data',
+                            '$request', '$value', '$param', '$query']:
+                    info = new_state.get(var)
+                    if info and info.sanitized_types:
+                        results.validated_vars.add(var)
+        except Exception:
+            pass
+
+    return results
+
 
 # =========================================================================
 # Feature Extraction
@@ -193,6 +379,91 @@ FRAMEWORK_PATTERNS = {
 }
 
 
+def _extend_ml_patterns_from_rule_engine():
+    """Extend feature extraction patterns from RuleEngine fp_rules. Hardcoded values are kept as fallback."""
+    try:
+        if get_rule_engine is None:
+            return
+        engine = get_rule_engine()
+        if engine is None:
+            return
+
+        fp_rules = engine.get_fp_rules()
+        if not fp_rules:
+            return
+
+        # Extend PREPARED_STMT_PATTERNS from 'prepared_stmt' category
+        prep_rules = fp_rules.get('prepared_stmt', [])
+        existing_prep = set(PREPARED_STMT_PATTERNS)
+        for rule in prep_rules:
+            if rule.pattern and rule.pattern not in existing_prep:
+                PREPARED_STMT_PATTERNS.append(rule.pattern)
+
+        # Extend TYPE_CAST_PATTERNS from 'type_cast' category
+        cast_rules = fp_rules.get('type_cast', [])
+        existing_cast = set(TYPE_CAST_PATTERNS)
+        for rule in cast_rules:
+            if rule.pattern and rule.pattern not in existing_cast:
+                TYPE_CAST_PATTERNS.append(rule.pattern)
+
+        # Extend VALIDATION_PATTERNS from 'validation' category
+        val_rules = fp_rules.get('validation', [])
+        existing_val = set(VALIDATION_PATTERNS)
+        for rule in val_rules:
+            if rule.pattern and rule.pattern not in existing_val:
+                VALIDATION_PATTERNS.append(rule.pattern)
+
+        # Extend AUTH_CHECK_PATTERNS from 'auth' category
+        auth_rules = fp_rules.get('auth', [])
+        existing_auth = set(AUTH_CHECK_PATTERNS)
+        for rule in auth_rules:
+            if rule.pattern and rule.pattern not in existing_auth:
+                AUTH_CHECK_PATTERNS.append(rule.pattern)
+
+        # Extend CMS_SAFE_PATTERNS from 'cms_safe' category
+        cms_rules = fp_rules.get('cms_safe', [])
+        existing_cms = set(CMS_SAFE_PATTERNS)
+        for rule in cms_rules:
+            if rule.pattern and rule.pattern not in existing_cms:
+                CMS_SAFE_PATTERNS.append(rule.pattern)
+
+        # Extend SANITIZER_TYPE_MAP from RuleEngine sanitizers
+        all_sanitizers = engine.get_sanitizers()
+        if all_sanitizers:
+            # Map RuleEngine protects_against to the vuln type names used in SANITIZER_TYPE_MAP
+            _vuln_name_map = {
+                'SQL_INJECTION': 'SQL Injection',
+                'SQL': 'SQL Injection',
+                'XSS': 'Cross-Site Scripting',
+                'CROSS_SITE_SCRIPTING': 'Cross-Site Scripting',
+                'COMMAND_INJECTION': 'Command Injection',
+                'COMMAND': 'Command Injection',
+                'PATH_TRAVERSAL': 'Path Traversal',
+                'FILE_INCLUSION': 'File Inclusion',
+                'FILE': 'Path Traversal',
+                'SSRF': 'Server-Side Request Forgery',
+                'CODE_INJECTION': 'Code Injection',
+                'CODE': 'Code Injection',
+            }
+            for san_name, san_def in all_sanitizers.items():
+                if san_name not in SANITIZER_TYPE_MAP:
+                    vuln_types = set()
+                    for prot in san_def.protects_against:
+                        mapped = _vuln_name_map.get(prot.upper())
+                        if mapped:
+                            vuln_types.add(mapped)
+                    if vuln_types:
+                        SANITIZER_TYPE_MAP[san_name] = vuln_types
+
+    except Exception:
+        # If RuleEngine fails, fall back to hardcoded patterns silently
+        pass
+
+
+# Extend patterns from RuleEngine at module load time
+_extend_ml_patterns_from_rule_engine()
+
+
 @dataclass
 class FeatureVector:
     """Features extracted from a single finding for classification."""
@@ -246,6 +517,24 @@ class FeatureVector:
     # CMS/framework safety
     cms_safe_pattern: bool = False
 
+    # --- v4.0 features (from new analysis modules) ---
+    # SSA-based: variable sanitized in one branch but not the other (phi node)
+    ssa_branch_sanitized: bool = False
+    # String domain: tainted fragment in safe SQL position (FROM/INTO vs WHERE)
+    string_context_safe: bool = False
+    # String domain: ratio of tainted fragments to total fragments
+    string_tainted_ratio: float = 0.0
+    # Type inference: variable narrowed to safe type (INT/BOOL/FLOAT)
+    type_narrowed_safe: bool = False
+    # Alias analysis: number of aliases for tainted variable
+    alias_count: int = 0
+    # Inter-procedural: taint flows through function call to sink
+    interproc_flow_to_sink: bool = False
+    # Inter-procedural: callee function wraps a sanitizer
+    interproc_sanitized: bool = False
+    # Framework models: Laravel/Symfony validation applied to input
+    framework_validated: bool = False
+
     def to_dict(self) -> Dict:
         """Convert to dict for ML model input."""
         return {
@@ -272,6 +561,15 @@ class FeatureVector:
             'uses_string_concat': int(self.uses_string_concat),
             'uses_interpolation': int(self.uses_interpolation),
             'cms_safe_pattern': int(self.cms_safe_pattern),
+            # v4.0 features
+            'ssa_branch_sanitized': int(self.ssa_branch_sanitized),
+            'string_context_safe': int(self.string_context_safe),
+            'string_tainted_ratio': self.string_tainted_ratio,
+            'type_narrowed_safe': int(self.type_narrowed_safe),
+            'alias_count': min(self.alias_count, 10),
+            'interproc_flow_to_sink': int(self.interproc_flow_to_sink),
+            'interproc_sanitized': int(self.interproc_sanitized),
+            'framework_validated': int(self.framework_validated),
         }
 
     def to_numeric_array(self) -> List[float]:
@@ -293,7 +591,8 @@ class FeatureExtractor:
     }
 
     def extract(self, finding_dict: Dict, code: str = "",
-                file_lines: List[str] = None) -> FeatureVector:
+                file_lines: List[str] = None,
+                analysis: Optional[FileAnalysisResults] = None) -> FeatureVector:
         """Extract features from a finding dictionary and its file code."""
         fv = FeatureVector()
 
@@ -397,6 +696,56 @@ class FeatureExtractor:
 
         # CMS safe pattern detection
         fv.cms_safe_pattern = self._check_cms_safe_patterns(context_text, code_line)
+
+        # --- v4.0 feature extraction ---
+        # Use REAL analysis results when available, fall back to regex heuristics
+        if analysis:
+            fv.type_narrowed_safe = self._real_type_narrowed(
+                code_line, fv.vuln_type, analysis
+            )
+            fv.alias_count = self._real_alias_count(code_line, analysis)
+            fv.string_context_safe = self._real_string_context(
+                line_num, code_line, fv.vuln_type, analysis
+            )
+            fv.framework_validated = self._real_framework_validated(
+                code_line, analysis
+            )
+            fv.interproc_sanitized = self._real_interproc_sanitized(
+                code_line, context_lines, analysis
+            )
+            # ORM detection from real analysis
+            if analysis.orm_vars:
+                fv.orm_detected = True
+            # These still use heuristics even with analysis (hard to derive from v4.0)
+            fv.ssa_branch_sanitized = self._detect_branch_sanitization(
+                context_lines, code_line, line_num, ctx_start
+            )
+            fv.string_tainted_ratio = self._calc_tainted_ratio(code_line)
+            fv.interproc_flow_to_sink = self._detect_interproc_flow(
+                context_lines, code_line, line_num, ctx_start
+            )
+        else:
+            # Regex heuristic fallback (no v4.0 analysis available)
+            fv.ssa_branch_sanitized = self._detect_branch_sanitization(
+                context_lines, code_line, line_num, ctx_start
+            )
+            fv.string_context_safe = self._detect_string_context_safe(
+                code_line, fv.vuln_type
+            )
+            fv.string_tainted_ratio = self._calc_tainted_ratio(code_line)
+            fv.type_narrowed_safe = self._detect_type_narrowing(
+                context_lines, code_line, fv.vuln_type
+            )
+            fv.alias_count = self._count_aliases(context_text, code_line)
+            fv.interproc_flow_to_sink = self._detect_interproc_flow(
+                context_lines, code_line, line_num, ctx_start
+            )
+            fv.interproc_sanitized = self._detect_interproc_sanitizer(
+                context_lines, code_line
+            )
+            fv.framework_validated = self._detect_framework_validation(
+                context_text, code_line
+            )
 
         return fv
 
@@ -505,6 +854,281 @@ class FeatureExtractor:
                 return True
         return False
 
+    # ------------------------------------------------------------------
+    # v4.0 REAL analysis methods (use pre-computed FileAnalysisResults)
+    # ------------------------------------------------------------------
+
+    def _real_type_narrowed(self, code_line: str, vuln_type: str,
+                             analysis: FileAnalysisResults) -> bool:
+        """Check type narrowing using REAL TypeInference results."""
+        if not analysis.type_map:
+            return False
+        # Safe types for SQL/XSS: INT, FLOAT, BOOL
+        safe_types = {'INT', 'FLOAT', 'BOOL', 'NULL', 'int', 'float', 'bool', 'null'}
+        for var_match in re.finditer(r'\$\w+', code_line):
+            var = var_match.group(0)
+            if var in analysis.type_map:
+                types = analysis.type_map[var]
+                # All types are safe → variable is safe
+                if types and types.issubset(safe_types):
+                    return True
+        return False
+
+    def _real_alias_count(self, code_line: str,
+                           analysis: FileAnalysisResults) -> int:
+        """Count aliases using REAL AliasAnalyzer results."""
+        if not analysis.alias_sets:
+            return 0
+        max_aliases = 0
+        for var_match in re.finditer(r'\$\w+', code_line):
+            var = var_match.group(0)
+            if var in analysis.alias_sets:
+                count = len(analysis.alias_sets[var]) - 1  # Exclude self
+                max_aliases = max(max_aliases, count)
+        return max_aliases
+
+    def _real_string_context(self, line_num: int, code_line: str,
+                              vuln_type: str,
+                              analysis: FileAnalysisResults) -> bool:
+        """Check string context safety using REAL StringAnalyzer results."""
+        if analysis.string_contexts and line_num in analysis.string_contexts:
+            ctx = analysis.string_contexts[line_num]
+            return ctx.get('safe', False)
+        # Fall back to regex if no pre-computed string context
+        return self._detect_string_context_safe(code_line, vuln_type)
+
+    def _real_framework_validated(self, code_line: str,
+                                   analysis: FileAnalysisResults) -> bool:
+        """Check framework validation using REAL FrameworkModelEngine results."""
+        if not analysis.validated_vars:
+            return False
+        for var_match in re.finditer(r'\$\w+', code_line):
+            var = var_match.group(0)
+            if var in analysis.validated_vars:
+                return True
+        # Also check ORM-protected variables
+        if analysis.orm_vars:
+            for var_match in re.finditer(r'\$\w+', code_line):
+                var = var_match.group(0)
+                if var in analysis.orm_vars:
+                    return True
+        return False
+
+    def _real_interproc_sanitized(self, code_line: str,
+                                   context_lines: List[str],
+                                   analysis: FileAnalysisResults) -> bool:
+        """Check inter-procedural sanitization using REAL analysis results."""
+        if not analysis.func_summaries:
+            return self._detect_interproc_sanitizer(context_lines, code_line)
+        # Check if any function called in context is a known sanitizer
+        context_text = '\n'.join(context_lines)
+        for func_name, summary in analysis.func_summaries.items():
+            sanitizer_for = summary.get('sanitizer_for', set())
+            if sanitizer_for and re.search(rf'\b{re.escape(func_name)}\s*\(', context_text):
+                return True
+        return False
+
+    # ------------------------------------------------------------------
+    # v4.0 HEURISTIC feature extraction methods (regex fallback)
+    # ------------------------------------------------------------------
+
+    def _detect_branch_sanitization(self, context_lines: List[str],
+                                     code_line: str, line_num: int,
+                                     ctx_start: int) -> bool:
+        """Detect if variable is sanitized in one branch but not the other.
+
+        Approximates SSA phi-node analysis: if there's an if/else where
+        the variable is sanitized (intval, htmlspecialchars, etc.) in one
+        branch but used raw in the other, this is a branch-sanitized pattern.
+        """
+        var_match = re.search(r'\$(\w+)', code_line)
+        if not var_match:
+            return False
+        var_name = re.escape(var_match.group(0))
+
+        # Look for if/else structure with sanitization of same variable
+        context_text = '\n'.join(context_lines)
+        # Pattern: if(...) { ... sanitizer($var) ... } else { ... $var ... }
+        san_funcs = '|'.join(['intval', 'floatval', 'htmlspecialchars',
+                              'htmlentities', 'strip_tags', 'addslashes',
+                              'escapeshellarg', 'basename', 'filter_var',
+                              'mysql_real_escape_string', 'mysqli_real_escape_string'])
+        has_branch = bool(re.search(r'\b(?:if|else)\b', context_text))
+        has_sanitizer_on_var = bool(re.search(
+            rf'(?:{san_funcs})\s*\(\s*{var_name}', context_text
+        ))
+        has_raw_usage = bool(re.search(
+            rf'(?:echo|query|exec|system|include|eval|header)\s*\(.*?{var_name}',
+            context_text
+        ))
+        return has_branch and has_sanitizer_on_var and has_raw_usage
+
+    def _detect_string_context_safe(self, code_line: str,
+                                     vuln_type: str) -> bool:
+        """Detect if tainted data is in a safe string context.
+
+        For SQL: variable after FROM/INTO/TABLE = table name position (safe).
+        For XSS: inside HTML comment or after safe attribute.
+        For CMD: variable as argument, not command name.
+        """
+        if 'SQL' in vuln_type or vuln_type == 'SQL Injection':
+            # Tainted var after FROM/INTO/JOIN = table name, generally safe
+            if re.search(r'\b(?:FROM|INTO|JOIN|TABLE)\s+["\']?\s*\.\s*\$\w+',
+                         code_line, re.IGNORECASE):
+                return True
+            # Hardcoded value in WHERE (no variable)
+            if re.search(r'WHERE\s+\w+\s*=\s*[\'"][^$]*[\'"]', code_line):
+                return True
+
+        if 'XSS' in vuln_type or vuln_type == 'Cross-Site Scripting':
+            # Inside HTML comment
+            if re.search(r'<!--.*\$\w+.*-->', code_line):
+                return True
+            # In meta tag (not displayed)
+            if re.search(r'<meta\b.*\$\w+', code_line, re.IGNORECASE):
+                return True
+
+        if 'Command' in vuln_type:
+            # Variable is an argument, not the command itself
+            # Pattern: exec("fixed_cmd " . $var) - var is argument
+            if re.search(r'(?:exec|system|passthru|shell_exec)\s*\(\s*["\'][a-zA-Z_/]+\s',
+                         code_line):
+                return True
+
+        return False
+
+    def _calc_tainted_ratio(self, code_line: str) -> float:
+        """Calculate ratio of tainted (variable) fragments in a string expression.
+
+        Higher ratio = more of the string is user-controlled.
+        """
+        # Count string literal parts vs variable parts in concatenation
+        parts = re.split(r'\s*\.\s*', code_line)
+        if not parts:
+            return 0.0
+        n_total = len(parts)
+        n_tainted = 0
+        for part in parts:
+            if re.search(r'\$_(?:GET|POST|REQUEST|COOKIE|FILES|SERVER)', part):
+                n_tainted += 1
+            elif re.search(r'\$\w+', part) and not re.search(r'["\'][^$]*["\']', part):
+                n_tainted += 1  # Variable (potentially tainted)
+        return n_tainted / n_total if n_total > 0 else 0.0
+
+    def _detect_type_narrowing(self, context_lines: List[str],
+                                code_line: str, vuln_type: str) -> bool:
+        """Detect if type narrowing makes the variable safe.
+
+        Looks for is_int()/is_numeric() guards or intval()/(int) casts
+        on the variable BEFORE it reaches the sink, in a way that
+        guarantees an integer type (safe for SQLi, XSS).
+        """
+        var_match = re.search(r'\$(\w+)', code_line)
+        if not var_match:
+            return False
+        var_name = re.escape(var_match.group(0))
+        context_text = '\n'.join(context_lines)
+
+        # Type check in condition: if (is_int($var)) { ...use $var... }
+        type_guard = bool(re.search(
+            rf'(?:is_int|is_numeric|is_float|is_bool|ctype_digit)\s*\(\s*{var_name}\s*\)',
+            context_text
+        ))
+
+        # Cast before use: $var = (int)$var; or $var = intval($input);
+        type_cast = bool(re.search(
+            rf'{var_name}\s*=\s*(?:\(int\)|\(float\)|\(bool\)|\(integer\)|intval\s*\(|floatval\s*\(|boolval\s*\(|abs\s*\()',
+            context_text
+        ))
+
+        # settype($var, 'integer')
+        settype = bool(re.search(
+            rf'settype\s*\(\s*{var_name}\s*,\s*[\'"](?:int|integer|float|bool|boolean)[\'"]',
+            context_text
+        ))
+
+        return type_guard or type_cast or settype
+
+    def _count_aliases(self, context_text: str, code_line: str) -> int:
+        """Count PHP reference aliases for variables in the code line.
+
+        Detects: $b = &$a patterns. More aliases = harder to track taint.
+        """
+        var_match = re.search(r'\$(\w+)', code_line)
+        if not var_match:
+            return 0
+        var_name = re.escape(var_match.group(0))
+        # Count reference assignments involving this variable
+        refs = re.findall(rf'=\s*&\s*{var_name}\b', context_text)
+        refs += re.findall(rf'{var_name}\s*=\s*&\s*\$\w+', context_text)
+        return len(refs)
+
+    def _detect_interproc_flow(self, context_lines: List[str],
+                                code_line: str, line_num: int,
+                                ctx_start: int) -> bool:
+        """Detect if taint flows through a function call to reach the sink.
+
+        Pattern: $result = custom_func($_GET['x']); ... query($result);
+        The variable in the sink comes from a custom function return value.
+        """
+        var_match = re.search(r'\$(\w+)', code_line)
+        if not var_match:
+            return False
+        var_name = re.escape(var_match.group(0))
+
+        finding_idx = line_num - ctx_start - 1
+        for line in context_lines[:finding_idx]:
+            # $var = someFunction($input)
+            if re.search(
+                rf'{var_name}\s*=\s*\w+\s*\([^)]*\$_(?:GET|POST|REQUEST|COOKIE)',
+                line
+            ):
+                return True
+            # $var = someFunction($other_var)
+            if re.search(rf'{var_name}\s*=\s*(?!(?:intval|htmlspecialchars|escapeshellarg|addslashes|strip_tags|basename|filter_var|floatval|abs)\b)\w+\s*\(\s*\$\w+', line):
+                return True
+        return False
+
+    def _detect_interproc_sanitizer(self, context_lines: List[str],
+                                     code_line: str) -> bool:
+        """Detect if the tainted variable was sanitized through a custom function.
+
+        Pattern: $clean = sanitize_input($dirty); ... query($clean);
+        The custom function name contains sanitize/clean/escape/filter/safe.
+        """
+        var_match = re.search(r'\$(\w+)', code_line)
+        if not var_match:
+            return False
+        var_name = re.escape(var_match.group(0))
+        context_text = '\n'.join(context_lines)
+
+        return bool(re.search(
+            rf'{var_name}\s*=\s*\w*(?:sanitize|clean|escape|filter|safe|protect|purify|validate|secure)\w*\s*\(',
+            context_text, re.IGNORECASE
+        ))
+
+    def _detect_framework_validation(self, context_text: str,
+                                      code_line: str) -> bool:
+        """Detect if Laravel/Symfony/etc validation is applied to the input.
+
+        Patterns:
+        - $request->validate([...])
+        - Validator::make(...)
+        - $this->validate($request, [...])
+        - $form->isValid()
+        """
+        validation_patterns = [
+            r'\$request->validate\s*\(',
+            r'Validator::make\s*\(',
+            r'->validate\s*\(\s*\$request',
+            r'->isValid\s*\(\s*\)',
+            r'\$validated\s*=\s*\$request->validated\(',
+            r'->validateWithBag\s*\(',
+            r'FormRequest',
+            r'@validated',
+        ]
+        return any(re.search(p, context_text) for p in validation_patterns)
+
     def _check_var_reassigned(self, context_lines: List[str], code_line: str,
                               line_num: int, ctx_start: int) -> bool:
         """Check if the variable in the finding was reassigned (potentially sanitized)."""
@@ -560,6 +1184,16 @@ class HeuristicClassifier:
         'uses_interpolation': 0.05,     # Interpolation → TP signal
         'var_reassigned': -0.08,        # Reassigned var → might be sanitized
         'is_ajax_handler': 0.05,        # AJAX handlers → slightly more risky
+
+        # v4.0 features
+        'ssa_branch_sanitized': -0.15,  # Sanitized in one branch → weaker FP signal
+        'string_context_safe': -0.25,   # Tainted part in safe position → FP
+        'string_tainted_ratio': 0.15,   # Higher ratio → more dangerous → TP
+        'type_narrowed_safe': -0.35,    # Type narrowed to INT → strong FP
+        'alias_count': 0.05,            # More aliases → harder to track → TP
+        'interproc_flow_to_sink': 0.10, # Cross-function taint → TP
+        'interproc_sanitized': -0.25,   # Custom sanitizer wrapper → FP
+        'framework_validated': -0.30,   # Framework validation → strong FP
     }
 
     # Base scores by vulnerability type (some types have higher TP rates)
@@ -684,6 +1318,38 @@ class HeuristicClassifier:
             score -= 0.20  # CMS framework protection detected
             reasons.append("CMS safe pattern")
 
+        # --- v4.0 feature scoring ---
+        if features.ssa_branch_sanitized:
+            score += self.WEIGHTS['ssa_branch_sanitized']
+            reasons.append("branch-sanitized variable")
+
+        if features.string_context_safe:
+            score += self.WEIGHTS['string_context_safe']
+            reasons.append("tainted data in safe string position")
+
+        if features.string_tainted_ratio > 0:
+            score += features.string_tainted_ratio * self.WEIGHTS['string_tainted_ratio']
+
+        if features.type_narrowed_safe:
+            score += self.WEIGHTS['type_narrowed_safe']
+            reasons.append("type narrowed to safe type")
+
+        if features.alias_count > 0:
+            score += min(features.alias_count, 3) * self.WEIGHTS['alias_count']
+            reasons.append(f"{features.alias_count} alias(es)")
+
+        if features.interproc_flow_to_sink:
+            score += self.WEIGHTS['interproc_flow_to_sink']
+            reasons.append("cross-function taint flow")
+
+        if features.interproc_sanitized:
+            score += self.WEIGHTS['interproc_sanitized']
+            reasons.append("custom sanitizer function")
+
+        if features.framework_validated:
+            score += self.WEIGHTS['framework_validated']
+            reasons.append("framework validation applied")
+
         # Clamp score to [0, 1]
         score = max(0.0, min(1.0, score))
 
@@ -705,7 +1371,7 @@ class MLClassifier:
     Requires training data. Falls back to heuristic if no model.
     """
 
-    MODEL_FILE = "fp_classifier_model.pkl"
+    MODEL_FILE = "apex_fp_classifier_v4.pkl"
 
     def __init__(self, model_dir: str = None):
         self.model = None
@@ -856,7 +1522,10 @@ class TrainingDataGenerator:
             file_lines = code.split('\n')
 
             # Scan file and label findings
-            from unified_scanner import UnifiedScanner
+            try:
+                from .unified_scanner import UnifiedScanner
+            except ImportError:
+                from core.unified_scanner import UnifiedScanner
             scanner = UnifiedScanner()
             findings = scanner.scan_code(code, str(php_file))
 
@@ -996,7 +1665,8 @@ class FPClassifier:
         method: str  # 'heuristic' or 'ml'
 
     def classify(self, finding_dict: Dict, code: str = "",
-                 file_lines: List[str] = None) -> 'FPClassifier.Result':
+                 file_lines: List[str] = None,
+                 analysis: Optional[FileAnalysisResults] = None) -> 'FPClassifier.Result':
         """
         Classify a finding as TP or FP.
 
@@ -1004,11 +1674,12 @@ class FPClassifier:
             finding_dict: Finding dictionary with type, severity, code, line, file
             code: Full file source code
             file_lines: Pre-split file lines (optional, computed from code)
+            analysis: Pre-computed v4.0 analysis results for the file
 
         Returns:
             Result with is_tp, confidence, reasoning
         """
-        features = self.extractor.extract(finding_dict, code, file_lines)
+        features = self.extractor.extract(finding_dict, code, file_lines, analysis)
 
         # Try ML first, fall back to heuristic
         if self.ml and self.ml.is_trained():
@@ -1049,15 +1720,41 @@ class FPClassifier:
         )
 
     def classify_batch(self, findings: List[Dict],
-                       file_codes: Dict[str, str]) -> List[Dict]:
+                       file_codes: Dict[str, str],
+                       file_analyses: Optional[Dict[str, FileAnalysisResults]] = None
+                       ) -> List[Dict]:
         """
         Classify a batch of findings. Returns filtered list (TPs only).
 
         Each finding gets additional fields:
-          ml_is_tp, ml_confidence, ml_reasoning, ml_method
+          ml_is_tp, ml_confidence, ml_reasoning, ml_method, ml_score
+
+        Args:
+            findings: List of finding dicts
+            file_codes: filepath -> source code
+            file_analyses: filepath -> FileAnalysisResults (from v4.0 modules)
         """
         results = []
         file_lines_cache = {}
+        analysis_cache = {}
+
+        # Build analysis results if not provided but modules available
+        if file_analyses is None and _HAS_CFG:
+            file_analyses = {}
+            re_engine = None
+            if get_rule_engine:
+                try:
+                    re_engine = get_rule_engine()
+                except Exception:
+                    pass
+            for filepath, code in file_codes.items():
+                if filepath not in file_analyses and code:
+                    try:
+                        ar = build_file_analysis(filepath, code, re_engine)
+                        if ar:
+                            file_analyses[filepath] = ar
+                    except Exception:
+                        pass
 
         for f in findings:
             filepath = f.get('file', '')
@@ -1067,7 +1764,10 @@ class FPClassifier:
             if filepath not in file_lines_cache:
                 file_lines_cache[filepath] = code.split('\n') if code else []
 
-            result = self.classify(f, code, file_lines_cache[filepath])
+            # Get analysis results for this file
+            analysis = file_analyses.get(filepath) if file_analyses else None
+
+            result = self.classify(f, code, file_lines_cache[filepath], analysis)
 
             f['ml_is_tp'] = result.is_tp
             f['ml_confidence'] = round(result.confidence, 2)

@@ -1,5 +1,6 @@
 # APEX - Advanced PHP Exploitation Scanner
 # Core dependencies
+pyyaml>=6.0
 
 # ML dependencies (optional - for ML-based filtering)
 numpy>=1.21.0

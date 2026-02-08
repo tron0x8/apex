@@ -16,6 +16,11 @@ import re
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 
+try:
+    from .rule_engine import get_rule_engine
+except ImportError:
+    get_rule_engine = None
+
 
 @dataclass
 class PreFilterResult:
@@ -84,9 +89,54 @@ class FPPreFilter:
         'get_headers',
     ]
 
-    def __init__(self):
+    def __init__(self, rule_engine=None):
         self._function_cache: Dict[str, List[FunctionInfo]] = {}
         self._call_cache: Dict[str, Dict[str, List[Tuple[int, List[str]]]]] = {}
+        self._load_rules_from_engine(rule_engine)
+
+    def _load_rules_from_engine(self, rule_engine=None):
+        """Load additional patterns from RuleEngine fp_rules, extending hardcoded defaults."""
+        try:
+            if rule_engine is None and get_rule_engine is not None:
+                rule_engine = get_rule_engine()
+            if rule_engine is None:
+                return
+
+            fp_rules = rule_engine.get_fp_rules()
+            if not fp_rules:
+                return
+
+            # Extend SAFE_PATHS from 'safe_path' category
+            safe_path_rules = fp_rules.get('safe_path', [])
+            hardcoded_safe = set(self.SAFE_PATHS)
+            for rule in safe_path_rules:
+                if rule.pattern and rule.pattern not in hardcoded_safe:
+                    self.SAFE_PATHS = list(self.SAFE_PATHS) + [rule.pattern]
+
+            # Extend DOC_PATTERNS from 'comment' or 'documentation' category
+            doc_rules = fp_rules.get('documentation', []) + fp_rules.get('comment', [])
+            hardcoded_doc = set(self.DOC_PATTERNS)
+            for rule in doc_rules:
+                if rule.pattern and rule.pattern not in hardcoded_doc:
+                    self.DOC_PATTERNS = list(self.DOC_PATTERNS) + [rule.pattern]
+
+            # Extend HTML_PATTERNS from 'html' category
+            html_rules = fp_rules.get('html', [])
+            hardcoded_html = set(self.HTML_PATTERNS)
+            for rule in html_rules:
+                if rule.pattern and rule.pattern not in hardcoded_html:
+                    self.HTML_PATTERNS = list(self.HTML_PATTERNS) + [rule.pattern]
+
+            # Extend HARDCODED_URL_PATTERNS from 'hardcoded_url' category
+            url_rules = fp_rules.get('hardcoded_url', [])
+            hardcoded_urls = set(self.HARDCODED_URL_PATTERNS)
+            for rule in url_rules:
+                if rule.pattern and rule.pattern not in hardcoded_urls:
+                    self.HARDCODED_URL_PATTERNS = list(self.HARDCODED_URL_PATTERNS) + [rule.pattern]
+
+        except Exception:
+            # If RuleEngine fails, fall back to hardcoded values silently
+            pass
 
     def _parse_functions(self, code: str) -> List[FunctionInfo]:
         """Parse all function definitions in the code"""
