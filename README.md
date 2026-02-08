@@ -10,9 +10,10 @@
   <img src="https://img.shields.io/badge/platform-linux%20%7C%20windows%20%7C%20macos-lightgrey.svg" alt="Platform">
   <img src="https://img.shields.io/badge/patterns-135%20rules-orange.svg" alt="135 Rules">
   <img src="https://img.shields.io/badge/OWASP%20Top%2010-9%2F10-brightgreen.svg" alt="OWASP Coverage">
-  <img src="https://img.shields.io/badge/ML%20F1-92.8%25-brightgreen.svg" alt="ML F1 Score">
+  <img src="https://img.shields.io/badge/ML%20F2-0.945-brightgreen.svg" alt="ML F2 Score">
   <img src="https://img.shields.io/badge/tests-179%20passed-brightgreen.svg" alt="179 Tests">
   <img src="https://img.shields.io/badge/frameworks-10%20supported-green.svg" alt="10 Frameworks">
+  <img src="https://img.shields.io/badge/datasets%20tested-11%20projects-blue.svg" alt="11 Datasets">
 </p>
 
 ## Overview
@@ -42,7 +43,7 @@ APEX is a static security analysis framework for PHP applications. It combines t
 - **Type Inference** - PHP type narrowing (`is_int()`, `(int)`, `settype()`) to eliminate false positives when variable is proven safe.
 - **Framework Deep Models** - YAML-driven validation constraint modeling for Laravel, Symfony, WordPress, etc.
 - **Incremental Analysis** - SHA-256 content hash caching with dependency-aware invalidation. Only re-analyzes changed files.
-- **ML v4 Classifier** - 30-feature GradientBoosting model trained on 548 samples (339 TP, 209 FP). Uses real v4.0 module outputs, not just regex heuristics.
+- **ML v6 Classifier** - GradientBoosting with asymmetric weights (TP=3.5x, FP=1.0x), F2-optimized scoring, 3-class output (SAFE/SUSPICIOUS/VULNERABLE). Trained on 4,701 samples including NIST/Stivalet benchmark data.
 
 ## Installation
 
@@ -273,7 +274,7 @@ apex/
           | ML FP Classifier |    | LLM Analysis     |
           | (GradientBoost,  |    | (Ollama /        |
           |  30 features,    |    |  Anthropic)      |
-          |  F1=0.928)       |    |                  |
+          |  3-class output) |    |                  |
           +------------------+    +------------------+
                     |                       |
                     v                       v
@@ -284,25 +285,26 @@ apex/
 
 ## ML FP Classifier
 
-### Model: `apex_fp_classifier_v4.pkl`
+### Model: `apex_fp_classifier_v4.pkl` (v6)
 
 | Metric | Value |
 |--------|-------|
-| Algorithm | GradientBoosting |
+| Algorithm | GradientBoosting (asymmetric weights) |
 | Features | 30 |
-| Training samples | 548 (339 TP, 209 FP) |
-| Cross-val F1 | 0.928 |
-| Cross-val Accuracy | 91.1% |
-| FP Precision | 95% |
-| TP Precision | 100% |
-| Prediction speed | 0.14ms / 6,950 predictions per second |
-| Model size | 347 KB |
+| Training samples | 4,701 (2,456 TP, 2,245 FP) |
+| Weight ratio | TP=3.5x, FP=1.0x (recall-biased) |
+| Optimization | F2 score (recall 2x more important) |
+| F2 Score | 0.945 |
+| TP Recall | 99% |
+| Model size | 392 KB |
 
-### 30 Features
+### 3-Class Output
 
-**Core (22):** severity, rule_confidence, source_risk, has_direct_source, sink_danger, sanitizer_present, sanitizer_count, sanitizer_type_match, sanitizer_distance, prepared_stmt_nearby, type_cast_nearby, validation_nearby, orm_detected, in_comment, in_admin_path, auth_check_nearby, in_try_catch, is_ajax_handler, var_reassigned, uses_string_concat, uses_interpolation, cms_safe_pattern
-
-**v4.0 Analysis (8):** ssa_branch_sanitized, string_context_safe, string_tainted_ratio, type_narrowed_safe, alias_count, interproc_flow_to_sink, interproc_sanitized, framework_validated
+| Class | Score Range | Meaning |
+|-------|------------|---------|
+| SAFE | < 0.30 | High confidence false positive |
+| SUSPICIOUS | 0.30 - 0.55 | Needs manual review |
+| VULNERABLE | > 0.55 | High confidence true positive |
 
 ### Training Data Sources
 
@@ -313,26 +315,11 @@ apex/
 | WackoPicko (49 PHP files) | 12 | - | 12 |
 | VulnPHP (9 PHP files) | 12 | - | 12 |
 | Test fixtures (vuln/safe PHP) | 38 | 8 | 46 |
-| Synthetic patterns | 8 | 8 | 16 |
-| Augmented patterns | 15 | 27 | 42 |
-| Extended dataset (20 categories) | 20 | 160 | 180 |
+| Synthetic + augmented patterns | 43 | 195 | 238 |
 | MaxSiteCMS (698 PHP files) | 14 | 6 | 20 |
-| **Total** | **339** | **209** | **548** |
-
-### Feature Importance
-
-```
-rule_confidence         58.9%  ##############################
-severity                 6.7%  ###
-source_risk              5.9%  ###
-sanitizer_distance       5.9%  ###
-in_comment               4.9%  ##
-var_reassigned           3.9%  ##
-sink_danger              2.5%  #
-sanitizer_type_match     2.5%  #
-validation_nearby        2.3%  #
-string_tainted_ratio     1.6%  #
-```
+| Stivalet/NIST benchmark (42,212 PHP) | 2,000 | 2,000 | 4,000 |
+| Vulnerable apps (DVWA, XVWA, etc.) | 106 | - | 106 |
+| **Total** | **2,456** | **2,245** | **4,701** |
 
 ## Vulnerability Coverage
 
@@ -380,14 +367,30 @@ Plus: XSS (CWE-79), File Inclusion LFI/RFI (CWE-98), NoSQL Injection (CWE-943), 
 
 ## Benchmark Results
 
-| Application | PHP Files | Raw Findings | After ML | FP Eliminated |
-|-------------|-----------|-------------|----------|---------------|
-| bWAPP | 198 | 212 | ~178 | ~34 (16%) |
-| Mutillidae | 170 | 55 | ~48 | ~7 (13%) |
-| DLE CMS | 192 | 75 | ~41 | ~34 (45%) |
-| MaxSiteCMS | 698 | 19 | ~15 | ~4 (21%) |
-| WackoPicko | 49 | 14 | ~12 | ~2 (14%) |
-| VulnPHP | 9 | 12 | ~11 | ~1 (8%) |
+### Real-World CMS Scans
+
+| Application | PHP Files | Findings | Critical | High | Top Vulnerability Types |
+|-------------|-----------|----------|----------|------|------------------------|
+| DVWA | 169 | 61 | 0 | 61 | XXE (13), IDOR (11), SQLi (10), CMDi (6) |
+| XVWA | 304 | 24 | 1 | 23 | XSS (6), SQLi (5), Path Traversal (3) |
+| WebGoatPHP | 908 | 14 | 0 | 14 | XSS (10), XPath (1), SSRF (1), XXE (1) |
+| OWASP VWA | 28 | 17 | 1 | 16 | SQLi (6), File Inclusion (4), XSS (3), CMDi (3) |
+| Geeklog | 2,083 | 24 | 1 | 23 | Insecure Randomness (8), Race Condition (5), File Read (5) |
+| DLE CMS | 192 | 6 | 0 | 2 | Code Injection (4), Weak Crypto (1), Race Condition (1) |
+| ImpressPages | 479 | 4 | 0 | 4 | Insecure Randomness (2), Path Traversal (1), Weak Crypto (1) |
+| MaxSiteCMS | 703 | 1 | 0 | 1 | File Write (1) |
+| Pagekit | 531 | 1 | 0 | 1 | Insecure Randomness (1) |
+| UmiCMS | 1,374 | 0 | 0 | 0 | Clean |
+
+### NIST/Stivalet Benchmark (42,212 PHP files)
+
+| Version | Recall | Precision | F1 | Findings |
+|---------|--------|-----------|-----|----------|
+| v1 (baseline scanner) | 16.2% | 27.6% | 20.4% | 12,671 |
+| v2 (+ML retraining) | 19.6% | 29.4% | 23.5% | 14,644 |
+| v3 (+array taint, cast, 3-class ML) | 24.6% | 29.1% | 26.7% | 19,345 |
+
+Top detections on Stivalet v3: XSS (5,689), LDAP Injection (2,758), Deserialization (2,637), SQLi (2,347), XPath Injection (1,910), Info Disclosure (1,271), CMDi (814)
 
 ## Test Suite: 179 Tests
 
@@ -413,13 +416,12 @@ Plus: XSS (CWE-79), File Inclusion LFI/RFI (CWE-98), NoSQL Injection (CWE-943), 
 
 | Metric | Value |
 |--------|-------|
-| Total code | 31,875 lines |
-| Python | 29,101 lines (64 files) |
-| YAML rules | 2,774 lines (15 files) |
-| Core modules | 22,666 lines (34 files) |
-| v4.0 new modules | 10 modules |
+| Total code | ~31,500 lines |
+| Core modules | 34 Python files |
+| YAML rules | 15 files (sources, sinks, sanitizers, patterns, frameworks) |
 | Test files | 16 files, 179 tests |
-| ML model | 347 KB, 30 features, 548 training samples |
+| ML model | 392 KB, 30 features, 4,701 training samples |
+| Datasets tested | 11 projects, 49,000+ PHP files |
 
 ## Example Output
 

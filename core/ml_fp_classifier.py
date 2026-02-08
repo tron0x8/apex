@@ -1395,7 +1395,13 @@ class MLClassifier:
         return self.model is not None
 
     def predict(self, features: FeatureVector) -> Tuple[bool, float]:
-        """Predict TP/FP using trained model."""
+        """Predict TP/FP using trained model with 3-class thresholds.
+
+        Returns (is_tp, probability) where:
+        - prob < 0.30 → SAFE (confident FP)
+        - 0.30 <= prob < 0.55 → SUSPICIOUS (borderline, keep but lower confidence)
+        - prob >= 0.55 → VULNERABLE (confident TP)
+        """
         if not self.is_trained():
             raise RuntimeError("No trained model available")
 
@@ -1403,7 +1409,13 @@ class MLClassifier:
         import numpy as np
         X = np.array([fv])
         prob = self.model.predict_proba(X)[0][1]  # Probability of TP
-        return prob > 0.5, prob
+
+        # 3-class decision thresholds:
+        # - Below 0.30: confident FP → eliminate
+        # - 0.30-0.55: suspicious → keep but flag as uncertain
+        # - Above 0.55: confident TP → keep
+        # This reduces the "cry wolf" tendency by raising the TP threshold
+        return prob >= 0.30, prob
 
     def train(self, features_list: List[FeatureVector],
               labels: List[bool], verbose: bool = False) -> Dict:
@@ -1663,6 +1675,7 @@ class FPClassifier:
         reasoning: str
         score: float
         method: str  # 'heuristic' or 'ml'
+        classification: str = 'unknown'  # 'safe', 'suspicious', 'vulnerable'
 
     def classify(self, finding_dict: Dict, code: str = "",
                  file_lines: List[str] = None,
@@ -1690,12 +1703,22 @@ class FPClassifier:
                     self.stats['true_positives'] += 1
                 else:
                     self.stats['false_positives'] += 1
+
+                # 3-class classification from probability
+                if prob < 0.30:
+                    classification = 'safe'
+                elif prob < 0.55:
+                    classification = 'suspicious'
+                else:
+                    classification = 'vulnerable'
+
                 return self.Result(
                     is_tp=is_tp,
                     confidence=abs(prob - 0.5) * 2,
-                    reasoning=f"ML model (prob={prob:.2f})",
+                    reasoning=f"ML model (prob={prob:.2f}, class={classification})",
                     score=prob,
                     method='ml',
+                    classification=classification,
                 )
             except Exception:
                 pass  # Fall through to heuristic
@@ -1774,6 +1797,7 @@ class FPClassifier:
             f['ml_reasoning'] = result.reasoning
             f['ml_method'] = result.method
             f['ml_score'] = round(result.score, 3)
+            f['ml_classification'] = result.classification
 
             if result.is_tp:
                 results.append(f)

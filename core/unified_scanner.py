@@ -1605,6 +1605,30 @@ class UnifiedScanner:
             line_num = code[:m.start()].count('\n') + 1
             tainted_vars[var_name] = (line_num, 'INPUT')
 
+        # Step 1a2: Array taint propagation
+        # Detect: $array[] = $_GET['x']; then $var = $array[N]; → $var is tainted
+        tainted_arrays = {}  # array_name -> (line_num, source_type)
+        for m in re.finditer(r'\$(\w+)\s*\[\s*\]\s*=\s*\$_(GET|POST|REQUEST|COOKIE)\s*\[', code):
+            arr_name = m.group(1)
+            source = m.group(2)
+            line_num = code[:m.start()].count('\n') + 1
+            tainted_arrays[arr_name] = (line_num, source)
+        # Also: $array['key'] = $_GET['x'] or $array[0] = $_GET['x']
+        for m in re.finditer(r'\$(\w+)\s*\[[^\]]*\]\s*=\s*\$_(GET|POST|REQUEST|COOKIE)\s*\[', code):
+            arr_name = m.group(1)
+            source = m.group(2)
+            line_num = code[:m.start()].count('\n') + 1
+            tainted_arrays[arr_name] = (line_num, source)
+        # Propagate array taint: $var = $array[N] or $var = $array['key']
+        for m in re.finditer(r'\$(\w+)\s*=\s*\$(\w+)\s*\[', code):
+            var_name = m.group(1)
+            arr_name = m.group(2)
+            if arr_name in tainted_arrays:
+                line_num = code[:m.start()].count('\n') + 1
+                arr_line, arr_source = tainted_arrays[arr_name]
+                if line_num >= arr_line and var_name not in tainted_vars:
+                    tainted_vars[var_name] = (line_num, arr_source)
+
         # Step 1b: Detect wrapper functions that return $_POST/$_GET/$_REQUEST
         # Pattern: function name(...) { ... return $_POST; ... }
         wrapper_funcs = set()
@@ -1651,6 +1675,36 @@ class UnifiedScanner:
             'esc_html', 'esc_attr', 'esc_url', 'wp_kses',
             'e', 'clean', 'sanitize', 'escape', 'purify',
         }
+        # Cast sanitization: $var = (int)$tainted → removes taint
+        # Track which vars have been sanitized by cast
+        _cast_sanitized = set()
+        for m in re.finditer(r'\$(\w+)\s*=\s*\((?:int|integer|float|double|bool|boolean)\)\s*\$(\w+)', code):
+            sanitized_var = m.group(1)
+            source_var = m.group(2)
+            _cast_sanitized.add(sanitized_var)
+            # Also handle self-cast: $var = (int)$var
+            if sanitized_var == source_var and sanitized_var in tainted_vars:
+                del tainted_vars[sanitized_var]
+        # Also handle: $tainted = (int) $tainted (reassignment with cast)
+        for m in re.finditer(r'\$(\w+)\s*=\s*\((?:int|integer|float|double|bool|boolean)\)\s*\$\1\b', code):
+            var_name = m.group(1)
+            _cast_sanitized.add(var_name)
+            if var_name in tainted_vars:
+                del tainted_vars[var_name]
+
+        # String interpolation taint: $query = "SELECT ... $tainted ..."
+        # Track vars used in double-quoted strings that contain other tainted vars
+        for m in re.finditer(r'\$(\w+)\s*=\s*"([^"]*)"', code):
+            var_name = m.group(1)
+            string_content = m.group(2)
+            line_num = code[:m.start()].count('\n') + 1
+            if var_name in tainted_vars or var_name in _cast_sanitized:
+                continue
+            for tainted_var, (t_line, t_source) in list(tainted_vars.items()):
+                if line_num >= t_line and re.search(rf'\${re.escape(tainted_var)}\b', string_content):
+                    tainted_vars[var_name] = (line_num, t_source)
+                    break
+
         for _pass in range(3):
             new_taints = {}
             for m in re.finditer(r'\$(\w+)\s*=\s*(.+?)\s*;', code):
@@ -1658,8 +1712,13 @@ class UnifiedScanner:
                 rhs = m.group(2)
                 line_num = code[:m.start()].count('\n') + 1
 
-                # Skip if already tainted
-                if var_name in tainted_vars:
+                # Skip if already tainted or cast-sanitized
+                if var_name in tainted_vars or var_name in _cast_sanitized:
+                    continue
+
+                # Check if RHS has a type cast → sanitized, skip
+                if re.match(r'\((?:int|integer|float|double|bool|boolean)\)\s*\$', rhs.strip()):
+                    _cast_sanitized.add(var_name)
                     continue
 
                 for tainted_var, (t_line, t_source) in list(tainted_vars.items()):
@@ -1743,6 +1802,20 @@ class UnifiedScanner:
             (r'header\s*\([^)]*\${var}', VulnType.HEADER_INJECTION, Severity.HIGH),
             # Open redirect
             (r'header\s*\(\s*["\']Location:\s*["\'][^)]*\${var}', VulnType.OPEN_REDIRECT, Severity.HIGH),
+            (r'header\s*\(\s*["\']Location:\s*[^)]*\${var}', VulnType.OPEN_REDIRECT, Severity.HIGH),
+            (r'header\s*\(\s*["\']Refresh:\s*[^)]*url=\s*[^)]*\${var}', VulnType.OPEN_REDIRECT, Severity.HIGH),
+            # XPath injection
+            (r'->xpath\s*\([^)]*\${var}', VulnType.XPATH_INJECTION, Severity.HIGH),
+            (r'xpath_eval\s*\([^)]*\${var}', VulnType.XPATH_INJECTION, Severity.HIGH),
+            (r'DOMXPath.*(?:query|evaluate)\s*\([^)]*\${var}', VulnType.XPATH_INJECTION, Severity.HIGH),
+            # LDAP injection
+            (r'ldap_search\s*\([^)]*\${var}', VulnType.LDAP_INJECTION, Severity.HIGH),
+            (r'ldap_bind\s*\([^)]*\${var}', VulnType.LDAP_INJECTION, Severity.HIGH),
+            (r'ldap_read\s*\([^)]*\${var}', VulnType.LDAP_INJECTION, Severity.HIGH),
+            (r'ldap_list\s*\([^)]*\${var}', VulnType.LDAP_INJECTION, Severity.HIGH),
+            (r'ldap_\w+\s*\([^)]*\${var}', VulnType.LDAP_INJECTION, Severity.MEDIUM),
+            # sprintf SQL/XPath - tainted var in format string via sprintf
+            (r'sprintf\s*\([^)]*\${var}', VulnType.SQL_INJECTION, Severity.MEDIUM),
         ]
 
         for var_name, (src_line, source_type) in tainted_vars.items():

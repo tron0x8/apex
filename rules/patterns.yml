@@ -517,11 +517,31 @@ LDAP_INJECTION:
   cwe: CWE-90
   description: LDAP search with user input
   remediation: Escape LDAP special characters
+- regex: "ldap_search\\s*\\([^)]*\\$\\w+"
+  severity: HIGH
+  cwe: CWE-90
+  description: LDAP search with variable input
+  remediation: Escape LDAP special characters
 - regex: "ldap_bind\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
   severity: HIGH
   cwe: CWE-90
   description: LDAP bind with user input
   remediation: Validate and escape credentials
+- regex: "ldap_bind\\s*\\([^)]*\\$\\w+"
+  severity: MEDIUM
+  cwe: CWE-90
+  description: LDAP bind with variable
+  remediation: Validate and escape credentials
+- regex: "ldap_read\\s*\\([^)]*\\$\\w+"
+  severity: MEDIUM
+  cwe: CWE-90
+  description: LDAP read with variable input
+  remediation: Escape LDAP special characters
+- regex: "ldap_list\\s*\\([^)]*\\$\\w+"
+  severity: MEDIUM
+  cwe: CWE-90
+  description: LDAP list with variable input
+  remediation: Escape LDAP special characters
 - regex: "ldap_\\w+\\s*\\([^)]*\\$\\w+"
   severity: MEDIUM
   cwe: CWE-90
@@ -533,10 +553,25 @@ XPATH_INJECTION:
   cwe: CWE-643
   description: XPath query with user input
   remediation: Use parameterized XPath; escape input
+- regex: "->xpath\\s*\\([^)]*\\$\\w+"
+  severity: HIGH
+  cwe: CWE-643
+  description: SimpleXML XPath with variable
+  remediation: Use parameterized XPath; escape input
 - regex: "->query\\s*\\([^)]*xpath[^)]*\\$"
   severity: HIGH
   cwe: CWE-643
-  description: XPath query with variable
+  description: DOMXPath query with variable
+  remediation: Use parameterized XPath
+- regex: "DOMXPath.*(?:query|evaluate)\\s*\\([^)]*\\$"
+  severity: HIGH
+  cwe: CWE-643
+  description: DOMXPath evaluation with variable
+  remediation: Use parameterized XPath
+- regex: "xpath_eval\\s*\\([^)]*\\$"
+  severity: HIGH
+  cwe: CWE-643
+  description: XPath evaluation with variable
   remediation: Use parameterized XPath
 TEMPLATE_INJECTION:
 - regex: "Twig.*render\\s*\\([^)]*\\$_(GET|POST|REQUEST)"

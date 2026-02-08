@@ -287,19 +287,25 @@ def train_optimized(features, labels, model_dir, verbose=True):
         print(f"  False Positives: {n_fp} ({n_fp*100//len(X)}%)")
         print(f"  Features: {X.shape[1]}")
 
-    # Handle class imbalance with sample weights
-    scale_pos = n_fp / max(n_tp, 1) if n_tp < n_fp else 1.0
-    scale_neg = n_tp / max(n_fp, 1) if n_fp < n_tp else 1.0
-    sample_weights = np.array([scale_pos if l == 1 else scale_neg for l in y])
+    # Asymmetric class weights: penalize missing a VULNERABLE (FN) 3.5x more
+    # than flagging a SAFE as dangerous (FP). This is security-critical:
+    # missing a real vulnerability is much worse than a false alarm.
+    weight_tp = 3.5   # Cost of missing a real vulnerability (FN)
+    weight_fp = 1.0   # Cost of false alarm (FP)
+    sample_weights = np.array([weight_tp if l == 1 else weight_fp for l in y])
+
+    if verbose:
+        print(f"\n[*] Asymmetric weights: TP={weight_tp}, FP={weight_fp}")
+        print(f"    (Missing a vuln costs {weight_tp}x more than a false alarm)")
 
     # Hyperparameter search
     if verbose:
         print(f"\n[*] Running hyperparameter optimization...")
 
     param_grid = {
-        'n_estimators': [100, 200, 300],
-        'max_depth': [3, 4, 5],
-        'learning_rate': [0.05, 0.1, 0.15],
+        'n_estimators': [150, 200, 300, 400],
+        'max_depth': [4, 5, 6, 7],
+        'learning_rate': [0.05, 0.08, 0.1, 0.15],
         'min_samples_leaf': [2, 3, 5],
         'subsample': [0.8, 0.9, 1.0],
     }
@@ -312,12 +318,18 @@ def train_optimized(features, labels, model_dir, verbose=True):
 
     # Fast grid search with reduced combinations
     from sklearn.model_selection import RandomizedSearchCV
+
+    # Custom scoring: prioritize recall (catching real vulns) while maintaining precision
+    from sklearn.metrics import make_scorer, fbeta_score
+    # F2 score: recall is weighted 2x more than precision
+    f2_scorer = make_scorer(fbeta_score, beta=2)
+
     search = RandomizedSearchCV(
         base_model,
         param_grid,
-        n_iter=50,  # Try 50 random combinations
+        n_iter=60,  # Try 60 random combinations
         cv=cv,
-        scoring='f1',
+        scoring=f2_scorer,  # F2 = recall-focused
         n_jobs=-1,  # Use all CPU cores
         random_state=42,
         verbose=0,
@@ -333,7 +345,7 @@ def train_optimized(features, labels, model_dir, verbose=True):
 
     if verbose:
         print(f"  Search time: {search_time:.1f}s")
-        print(f"  Best F1: {best_score:.3f}")
+        print(f"  Best F2 (recall-focused): {best_score:.3f}")
         print(f"  Best params: {best_params}")
 
     # Cross-validation with best model
@@ -388,6 +400,18 @@ def train_optimized(features, labels, model_dir, verbose=True):
 
     if verbose:
         print(f"\n[*] Prediction speed: {pred_time*1000:.2f}ms per sample ({1/pred_time:.0f}/sec)")
+
+    # 3-class threshold analysis
+    if verbose:
+        probs = best_model.predict_proba(X)[:, 1]
+        print(f"\n[*] 3-Class Threshold Analysis:")
+        for lo, hi, label in [(0.0, 0.30, 'SAFE'), (0.30, 0.55, 'SUSPICIOUS'), (0.55, 1.01, 'VULNERABLE')]:
+            mask = (probs >= lo) & (probs < hi)
+            n_in_class = mask.sum()
+            n_tp_in = y[mask].sum() if n_in_class > 0 else 0
+            n_fp_in = n_in_class - n_tp_in
+            pct_tp = n_tp_in / max(n_in_class, 1) * 100
+            print(f"    {label:12s} [{lo:.2f}-{hi:.2f}): {n_in_class:5d} samples ({n_tp_in:4d} TP, {n_fp_in:4d} FP, {pct_tp:.0f}% TP)")
 
     # Save model
     import pickle
@@ -517,7 +541,52 @@ def main():
     if verbose:
         print(f"  [MX] Extended: {len(ext_fp) + len(ext_tp)} ({len(ext_tp)} TP, {len(ext_fp)} FP)")
 
-    # === Source 6: CMS scan results (mixed labels from heuristic) ===
+    # === Source 6: Stivalet labeled benchmark data ===
+    stivalet_path = os.path.join(data_dir, 'training_data_labeled.json')
+    if not os.path.exists(stivalet_path):
+        # Try scan_results dir on server
+        stivalet_path = '/root/scan_results/training_data_labeled.json'
+    if os.path.exists(stivalet_path):
+        stiv_data = load_scan_json(stivalet_path)
+        n_stiv_tp = 0
+        n_stiv_fp = 0
+        # Sample to avoid overwhelming other data sources
+        # Take all FP (valuable), sample TP to match
+        stiv_fp_list = stiv_data.get('stivalet_fp', [])
+        stiv_tp_list = stiv_data.get('stivalet_tp', [])
+        vuln_tp_list = stiv_data.get('vuln_app_tp', [])
+
+        # Use stratified sampling: max 2000 FP + 2000 TP from Stivalet
+        import random
+        random.seed(42)
+        max_per_class = 2000
+        if len(stiv_fp_list) > max_per_class:
+            stiv_fp_list = random.sample(stiv_fp_list, max_per_class)
+        if len(stiv_tp_list) > max_per_class:
+            stiv_tp_list = random.sample(stiv_tp_list, max_per_class)
+
+        for finding in stiv_fp_list:
+            fv = extractor.extract(finding, finding.get('code', ''))
+            all_features.append(fv)
+            all_labels.append(False)
+            n_stiv_fp += 1
+        for finding in stiv_tp_list:
+            fv = extractor.extract(finding, finding.get('code', ''))
+            all_features.append(fv)
+            all_labels.append(True)
+            n_stiv_tp += 1
+        for finding in vuln_tp_list:
+            fv = extractor.extract(finding, finding.get('code', ''))
+            all_features.append(fv)
+            all_labels.append(True)
+            n_stiv_tp += 1
+        if verbose:
+            print(f"  [MX] Stivalet benchmark: {n_stiv_tp + n_stiv_fp} ({n_stiv_tp} TP, {n_stiv_fp} FP)")
+    else:
+        if verbose:
+            print(f"  [--] Stivalet: training_data_labeled.json not found")
+
+    # === Source 7: CMS scan results (mixed labels from heuristic) ===
     cms_scans = {
         'MaxSiteCMS': ('scan_maxsite_v2.json', data_dir),
     }
