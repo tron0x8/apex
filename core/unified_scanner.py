@@ -648,6 +648,11 @@ class UnifiedScanner:
         if len(line.strip()) < 10:
             return True
 
+        # PHP/JS comment lines (// or # or /* */)
+        stripped = line.strip()
+        if stripped.startswith('//') or stripped.startswith('#') or stripped.startswith('/*') or stripped.startswith('*'):
+            return True
+
         # Documentation/example patterns
         if re.search(r'(?:example|sample|demo|test|TODO|FIXME|NOTE):', line, re.I):
             return True
@@ -808,6 +813,17 @@ class UnifiedScanner:
             # Concatenation with defined constant only
             if re.search(r'(?:include|require).*\b[A-Z_]{3,}\b\s*\.\s*[\'"]', line, re.I):
                 return True
+            # __DIR__ or __FILE__ based include (static base path)
+            if re.search(r'(?:include|require).*__(?:DIR|FILE)__', line, re.I):
+                return True
+
+        if vuln_type == VulnType.PATH_TRAVERSAL:
+            # __DIR__/__FILE__ + string literal = static path
+            if re.search(r'__(?:DIR|FILE)__\s*\.\s*[\'"]', line, re.I):
+                return True
+            # Static include/require with hardcoded path
+            if re.search(r'(?:include|require)(?:_once)?\s*\(\s*["\'][^"\'$]+["\']', line, re.I):
+                return True
 
         if vuln_type == VulnType.FILE_WRITE:
             # Writing to hardcoded path (not user-controlled)
@@ -823,6 +839,9 @@ class UnifiedScanner:
                 return True
             # Reading config/cache/template files with constant path
             if re.search(r'file_get_contents\s*\([^)]*(?:BASEPATH|ROOT_DIR|__DIR__|dirname)', line, re.I):
+                return True
+            # Reading from variable with cache/etag/config/template/theme/layout in name
+            if re.search(r'file_get_contents\s*\(\s*\$\w*(?:etag|cache|config|template|theme|layout|css|style)\w*\s*\)', line, re.I):
                 return True
 
         if vuln_type == VulnType.UNSAFE_UPLOAD:
@@ -926,6 +945,10 @@ class UnifiedScanner:
             # Whitelist domain check
             if re.search(r'(?:in_array|preg_match)\s*\([^)]*(?:allowed|whitelist|valid)', line, re.I):
                 return True
+            # file_get_contents with config/cache/etag variable (not user URL)
+            if re.search(r'file_get_contents\s*\(\s*\$\w*(?:etag|cache|config|template|theme|layout|css|style|path|file_?name)\w*\s*\)', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
 
         if vuln_type == VulnType.IDOR:
             # ID comes from session (authenticated user's own ID)
@@ -944,6 +967,10 @@ class UnifiedScanner:
             # (check context for str_replace removing \r\n)
             if re.search(r'str_replace\s*\([^)]*\\[rn]', line, re.I):
                 return True
+            # ETag/Cache-control/Content-Type headers (non-user-controlled)
+            if re.search(r'header\s*\(\s*["\'](?:ETag|Cache-control|Expires|Content-Type|Status|X-)\s*:', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
 
         if vuln_type == VulnType.MASS_ASSIGNMENT:
             # Using ->only() to whitelist fields (safe)
@@ -956,6 +983,17 @@ class UnifiedScanner:
         if vuln_type == VulnType.INSECURE_RANDOM:
             # Using cryptographic random functions
             if re.search(r'(?:random_bytes|random_int|openssl_random_pseudo_bytes)\s*\(', line, re.I):
+                return True
+            # ETag/cache context: md5(microtime()) for HTTP caching (not security)
+            if re.search(r'(?:md5|sha1)\s*\(\s*(?:microtime|time)\s*\(', line, re.I):
+                if re.search(r'(?:etag|cache|css|style|header\s*\(\s*["\']ETag)', line, re.I):
+                    return True
+            # UUID/feed/slug generation (not security-critical)
+            if re.search(r'(?:uuid|feed|atom|rss|slug)\s*', line, re.I):
+                if re.search(r'(?:md5|sha1)\s*\(\s*(?:\$\w+\s*\?\s*:\s*)?(?:uniqid|microtime)', line, re.I):
+                    return True
+            # Variable assigned to $etag, $cache_key, $hash for non-security use
+            if re.search(r'\$(?:etag|cache_?key|css_?hash|style_?hash)\s*=\s*(?:md5|sha1)\s*\(', line, re.I):
                 return True
 
         if vuln_type == VulnType.RACE_CONDITION:
@@ -1009,6 +1047,13 @@ class UnifiedScanner:
                 return True
             if re.search(r'header\s*\([^)]*application/json', context, re.I):
                 return True
+            # No actual echo/print of user input on the line (arithmetic/assignment only)
+            if not re.search(r'(?:echo|print|die|exit)\s', line, re.I):
+                if not re.search(r'<\?(?:php)?\s*=', line, re.I):
+                    if re.search(r'\$_(?:REQUEST|GET|POST)\s*\[\s*["\']["\'\]]+\s*\]', line):
+                        # User variable present but not in output context
+                        if re.search(r'(?:=|\+|-|\*|/|%|<|>|\b(?:if|while|for)\b)', line):
+                            return True
 
         # API response context
         if re.search(r'return\s+response\(\)->json', context, re.I):
@@ -1018,6 +1063,21 @@ class UnifiedScanner:
         if vuln_type == VulnType.FILE_INCLUSION:
             if re.search(r'(?:include|require)[^$]*["\'][^"\'$]+["\']', line, re.I):
                 return True
+            # preg_replace whitelist sanitizer in context (strips path traversal chars)
+            if re.search(r'preg_replace\s*\(\s*["\']\/\[\^[a-z0-9_ -]+\]\/[i]?["\']', context, re.I):
+                return True
+            # __DIR__/__FILE__ based path construction in context
+            if re.search(r'__(?:DIR|FILE)__\s*\.\s*[\'"]', context, re.I):
+                return True
+
+        # Static file paths for PATH_TRAVERSAL
+        if vuln_type == VulnType.PATH_TRAVERSAL:
+            # __DIR__ + string literal = static path, not user-controlled
+            if re.search(r'__(?:DIR|FILE)__\s*\.\s*[\'"]', line, re.I):
+                return True
+            # include_once with hardcoded relative path
+            if re.search(r'(?:include|require)(?:_once)?\s*\(\s*["\'][^"\'$]+["\']', line, re.I):
+                return True
 
         # File write/read with path validation in context
         if vuln_type in (VulnType.FILE_WRITE, VulnType.FILE_READ):
@@ -1026,6 +1086,35 @@ class UnifiedScanner:
                 return True
             # basename used to strip directory traversal
             if re.search(r'basename\s*\(', context, re.I):
+                return True
+
+        # FILE_READ: variable derived from config path, not user input
+        if vuln_type == VulnType.FILE_READ:
+            # Check if file_get_contents variable is assigned from path concat with no user input
+            m = re.search(r'file_get_contents\s*\(\s*\$(\w+)', line)
+            if m:
+                var_name = m.group(1)
+                # Look in context for variable assignment
+                assign_pat = r'\$' + re.escape(var_name) + r'\s*='
+                assign_match = re.search(assign_pat, context)
+                if assign_match:
+                    assign_line = context[assign_match.start():context.find('\n', assign_match.start())]
+                    # Assignment from config/constant path without user input
+                    if not re.search(r'\$_(GET|POST|REQUEST|COOKIE|SERVER|FILES)', assign_line, re.I):
+                        if re.search(r'(?:_CONF|_CONFIG|ROOT|BASE|DIR|PATH|LAYOUT|THEME)\b', assign_line, re.I):
+                            return True
+
+        # INSECURE_RANDOM: check broader context for non-security usage
+        if vuln_type == VulnType.INSECURE_RANDOM:
+            # ETag header nearby = caching purpose, not security
+            if re.search(r'header\s*\(\s*["\'](?:ETag|Cache-control|Expires)', context, re.I):
+                return True
+            # Variable name suggests non-security use
+            if re.search(r'\$(?:etag|cache|css|style)\w*\s*=', context, re.I):
+                if re.search(r'(?:md5|sha1)\s*\(\s*(?:microtime|time)\s*\(', line, re.I):
+                    return True
+            # UUID generation function context
+            if re.search(r'function\s+(?:uuid|generateUuid|generate_uuid|uniqueId)\s*\(', context, re.I):
                 return True
 
         # Backtick for shell but with escapeshellarg in context
