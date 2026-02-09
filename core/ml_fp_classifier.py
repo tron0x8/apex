@@ -372,7 +372,7 @@ FRAMEWORK_PATTERNS = {
     'laravel': r'Illuminate\\|Route::|Eloquent|Auth::|\$request->input|blade\.php',
     'symfony': r'Symfony\\|AbstractController|@Route|->getRepository\(',
     'wordpress': r'wp_|WP_|WordPress|add_action|add_filter|get_option',
-    'codeigniter': r'CI_Controller|->input->|->db->|codeigniter',
+    'codeigniter': r'CI_Controller|->input->|->db->|codeigniter|BASEPATH',
     'yii': r'Yii::|CActiveRecord|yii\\|Yii2',
     'drupal': r'drupal_|Drupal\\|hook_|\.module$',
     'cakephp': r'CakePlugin|AppController|cake|TableRegistry',
@@ -516,6 +516,9 @@ class FeatureVector:
 
     # CMS/framework safety
     cms_safe_pattern: bool = False
+
+    # Danger amplifiers
+    base64_decode_on_input: bool = False  # base64_decode on user input = obfuscation
 
     # --- v4.0 features (from new analysis modules) ---
     # SSA-based: variable sanitized in one branch but not the other (phi node)
@@ -694,6 +697,11 @@ class FeatureExtractor:
         # Variable reassignment check (look for same var being reassigned before sink)
         fv.var_reassigned = self._check_var_reassigned(context_lines, code_line, line_num, ctx_start)
 
+        # base64_decode on user input = obfuscation/evasion, increases danger
+        fv.base64_decode_on_input = bool(re.search(
+            r'base64_decode\s*\(\s*\$', context_text, re.IGNORECASE
+        ))
+
         # CMS safe pattern detection
         fv.cms_safe_pattern = self._check_cms_safe_patterns(context_text, code_line)
 
@@ -757,12 +765,31 @@ class FeatureExtractor:
             if source in code_line:
                 return source.replace('$_', ''), risk, True
 
+        # Check wrapper variables that commonly hold user input
+        # e.g. $post['content'], $data['file'], $input['name']
+        wrapper_patterns = [
+            (r"\$post\s*\[", 'POST', 0.85),
+            (r"\$data\s*\[", 'POST', 0.75),
+            (r"\$input\s*\[", 'POST', 0.85),
+            (r"\$request\s*\[", 'REQUEST', 0.85),
+            (r"\$params\s*\[", 'GET', 0.75),
+            (r"\$args\s*\[", 'GET', 0.70),
+        ]
+        for pattern, src_name, risk in wrapper_patterns:
+            if re.search(pattern, code_line, re.IGNORECASE):
+                return src_name, risk, False
+
         # Check context lines for source
         start = max(0, line_num - 30)
         context = '\n'.join(file_lines[start:line_num]) if file_lines else ''
         for source, risk in SOURCE_RISK.items():
             if source in context:
                 return source.replace('$_', ''), risk * 0.7, False
+
+        # Check context for wrapper variables too
+        for pattern, src_name, risk in wrapper_patterns:
+            if re.search(pattern, context, re.IGNORECASE):
+                return src_name, risk * 0.7, False
 
         return '', 0.3, False  # Unknown source, moderate risk
 
@@ -1184,6 +1211,7 @@ class HeuristicClassifier:
         'uses_interpolation': 0.05,     # Interpolation → TP signal
         'var_reassigned': -0.08,        # Reassigned var → might be sanitized
         'is_ajax_handler': 0.05,        # AJAX handlers → slightly more risky
+        'base64_decode_on_input': 0.15, # base64_decode on user input → evasion signal → TP
 
         # v4.0 features
         'ssa_branch_sanitized': -0.15,  # Sanitized in one branch → weaker FP signal
@@ -1298,6 +1326,10 @@ class HeuristicClassifier:
 
         if features.is_ajax_handler:
             score += self.WEIGHTS['is_ajax_handler']
+
+        if features.base64_decode_on_input:
+            score += self.WEIGHTS['base64_decode_on_input']
+            reasons.append("base64_decode on user input")
 
         # Sanitizer distance modifier (closer = stronger FP signal)
         if features.sanitizer_present and features.sanitizer_distance < 5:
@@ -1694,10 +1726,35 @@ class FPClassifier:
         """
         features = self.extractor.extract(finding_dict, code, file_lines, analysis)
 
+        # Critical sink override check: dangerous sinks should never be
+        # eliminated as SAFE unless a PROPER sanitizer is present
+        _CRITICAL_TYPES = {
+            'Arbitrary File Write', 'Arbitrary File Read',
+            'Code Injection', 'Remote Code Execution',
+            'Command Injection', 'Insecure Deserialization',
+            'File Inclusion',
+        }
+        _PROPER_FILE_SANITIZERS = re.compile(
+            r'\b(?:basename|realpath|is_uploaded_file|move_uploaded_file)\s*\(', re.I
+        )
+        vuln_type = finding_dict.get('type', '')
+        code_line = finding_dict.get('code', '')
+        needs_critical_override = (
+            vuln_type in _CRITICAL_TYPES
+            and not _PROPER_FILE_SANITIZERS.search(code_line)
+        )
+
         # Try ML first, fall back to heuristic
         if self.ml and self.ml.is_trained():
             try:
                 is_tp, prob = self.ml.predict(features)
+
+                # Critical sink override: never let ML mark dangerous
+                # sinks as SAFE - at minimum keep as SUSPICIOUS
+                if needs_critical_override and not is_tp:
+                    is_tp = True
+                    prob = max(prob, 0.35)
+
                 self.stats['total_classified'] += 1
                 if is_tp:
                     self.stats['true_positives'] += 1
