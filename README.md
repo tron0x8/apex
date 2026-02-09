@@ -316,7 +316,7 @@ apex/
 | VulnPHP (9 PHP files) | 12 | - | 12 |
 | Test fixtures (vuln/safe PHP) | 38 | 8 | 46 |
 | Synthetic + augmented patterns | 43 | 195 | 238 |
-| MaxSiteCMS (698 PHP files) | 14 | 6 | 20 |
+| CMS-A (698 PHP files) | 14 | 6 | 20 |
 | Stivalet/NIST benchmark (42,212 PHP) | 2,000 | 2,000 | 4,000 |
 | Vulnerable apps (DVWA, XVWA, etc.) | 106 | - | 106 |
 | **Total** | **2,456** | **2,245** | **4,701** |
@@ -363,7 +363,7 @@ Plus: XSS (CWE-79), File Inclusion LFI/RFI (CWE-98), NoSQL Injection (CWE-943), 
 | CakePHP | Auto | Validator | Table, Query | `h()` |
 | Slim | Auto | - | - | - |
 | Laminas | Auto | InputFilter | TableGateway | `escapeHtml()` |
-| DLE | Auto | DLE sanitizers | DLE DB functions | DLE filters |
+| Custom CMS | Auto | Custom sanitizers | Custom DB functions | Custom filters |
 
 ## Benchmark Results
 
@@ -375,12 +375,12 @@ Plus: XSS (CWE-79), File Inclusion LFI/RFI (CWE-98), NoSQL Injection (CWE-943), 
 | XVWA | 304 | 24 | 1 | 23 | XSS (6), SQLi (5), Path Traversal (3) |
 | WebGoatPHP | 908 | 14 | 0 | 14 | XSS (10), XPath (1), SSRF (1), XXE (1) |
 | OWASP VWA | 28 | 17 | 1 | 16 | SQLi (6), File Inclusion (4), XSS (3), CMDi (3) |
-| Geeklog | 2,083 | 24 | 1 | 23 | Insecure Randomness (8), Race Condition (5), File Read (5) |
-| DLE CMS | 192 | 6 | 0 | 2 | Code Injection (4), Weak Crypto (1), Race Condition (1) |
-| ImpressPages | 479 | 4 | 0 | 4 | Insecure Randomness (2), Path Traversal (1), Weak Crypto (1) |
-| MaxSiteCMS | 703 | 1 | 0 | 1 | File Write (1) |
-| Pagekit | 531 | 1 | 0 | 1 | Insecure Randomness (1) |
-| UmiCMS | 1,374 | 0 | 0 | 0 | Clean |
+| CMS-A | 2,083 | 24 | 1 | 23 | Insecure Randomness (8), Race Condition (5), File Read (5) |
+| CMS-B | 192 | 6 | 0 | 2 | Code Injection (4), Weak Crypto (1), Race Condition (1) |
+| CMS-C | 479 | 4 | 0 | 4 | Insecure Randomness (2), Path Traversal (1), Weak Crypto (1) |
+| CMS-D | 703 | 1 | 0 | 1 | File Write (1) |
+| CMS-E | 531 | 1 | 0 | 1 | Insecure Randomness (1) |
+| CMS-F | 1,374 | 0 | 0 | 0 | Clean |
 
 ### NIST/Stivalet Benchmark (42,212 PHP files)
 
