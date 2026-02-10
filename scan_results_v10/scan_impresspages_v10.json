@@ -1,0 +1,89 @@
+{
+  "scan_date": "2026-02-10T02:39:40.609920",
+  "target": "/root/cms_test/ImpressPages",
+  "total_files": 461,
+  "total_findings": 5,
+  "critical": 0,
+  "high": 5,
+  "medium": 0,
+  "low": 0,
+  "findings": [
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 112,
+      "code": "$composerPlugins = require($composerConfigFile);",
+      "file": "/root/cms_test/ImpressPages/Ip/Config.php",
+      "confidence": "85%",
+      "source": "getenv",
+      "sink": "File Inclusion",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 277,
+      "code": "$config = array_merge($config, require($envConfigFile));",
+      "file": "/root/cms_test/ImpressPages/Ip/Config.php",
+      "confidence": "85%",
+      "source": "getenv",
+      "sink": "File Inclusion",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 13,
+      "code": "return substr(sha1(rand()), 0, $length);",
+      "file": "/root/cms_test/ImpressPages/Ip/Lib/Random.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Weak Cryptography",
+      "severity": "HIGH",
+      "line": 135,
+      "code": "$hash = md5($salt . $password, TRUE);",
+      "file": "/root/cms_test/ImpressPages/Ip/Lib/PasswordHash.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Weak Cryptography",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Weak Cryptography",
+      "severity": "HIGH",
+      "line": 137,
+      "code": "$hash = md5($hash . $password, TRUE);",
+      "file": "/root/cms_test/ImpressPages/Ip/Lib/PasswordHash.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Weak Cryptography",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    }
+  ],
+  "skipped_vendor_files": 19,
+  "scan_time_seconds": 4.2
+}

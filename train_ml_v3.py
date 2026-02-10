@@ -303,7 +303,56 @@ def collect_all_data(extractor, data_dir, verbose=True):
         add_simple(ext_fp, False, "extended_fp")
         add_simple(ext_tp, True, "extended_tp")
 
-    print("\n[7] Manual CMS Labels")
+    print("\n[7] CMS Scan v8 Labeled Data")
+    for cms_file in ['cms_scan_v8_labeled.json']:
+        cms_path = os.path.join(data_dir, cms_file)
+        if not os.path.exists(cms_path):
+            cms_path = f'/root/apex/vuln_datasets/{cms_file}'
+        if os.path.exists(cms_path):
+            cms_data = load_json(cms_path)
+            for key, label in [('stivalet_fp', False), ('stivalet_tp', True), ('vuln_app_tp', True)]:
+                items = cms_data.get(key, [])
+                if items:
+                    f, l, c, v = extract_from_findings(items, label, extractor)
+                    add(f, l, c, v, f"cms_v8_{key}")
+
+    print("\n[8] RealVul Dataset (EMNLP 2024)")
+    realvul_dir = '/root/apex/vuln_datasets/realvul'
+    if os.path.isdir(realvul_dir):
+        for rv_file in ['dataset_unique_79.json', 'dataset_unique_89.json',
+                        'SARD_php_vulnerability_79.json', 'SARD_php_vulnerability_89.json']:
+            rv_path = os.path.join(realvul_dir, rv_file)
+            if not os.path.exists(rv_path):
+                for root_d, dirs, files in os.walk(realvul_dir):
+                    if rv_file in files:
+                        rv_path = os.path.join(root_d, rv_file)
+                        break
+            if os.path.exists(rv_path):
+                try:
+                    rv_data = load_json(rv_path)
+                    if isinstance(rv_data, list):
+                        rv_tp, rv_fp = [], []
+                        for item in rv_data:
+                            label_val = item.get('label', item.get('target', None))
+                            code = item.get('func', item.get('code', item.get('source', '')))
+                            if not code:
+                                continue
+                            vuln_type = 'Cross-Site Scripting' if '79' in rv_file else 'SQL Injection'
+                            finding = {'type': vuln_type, 'code': code[:500], 'line': 1, 'file': rv_file}
+                            if label_val in [1, True, '1', 'vulnerable']:
+                                rv_tp.append(finding)
+                            else:
+                                rv_fp.append(finding)
+                        if rv_tp:
+                            f, l, c, v = extract_from_findings(rv_tp[:2000], True, extractor)
+                            add(f, l, c, v, f"realvul_tp_{rv_file}")
+                        if rv_fp:
+                            f, l, c, v = extract_from_findings(rv_fp[:2000], False, extractor)
+                            add(f, l, c, v, f"realvul_fp_{rv_file}")
+                except Exception as e:
+                    print(f"    [WARN] {rv_file}: {e}")
+
+    print("\n[9] Manual CMS Labels")
     f, l, c, v = [], [], [], []
     for item in MANUAL_CMS_LABELS:
         finding = {k: val for k, val in item.items() if k != 'label'}
@@ -313,6 +362,33 @@ def collect_all_data(extractor, data_dir, verbose=True):
         c.append(fv.code_context_raw or finding.get('code', ''))
         v.append(finding.get('type', ''))
     add(f, l, c, v, "manual_cms")
+
+    print("\n[10] Auto-Scanned Vulnerable Apps (TP)")
+    vuln_auto_dir = '/root/apex/vuln_datasets'
+    auto_scan_files = [
+        'scan_dvwa_auto.json',
+        'scan_webgoatphp_auto.json',
+        'scan_xvwa_auto.json',
+        'scan_vulnerableapp_auto.json',
+        'scan_php-goof_auto.json',
+        'scan_oste_auto.json',
+        'scan_tudo_auto.json',
+        'scan_vulnwebapp_auto.json',
+    ]
+    for auto_file in auto_scan_files:
+        auto_path = os.path.join(vuln_auto_dir, auto_file)
+        if not os.path.exists(auto_path):
+            auto_path = os.path.join(data_dir, auto_file)
+        if os.path.exists(auto_path):
+            try:
+                auto_data = load_json(auto_path)
+                findings = auto_data.get('findings', [])
+                if findings:
+                    f, l, c, v = extract_from_findings(findings, True, extractor)
+                    name = auto_file.replace('scan_', '').replace('_auto.json', '')
+                    add(f, l, c, v, f"vuln_auto_{name}")
+            except Exception as e:
+                print(f"    [WARN] {auto_file}: {e}")
 
     return all_features, all_labels, all_contexts, all_vtypes, stats
 

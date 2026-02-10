@@ -1,0 +1,29 @@
+{
+  "scan_date": "2026-02-10T02:39:53.321158",
+  "target": "/root/cms_test/umi.cms.3-dev",
+  "total_files": 1371,
+  "total_findings": 1,
+  "critical": 0,
+  "high": 1,
+  "medium": 0,
+  "low": 0,
+  "findings": [
+    {
+      "type": "XML External Entity",
+      "severity": "HIGH",
+      "line": 103,
+      "code": "$inputData = file_get_contents('php://input');",
+      "file": "/root/cms_test/umi.cms.3-dev/umicms/library/hmvc/component/admin/collection/BaseController.php",
+      "confidence": "70%",
+      "source": "php://input",
+      "sink": "XML External Entity",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    }
+  ],
+  "skipped_vendor_files": 3,
+  "scan_time_seconds": 10.52
+}

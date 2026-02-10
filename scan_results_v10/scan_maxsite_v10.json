@@ -1,0 +1,151 @@
+{
+  "scan_date": "2026-02-10T02:41:43.356972",
+  "target": "/root/cms_test/MaxSiteCMS",
+  "total_files": 698,
+  "total_findings": 9,
+  "critical": 0,
+  "high": 8,
+  "medium": 1,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Insecure Direct Object Reference",
+      "severity": "MEDIUM",
+      "line": 180,
+      "code": "$id = $_POST['id'];",
+      "file": "/root/cms_test/MaxSiteCMS/application/maxsite/plugins/samborsky_polls/manage.php",
+      "confidence": "50%",
+      "source": "POST",
+      "sink": "Insecure Direct Object Reference",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 74,
+      "code": "if (file_exists($functions_file)) require_once($functions_file);",
+      "file": "/root/cms_test/MaxSiteCMS/application/maxsite/plugins/theme_switch/index.php",
+      "confidence": "75%",
+      "source": "COOKIE",
+      "sink": "File Inclusion",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Arbitrary File Read",
+      "severity": "HIGH",
+      "line": 359,
+      "code": "if (file_exists($fn)) readfile($fn);",
+      "file": "/root/cms_test/MaxSiteCMS/application/maxsite/plugins/theme_switch/index.php",
+      "confidence": "65%",
+      "source": "$_COOKIE",
+      "sink": "Arbitrary File Read",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "XML External Entity",
+      "severity": "HIGH",
+      "line": 44,
+      "code": "file_put_contents( $up_dir . $fn, file_get_contents('php://input') );",
+      "file": "/root/cms_test/MaxSiteCMS/application/maxsite/admin/plugins/auto_post/uploads-require-maxsite.php",
+      "confidence": "70%",
+      "source": "php://input",
+      "sink": "XML External Entity",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "XML External Entity",
+      "severity": "HIGH",
+      "line": 64,
+      "code": "file_put_contents( $up_dir . $fn, file_get_contents('php://input') );",
+      "file": "/root/cms_test/MaxSiteCMS/application/maxsite/admin/plugins/admin_page/uploads-require-maxsite.php",
+      "confidence": "70%",
+      "source": "SERVER",
+      "sink": "XML External Entity",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Arbitrary File Write",
+      "severity": "HIGH",
+      "line": 17,
+      "code": "file_put_contents($file, $post['content']);",
+      "file": "/root/cms_test/MaxSiteCMS/application/maxsite/admin/plugins/editor_files/save-file-ajax.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "Arbitrary File Write",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Arbitrary File Read",
+      "severity": "HIGH",
+      "line": 11,
+      "code": "if ($file and file_exists($file)) echo file_get_contents($file);",
+      "file": "/root/cms_test/MaxSiteCMS/application/maxsite/admin/plugins/editor_files/load-file-ajax.php",
+      "confidence": "55%",
+      "source": "base64_decode",
+      "sink": "Arbitrary File Read",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 894,
+      "code": "return $this->_csrf_hash = md5(uniqid(rand(), TRUE));",
+      "file": "/root/cms_test/MaxSiteCMS/system/core/Security.php",
+      "confidence": "65%",
+      "source": "COOKIE",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 92,
+      "code": "$mysqli->query($sql);",
+      "file": "/root/cms_test/MaxSiteCMS/install/installer/post.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    }
+  ],
+  "skipped_vendor_files": 5,
+  "scan_time_seconds": 7.5
+}

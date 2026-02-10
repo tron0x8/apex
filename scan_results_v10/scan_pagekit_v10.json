@@ -1,0 +1,29 @@
+{
+  "scan_date": "2026-02-10T02:39:46.841351",
+  "target": "/root/cms_test/pagekit",
+  "total_files": 522,
+  "total_findings": 1,
+  "critical": 0,
+  "high": 0,
+  "medium": 1,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Server-Side Request Forgery",
+      "severity": "MEDIUM",
+      "line": 269,
+      "code": "$data[$file] = ($file = App::locator()->get($file)) ? json_decode(file_get_contents($file), true) : ",
+      "file": "/root/cms_test/pagekit/app/system/modules/intl/src/IntlModule.php",
+      "confidence": "55%",
+      "source": "WEAK_INPUT",
+      "sink": "Server-Side Request Forgery",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    }
+  ],
+  "skipped_vendor_files": 9,
+  "scan_time_seconds": 4.45
+}

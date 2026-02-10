@@ -1,0 +1,547 @@
+{
+  "scan_date": "2026-02-10T02:39:11.767837",
+  "target": "/root/cms_test/geeklog",
+  "total_files": 837,
+  "total_findings": 35,
+  "critical": 1,
+  "high": 29,
+  "medium": 5,
+  "low": 0,
+  "findings": [
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 192,
+      "code": "header('Location: ' . $_CONF['site_url'] . '/webservices/atom/?plugin=' . $WS_PLUGIN . '&id' . '=' .",
+      "file": "/root/cms_test/geeklog/system/lib-webservices.php",
+      "confidence": "85%",
+      "source": "SERVER",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 360,
+      "code": "if (file_exists($fullpath)) {",
+      "file": "/root/cms_test/geeklog/system/lib-plugins.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 1449,
+      "code": "$token = md5($uid . $pageURL . uniqid(rand(), 1));",
+      "file": "/root/cms_test/geeklog/system/lib-security.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 258,
+      "code": "if (!$file = fopen($this->_logFile, 'a')) {",
+      "file": "/root/cms_test/geeklog/system/classes/upload.class.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 438,
+      "code": "var_dump($value);",
+      "file": "/root/cms_test/geeklog/system/classes/Session.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 526,
+      "code": "var_dump($retval);",
+      "file": "/root/cms_test/geeklog/system/classes/Session.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 175,
+      "code": "if (!$file = fopen($this->_logFile, 'a')) {",
+      "file": "/root/cms_test/geeklog/system/classes/downloader.class.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 1780,
+      "code": "$f = @fopen($filename, 'w');",
+      "file": "/root/cms_test/geeklog/system/classes/template.class.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 1505,
+      "code": "var_dump($XML_RPC_xh[$parser]['value']);",
+      "file": "/root/cms_test/geeklog/system/classes/XML/RPC.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 21,
+      "code": "print_r($this);",
+      "file": "/root/cms_test/geeklog/system/classes/Text/Wiki/Render/Latex/Html.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 113,
+      "code": "$_SESSION['token'] = md5(uniqid(rand(), 1));",
+      "file": "/root/cms_test/geeklog/system/classes/htmLawed/htmLawedTest.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 934,
+      "code": "'phpinfo_disabled'          => 'In order to view the current php settings, you will have to contact ",
+      "file": "/root/cms_test/geeklog/language/english_utf-8.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 917,
+      "code": "'phpinfo_disabled' => '\u73fe\u5728\u306ePHP\u306e\u8a2d\u5b9a\u3092\u898b\u308b\u306b\u306f\u3001\u30db\u30b9\u30c6\u30a3\u30f3\u30b0\u4f1a\u793e\u306b\u9023\u7d61\u3057\u3066phpinfo()\u95a2\u6570\u3092\u6709\u52b9\u306b\u3059\u308b\u5fc5\u8981\u304c\u3042\u308a\u307e\u3059\u3002'",
+      "file": "/root/cms_test/geeklog/language/japanese_utf-8.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 935,
+      "code": "'phpinfo_disabled'          => 'In order to view the current php settings, you will have to contact ",
+      "file": "/root/cms_test/geeklog/language/english.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 8599,
+      "code": "var_dump($errContext);",
+      "file": "/root/cms_test/geeklog/public_html/lib-common.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 2590,
+      "code": "if (!$file = fopen($logfile, 'a')) {",
+      "file": "/root/cms_test/geeklog/public_html/lib-common.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "MEDIUM",
+      "line": 772,
+      "code": "if (file_exists($plugin_dir)) {",
+      "file": "/root/cms_test/geeklog/public_html/admin/plugins.php",
+      "confidence": "60%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "MEDIUM",
+      "line": 780,
+      "code": "if (file_exists($public_dir)) {",
+      "file": "/root/cms_test/geeklog/public_html/admin/plugins.php",
+      "confidence": "60%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 642,
+      "code": "require_once $filename;",
+      "file": "/root/cms_test/geeklog/public_html/admin/configuration.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "File Inclusion",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "CRITICAL",
+      "line": 274,
+      "code": "$sql = sprintf(\"UPDATE %s SET value = '%s' WHERE name = '%s'\", $_TABLES['conf_values'], serialize($_",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/rescue.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Insecure Deserialization",
+      "severity": "HIGH",
+      "line": 118,
+      "code": "$rows[$A['name']] = unserialize($A['value']);",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/rescue.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Insecure Deserialization",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "MEDIUM",
+      "line": 451,
+      "code": ". urlencode($currentFileName) . '&foffset=' . $fOffset . '&totalqueries=' . $totalQueries . '&db_con",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/bigdump.php",
+      "confidence": "50%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "quote"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "MEDIUM",
+      "line": 453,
+      "code": ". ' <p><a href=\"' . $_SERVER['PHP_SELF'] . '?start=' . $lineNumber . '&fn=' . urlencode($currentFile",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/bigdump.php",
+      "confidence": "50%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "quote"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 56,
+      "code": "@mysql_query(\"SET NAMES {$args['charset']}\");",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/classes/mysql.class.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 272,
+      "code": "header('Location: index.php?mode=' . $_GET['op']",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/classes/installer.class.php",
+      "confidence": "70%",
+      "source": "GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 53,
+      "code": "@$this->conn->query(\"SET NAMES {$args['charset']}\");",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/classes/mysqli.class.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 631,
+      "code": "header('Location: bigdump.php?start=1&foffset=0&totalqueries=0'",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/classes/Migrate.php",
+      "confidence": "50%",
+      "source": "$_REQUEST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [
+        "str_replace"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 631,
+      "code": "header('Location: bigdump.php?start=1&foffset=0&totalqueries=0'",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/classes/Migrate.php",
+      "confidence": "75%",
+      "source": "$_REQUEST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "MEDIUM",
+      "line": 612,
+      "code": "$display .= $this->getAlertMsg(sprintf($LANG_MIGRATE[43], $backupFile));",
+      "file": "/root/cms_test/geeklog/public_html/admin/install/classes/Migrate.php",
+      "confidence": "75%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      }
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 46,
+      "code": "var_dump($v);",
+      "file": "/root/cms_test/geeklog/tests/system/classes/PluginClassTest.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 311,
+      "code": "if ( file_exists( $fullpath ) ) {",
+      "file": "/root/cms_test/geeklog/tests/files/dummy/system/lib-plugins.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 36,
+      "code": "$fp = fopen($rdffile, \"w\");",
+      "file": "/root/cms_test/geeklog/tests/files/dummy/plugins/spamx/rss.inc.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 54,
+      "code": "$fd = fopen($_CONF['path_log'] . $log, \"w\");",
+      "file": "/root/cms_test/geeklog/tests/files/dummy/plugins/spamx/LogView.Admin.class.php",
+      "confidence": "65%",
+      "source": "POST",
+      "sink": "Race Condition",
+      "sanitizers": [
+        "COM_applyFilter"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 356,
+      "code": "$handle = fopen($path.$file, 'a');",
+      "file": "/root/cms_test/geeklog/tests/files/classes/tests.class.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 390,
+      "code": "$handle = fopen($path.$file, 'w');",
+      "file": "/root/cms_test/geeklog/tests/files/classes/tests.class.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      }
+    }
+  ],
+  "skipped_vendor_files": 1246,
+  "scan_time_seconds": 26.35
+}
