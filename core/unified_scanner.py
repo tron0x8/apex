@@ -691,6 +691,13 @@ class UnifiedScanner:
                 return True
             # NOTE: Custom sanitizers like safesql are NOT filtered here
             # They will be reported with lower confidence (potential bypass)
+            # sprintf with language/translation string (not SQL query building)
+            if re.search(r'sprintf\s*\(\s*\$(?:LANG|lang|_LANG|language|locale|L10N|i18n)\w*\s*\[', line, re.I):
+                return True
+            # String concatenation with language strings
+            if re.search(r'\$(?:LANG|lang|_LANG)\w*\s*\[.*\]\s*\.', line, re.I):
+                if not re.search(r'(?:SELECT|INSERT|UPDATE|DELETE|FROM|WHERE)\b', line, re.I):
+                    return True
 
         if vuln_type == VulnType.XSS:
             # Already escaped output
@@ -816,6 +823,24 @@ class UnifiedScanner:
             # __DIR__ or __FILE__ based include (static base path)
             if re.search(r'(?:include|require).*__(?:DIR|FILE)__', line, re.I):
                 return True
+            # Config-based path includes: $_CONF['path'] . 'file.php'
+            if re.search(r'(?:include|require).*\$_?(?:CONF|CONFIG|CFG|config)\s*\[', line, re.I):
+                if re.search(r'\.\s*[\'"][^"\'$]+\.php["\']', line):
+                    return True
+            # Plugin/module instance variable (not user input)
+            if re.search(r'(?:include|require).*\$(?:plugin|module|component|class)_(?:path|dir|inst|file)', line, re.I):
+                return True
+            # Require from config/env variable (not direct user input)
+            if re.search(r'(?:include|require)\w*\s*\(?\s*\$\w*(?:Config|Env|Setting|Option)(?:File|Path)', line, re.I):
+                return True
+            # Require variable that comes from internal logic (no direct user input)
+            if re.search(r'(?:include|require)\w*\s*\(?\s*\$\w+\s*\)', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    # Only filter if no direct superglobal on same line
+                    pass  # Kept for targeted filtering below
+            # Composer autoload / config file loading
+            if re.search(r'(?:include|require)\w*\s*\(?\s*\$(?:composer|autoload|vendor)', line, re.I):
+                return True
 
         if vuln_type == VulnType.PATH_TRAVERSAL:
             # __DIR__/__FILE__ + string literal = static path
@@ -824,6 +849,14 @@ class UnifiedScanner:
             # Static include/require with hardcoded path
             if re.search(r'(?:include|require)(?:_once)?\s*\(\s*["\'][^"\'$]+["\']', line, re.I):
                 return True
+            # str_replace for sanitization/escaping (not path traversal)
+            if re.search(r'str_replace\s*\(\s*["\']', line, re.I):
+                if not re.search(r'\.\.|%2e|%00', line, re.I):
+                    return True
+            # POST data being escaped/sanitized for config storage
+            if re.search(r'\$_POST\s*\[[^\]]+\]\s*\)', line, re.I):
+                if re.search(r'(?:str_replace|addslashes|addcslashes|preg_replace)\s*\(', line, re.I):
+                    return True
 
         if vuln_type == VulnType.FILE_WRITE:
             # Writing to hardcoded path (not user-controlled)
@@ -832,6 +865,13 @@ class UnifiedScanner:
             # Writing cache/temp/log files (common safe pattern)
             if re.search(r'file_put_contents\s*\([^,]*(?:cache|temp|tmp|log|\.lock)', line, re.I):
                 return True
+            # Writing etag/hash files (cache busting)
+            if re.search(r'file_put_contents\s*\(\s*\$\w*(?:etag|cache|hash|compiled|manifest)', line, re.I):
+                return True
+            # Suppressed write (@ prefix) to non-user path
+            if re.search(r'@file_put_contents\s*\(', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
 
         if vuln_type == VulnType.FILE_READ:
             # Reading from hardcoded path (not user-controlled)
@@ -920,6 +960,17 @@ class UnifiedScanner:
             # sha1/md5 for unique ID generation (not password)
             if re.search(r'(?:uniqid|microtime|rand|time)\s*\(', line, re.I):
                 return True
+            # md5 of JSON/serialized data (cache/config hashing)
+            if re.search(r'(?:md5|sha1)\s*\(\s*(?:json_encode|serialize|implode)\s*\(', line, re.I):
+                return True
+            # Hash used for cache key, versioning, or comparison
+            if re.search(r'\$\w*(?:hash|md5|digest)\s*=\s*(?:md5|sha1)\s*\(', line, re.I):
+                if not re.search(r'password|passwd|pwd', line, re.I):
+                    return True
+            # Less/CSS/SCSS compilation cache hash
+            if re.search(r'(?:less|sass|scss|css|compile|asset)\w*', line, re.I):
+                if re.search(r'(?:md5|sha1|crc32)\s*\(', line, re.I):
+                    return True
 
         if vuln_type == VulnType.XXE:
             # Entity loading explicitly disabled
@@ -933,6 +984,9 @@ class UnifiedScanner:
             if re.search(r'simplexml_load_string\s*\(\s*["\']<', line):
                 return True
             if re.search(r'simplexml_load_file\s*\(\s*["\']', line):
+                return True
+            # file_get_contents('php://input') - reading POST body is NOT XXE
+            if re.search(r'file_get_contents\s*\(\s*["\']php://input["\']', line, re.I):
                 return True
 
         if vuln_type == VulnType.SSRF:
@@ -949,6 +1003,9 @@ class UnifiedScanner:
             if re.search(r'file_get_contents\s*\(\s*\$\w*(?:etag|cache|config|template|theme|layout|css|style|path|file_?name)\w*\s*\)', line, re.I):
                 if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
                     return True
+            # Framework locator/resolver (returns internal paths)
+            if re.search(r'(?:locator|resolver|finder|loader)\s*(?:->|::)\s*(?:get|find|locate|resolve)\s*\(', line, re.I):
+                return True
 
         if vuln_type == VulnType.IDOR:
             # ID comes from session (authenticated user's own ID)
@@ -970,6 +1027,21 @@ class UnifiedScanner:
             # ETag/Cache-control/Content-Type headers (non-user-controlled)
             if re.search(r'header\s*\(\s*["\'](?:ETag|Cache-control|Expires|Content-Type|Status|X-)\s*:', line, re.I):
                 if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
+            # Content-Disposition header with filename from variable (download helpers)
+            if re.search(r'header\s*\(\s*["\']Content-Disposition:\s*attachment', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
+            # Location header using sanitized/internal URL variable
+            if re.search(r'header\s*\(\s*["\']Location:\s*["\']?\s*\.\s*\$(?:url|redirect|location|return_url|site_url)', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
+            # WWW-Authenticate, P3P, Pragma headers (framework headers)
+            if re.search(r'header\s*\(\s*["\'](?:WWW-Authenticate|P3P|Pragma|Vary|Access-Control)', line, re.I):
+                return True
+            # Static Location with fully hardcoded URL (no concatenation)
+            if re.search(r'header\s*\(\s*["\']Location:\s*[^"\']+["\']\s*\)', line, re.I):
+                if not re.search(r'\.\s*\$', line):
                     return True
 
         if vuln_type == VulnType.MASS_ASSIGNMENT:
@@ -995,11 +1067,91 @@ class UnifiedScanner:
             # Variable assigned to $etag, $cache_key, $hash for non-security use
             if re.search(r'\$(?:etag|cache_?key|css_?hash|style_?hash)\s*=\s*(?:md5|sha1)\s*\(', line, re.I):
                 return True
+            # array_rand for display/UI purposes (not security token)
+            if re.search(r'array_rand\s*\(', line, re.I):
+                return True
+            # uniqid for placeholder/identifier (not security token)
+            # Only FP if plain uniqid() without rand() and not for security
+            if re.search(r'uniqid\s*\(\s*["\']', line, re.I):
+                if not re.search(r'(?:token|session|csrf|nonce|auth|rand|random)', line, re.I):
+                    return True
+            # mt_rand/rand for non-security (color, position, delay, CSS)
+            if re.search(r'(?:mt_rand|rand)\s*\(', line, re.I):
+                if re.search(r'(?:color|position|delay|margin|padding|width|height|font|captcha|placeholder)', line, re.I):
+                    return True
+            # Session state check (not randomness issue)
+            if re.search(r'\$_SESSION\s*\[', line, re.I):
+                if not re.search(r'(?:mt_rand|rand|uniqid)\s*\(', line, re.I):
+                    return True
 
         if vuln_type == VulnType.RACE_CONDITION:
             # File locking present
             if re.search(r'flock\s*\(', line, re.I):
                 return True
+            # chmod/chown on path variable (permission setting, not exploitable TOCTOU)
+            if re.search(r'@?chmod\s*\(', line, re.I):
+                return True
+            # mkdir (directory creation is idempotent)
+            if re.search(r'@?mkdir\s*\(', line, re.I):
+                return True
+            # Simple file cleanup: unlink/rmdir on non-user-controlled path
+            if re.search(r'@?(?:unlink|rmdir)\s*\(', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
+            # file_exists + operation (cache/temp cleanup patterns)
+            if re.search(r'file_exists\s*\([^)]+\)\s*&&\s*@?(?:unlink|rmdir)', line, re.I):
+                return True
+            # clearstatcache
+            if re.search(r'clearstatcache\s*\(', line, re.I):
+                return True
+            # touch for lock files
+            if re.search(r'@?touch\s*\(', line, re.I):
+                return True
+            # rename/copy with non-user paths
+            if re.search(r'@?(?:rename|copy)\s*\(', line, re.I):
+                if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                    return True
+            # is_dir/is_file/is_writable check only (no sink)
+            if re.search(r'^[^=]*(?:is_dir|is_file|is_writable|is_readable)\s*\(', line, re.I):
+                return True
+            # Syndication/RSS/feed file write (non-security)
+            if re.search(r'(?:rss|feed|atom|syndication|sitemap)', line, re.I):
+                return True
+            # file_exists check alone (no dangerous follow-up on same line)
+            if re.search(r'file_exists\s*\(\s*\$', line, re.I):
+                if not re.search(r'(?:unlink|rmdir|rename|move|copy|fopen|include|require)', line, re.I):
+                    return True
+            # fopen for logging (append/write to log/cache/temp files)
+            if re.search(r'@?fopen\s*\(', line, re.I):
+                if re.search(r'(?:log|cache|temp|tmp|rss|rdf|feed|sitemap)\w*', line, re.I):
+                    return True
+                # fopen to member variable (internal operation)
+                if re.search(r'fopen\s*\(\s*\$(?:this|self)\s*->', line, re.I):
+                    return True
+                # fopen with config path variable (not user controlled)
+                if re.search(r'fopen\s*\(\s*\$_?(?:CONF|CONFIG|CFG)\s*\[', line, re.I):
+                    return True
+                # fopen for write/append to non-user path
+                if re.search(r'fopen\s*\([^)]+,\s*["\'][wa][+"]?\s*["\']', line, re.I):
+                    if not re.search(r'\$_(GET|POST|REQUEST|COOKIE)', line, re.I):
+                        return True
+
+        if vuln_type == VulnType.INFO_DISCLOSURE:
+            # print_r with second argument true (returns string, not output)
+            if re.search(r'print_r\s*\([^,]+,\s*(?:true|TRUE|1)\s*\)', line, re.I):
+                return True
+            # Language/translation string arrays
+            if re.search(r'\$(?:lang|_LANG|language|locale|i18n|l10n)\s*\[', line, re.I):
+                return True
+            # PHP error display config (not actual disclosure)
+            if re.search(r'(?:display_errors|error_reporting|ini_set)', line, re.I):
+                return True
+            # Debug info stored in variable (not output)
+            if re.search(r'\$\w*(?:debug|trace|log)\w*\s*[.=]', line, re.I):
+                if not re.search(r'(?:echo|print)\s', line, re.I):
+                    return True
+            # var_dump only in test file paths (not production code)
+            # Production var_dump IS a real info disclosure
 
         return False
 
