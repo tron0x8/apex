@@ -1,6 +1,3 @@
-# APEX Security Scanner - Sink Definitions
-# All sink definitions extracted from the APEX codebase
-# Organized by vulnerability type with severity levels and CWE mappings
 
 SQL_INJECTION:
   - name: mysql_query
@@ -475,6 +472,266 @@ PATTERN_ARG_SINKS:
     cwe: CWE-185
     description: "Regular expression split (ReDoS risk)"
     arg_position: 0
+
+ENVIRONMENT:
+  - name: putenv
+    pattern: 'putenv\s*\('
+    severity: HIGH
+    cwe: CWE-78
+    description: "Set environment variable (env injection)"
+
+  - name: ini_set
+    pattern: 'ini_set\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Modify PHP configuration at runtime"
+
+  - name: dl
+    pattern: '\bdl\s*\('
+    severity: CRITICAL
+    cwe: CWE-94
+    description: "Load PHP extension at runtime"
+
+  - name: set_include_path
+    pattern: 'set_include_path\s*\('
+    severity: HIGH
+    cwe: CWE-98
+    description: "Modify include path"
+
+REFLECTION:
+  - name: ReflectionClass
+    pattern: 'new\s+ReflectionClass\s*\('
+    severity: HIGH
+    cwe: CWE-470
+    description: "Reflection on class name"
+
+  - name: ReflectionFunction
+    pattern: 'new\s+ReflectionFunction\s*\('
+    severity: HIGH
+    cwe: CWE-470
+    description: "Reflection on function name"
+
+  - name: ReflectionMethod
+    pattern: 'new\s+ReflectionMethod\s*\('
+    severity: HIGH
+    cwe: CWE-470
+    description: "Reflection on method name"
+
+  - name: class_exists
+    pattern: 'class_exists\s*\('
+    severity: MEDIUM
+    cwe: CWE-470
+    description: "Class existence check (may trigger autoload)"
+
+CALLBACK:
+  - name: ob_start_callback
+    pattern: 'ob_start\s*\('
+    severity: MEDIUM
+    cwe: CWE-94
+    description: "Output buffer with callback"
+
+  - name: register_shutdown_function
+    pattern: 'register_shutdown_function\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Register shutdown callback"
+
+  - name: register_tick_function
+    pattern: 'register_tick_function\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Register tick callback"
+
+  - name: spl_autoload_register
+    pattern: 'spl_autoload_register\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Register autoloader"
+
+  - name: set_error_handler
+    pattern: 'set_error_handler\s*\('
+    severity: MEDIUM
+    cwe: CWE-94
+    description: "Set error handler callback"
+
+  - name: array_walk
+    pattern: 'array_walk\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Apply callback to array"
+
+  - name: array_walk_recursive
+    pattern: 'array_walk_recursive\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Apply callback to array recursively"
+
+  - name: iterator_apply
+    pattern: 'iterator_apply\s*\('
+    severity: HIGH
+    cwe: CWE-94
+    description: "Apply function to iterator"
+
+NETWORK:
+  - name: stream_context_create
+    pattern: 'stream_context_create\s*\('
+    severity: MEDIUM
+    cwe: CWE-295
+    description: "Stream context (SSL/TLS config)"
+
+  - name: stream_socket_client
+    pattern: 'stream_socket_client\s*\('
+    severity: HIGH
+    cwe: CWE-918
+    description: "Socket client connection"
+
+  - name: stream_socket_server
+    pattern: 'stream_socket_server\s*\('
+    severity: HIGH
+    cwe: CWE-918
+    description: "Socket server binding"
+
+  - name: SoapClient
+    pattern: 'new\s+SoapClient\s*\('
+    severity: HIGH
+    cwe: CWE-918
+    description: "SOAP client (SSRF risk)"
+
+  - name: dns_get_record
+    pattern: 'dns_get_record\s*\('
+    severity: MEDIUM
+    cwe: CWE-918
+    description: "DNS lookup"
+
+  - name: gethostbyname
+    pattern: 'gethostbyname\s*\('
+    severity: MEDIUM
+    cwe: CWE-918
+    description: "Hostname to IP resolution"
+
+PERMISSION:
+  - name: chmod
+    pattern: 'chmod\s*\('
+    severity: MEDIUM
+    cwe: CWE-732
+    description: "Change file permissions"
+
+  - name: chown
+    pattern: 'chown\s*\('
+    severity: HIGH
+    cwe: CWE-732
+    description: "Change file owner"
+
+  - name: chgrp
+    pattern: 'chgrp\s*\('
+    severity: MEDIUM
+    cwe: CWE-732
+    description: "Change file group"
+
+  - name: symlink
+    pattern: 'symlink\s*\('
+    severity: HIGH
+    cwe: CWE-59
+    description: "Create symbolic link"
+
+  - name: link
+    pattern: '\blink\s*\('
+    severity: HIGH
+    cwe: CWE-59
+    description: "Create hard link"
+
+  - name: tempnam
+    pattern: 'tempnam\s*\('
+    severity: MEDIUM
+    cwe: CWE-377
+    description: "Create temporary file"
+
+SESSION:
+  - name: session_id
+    pattern: 'session_id\s*\('
+    severity: HIGH
+    cwe: CWE-384
+    description: "Set session ID (session fixation)"
+
+  - name: setrawcookie
+    pattern: 'setrawcookie\s*\('
+    severity: MEDIUM
+    cwe: CWE-565
+    description: "Set raw cookie (no encoding)"
+
+  - name: session_name
+    pattern: 'session_name\s*\('
+    severity: MEDIUM
+    cwe: CWE-384
+    description: "Set session name"
+
+  - name: session_save_path
+    pattern: 'session_save_path\s*\('
+    severity: HIGH
+    cwe: CWE-384
+    description: "Set session save path"
+
+LOG:
+  - name: error_log
+    pattern: 'error_log\s*\('
+    severity: MEDIUM
+    cwe: CWE-117
+    description: "Error logging"
+
+  - name: syslog
+    pattern: 'syslog\s*\('
+    severity: MEDIUM
+    cwe: CWE-117
+    description: "System logging"
+
+  - name: trigger_error
+    pattern: 'trigger_error\s*\('
+    severity: LOW
+    cwe: CWE-209
+    description: "Trigger PHP error"
+
+DATABASE_EXTENDED:
+  - name: sqlite3_exec
+    pattern: '->exec\s*\('
+    severity: HIGH
+    cwe: CWE-89
+    description: "SQLite3 exec method"
+
+  - name: sqlite3_query
+    pattern: '->querySingle\s*\('
+    severity: HIGH
+    cwe: CWE-89
+    description: "SQLite3 querySingle method"
+
+  - name: cubrid_execute
+    pattern: 'cubrid_execute\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "CUBRID query execution"
+
+  - name: db2_exec
+    pattern: 'db2_exec\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "DB2 query execution"
+
+  - name: ibase_query
+    pattern: 'ibase_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "Firebird/InterBase query"
+
+  - name: maxdb_query
+    pattern: 'maxdb_query\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "MaxDB query execution"
+
+  - name: oci_execute
+    pattern: 'oci_execute\s*\('
+    severity: CRITICAL
+    cwe: CWE-89
+    description: "Oracle execute"
 
 VARIABLE_MANIPULATION:
   - name: extract

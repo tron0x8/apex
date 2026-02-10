@@ -1,5 +1,3 @@
-# APEX Rule Engine - Sanitizer Definitions
-# Functions/patterns that remove or neutralize taint
 
 sql_sanitizers:
   - name: mysql_real_escape_string
@@ -477,6 +475,361 @@ regex_dos_sanitizers:
     pattern: '(?:pcre\.backtrack_limit|set_time_limit|ini_set)'
     protects_against: [REGEX_DOS]
     strength: weak
+
+encoding_sanitizers:
+  - name: mb_convert_encoding
+    pattern: 'mb_convert_encoding\s*\('
+    protects_against: [XSS, SQL_INJECTION]
+    strength: weak
+
+  - name: iconv
+    pattern: 'iconv\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: mb_detect_encoding
+    pattern: 'mb_detect_encoding\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: utf8_encode
+    pattern: 'utf8_encode\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+modern_crypto_sanitizers:
+  - name: sodium_crypto_secretbox
+    pattern: 'sodium_crypto_\w+\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: hash_hmac
+    pattern: 'hash_hmac\s*\('
+    protects_against: [WEAK_CRYPTO, TYPE_JUGGLING]
+    strength: strong
+
+  - name: hash_pbkdf2
+    pattern: 'hash_pbkdf2\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: argon2
+    pattern: 'PASSWORD_ARGON2'
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: bcrypt
+    pattern: 'PASSWORD_BCRYPT'
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+laravel_sanitizers:
+  - name: laravel_validated
+    pattern: '\$request->validated\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: laravel_only
+    pattern: '\$request->only\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: laravel_except
+    pattern: '\$request->except\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: laravel_validator_make
+    pattern: 'Validator::make\s*\('
+    protects_against: [SQL_INJECTION, XSS]
+    strength: strong
+
+  - name: laravel_authorize
+    pattern: '\$this->authorize\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: laravel_middleware_auth
+    pattern: 'middleware\s*\(\s*[''"]auth'
+    protects_against: [AUTH_BYPASS]
+    strength: strong
+
+  - name: laravel_policy
+    pattern: '->can\s*\(\s*[''"]'
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: laravel_crypt
+    pattern: 'Crypt::(?:encrypt|decrypt)\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+wordpress_sanitizers:
+  - name: wp_esc_url
+    pattern: 'esc_url\s*\('
+    protects_against: [XSS, OPEN_REDIRECT, SSRF]
+    strength: strong
+
+  - name: wp_esc_url_raw
+    pattern: 'esc_url_raw\s*\('
+    protects_against: [XSS, OPEN_REDIRECT, SSRF]
+    strength: strong
+
+  - name: wp_absint
+    pattern: 'absint\s*\('
+    protects_against: [SQL_INJECTION, XSS, IDOR]
+    strength: strong
+
+  - name: wp_sanitize_file_name
+    pattern: 'sanitize_file_name\s*\('
+    protects_against: [FILE_PATH, PATH_TRAVERSAL, FILE_INCLUSION]
+    strength: strong
+
+  - name: wp_sanitize_key
+    pattern: 'sanitize_key\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+  - name: wp_sanitize_title
+    pattern: 'sanitize_title\s*\('
+    protects_against: [XSS, SQL_INJECTION]
+    strength: strong
+
+  - name: wp_sanitize_user
+    pattern: 'sanitize_user\s*\('
+    protects_against: [SQL_INJECTION, XSS]
+    strength: strong
+
+  - name: wp_sanitize_email
+    pattern: 'sanitize_email\s*\('
+    protects_against: [EMAIL_INJECTION, XSS]
+    strength: strong
+
+  - name: wp_check_admin_referer
+    pattern: 'check_admin_referer\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: wp_check_ajax_referer
+    pattern: 'check_ajax_referer\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: wp_nonce_field
+    pattern: 'wp_nonce_field\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: wp_sanitize_redirect
+    pattern: 'wp_sanitize_redirect\s*\('
+    protects_against: [OPEN_REDIRECT]
+    strength: strong
+
+  - name: wp_validate_redirect
+    pattern: 'wp_validate_redirect\s*\('
+    protects_against: [OPEN_REDIRECT]
+    strength: strong
+
+symfony_sanitizers:
+  - name: symfony_param_converter
+    pattern: '@ParamConverter'
+    protects_against: [SQL_INJECTION, IDOR]
+    strength: strong
+
+  - name: symfony_form_valid
+    pattern: '->isValid\s*\('
+    protects_against: [SQL_INJECTION, XSS]
+    strength: weak
+
+  - name: symfony_csrf
+    pattern: 'isCsrfTokenValid\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: symfony_voter
+    pattern: 'denyAccessUnlessGranted\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: symfony_security
+    pattern: '@IsGranted\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+php8_sanitizers:
+  - name: str_contains
+    pattern: 'str_contains\s*\('
+    protects_against: [FILE_INCLUSION, OPEN_REDIRECT]
+    strength: weak
+
+  - name: str_starts_with
+    pattern: 'str_starts_with\s*\('
+    protects_against: [FILE_INCLUSION, OPEN_REDIRECT, PATH_TRAVERSAL]
+    strength: weak
+
+  - name: str_ends_with
+    pattern: 'str_ends_with\s*\('
+    protects_against: [FILE_INCLUSION, UNSAFE_UPLOAD]
+    strength: weak
+
+  - name: match_expression
+    pattern: 'match\s*\(\s*\$'
+    protects_against: [FILE_INCLUSION, OPEN_REDIRECT, CODE_INJECTION]
+    strength: strong
+
+  - name: enum_from
+    pattern: '::from\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+  - name: enum_tryFrom
+    pattern: '::tryFrom\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+doctrine_sanitizers:
+  - name: doctrine_createQueryBuilder
+    pattern: 'createQueryBuilder\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: doctrine_setParameter
+    pattern: '->setParameter\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: doctrine_setParameters
+    pattern: '->setParameters\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: doctrine_expr
+    pattern: '->expr\s*\(\s*\)->'
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+ci_sanitizers:
+  - name: ci_xss_clean
+    pattern: 'xss_clean\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: ci_escape
+    pattern: '\$this->db->escape\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: ci_escape_str
+    pattern: '\$this->db->escape_str\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: ci_escape_like_str
+    pattern: '\$this->db->escape_like_str\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: ci_security
+    pattern: '\$this->security->xss_clean\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+output_sanitizers:
+  - name: sprintf_safe
+    pattern: 'sprintf\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: number_format
+    pattern: 'number_format\s*\('
+    protects_against: [XSS, SQL_INJECTION]
+    strength: strong
+
+  - name: wordwrap
+    pattern: 'wordwrap\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: nl2br
+    pattern: 'nl2br\s*\('
+    protects_against: []
+    strength: weak
+
+array_sanitizers:
+  - name: array_intersect_key
+    pattern: 'array_intersect_key\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: array_keys_whitelist
+    pattern: 'array_flip\s*\(\s*\[.*?\]\s*\)'
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: array_column
+    pattern: 'array_column\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: weak
+
+  - name: compact
+    pattern: 'compact\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: weak
+
+session_sanitizers:
+  - name: session_regenerate_id
+    pattern: 'session_regenerate_id\s*\('
+    protects_against: [SESSION_FIXATION]
+    strength: strong
+
+  - name: session_destroy
+    pattern: 'session_destroy\s*\('
+    protects_against: [SESSION_FIXATION]
+    strength: strong
+
+ssl_sanitizers:
+  - name: verify_peer_true
+    pattern: 'verify_peer.*?true'
+    protects_against: [SSL_MISCONFIG]
+    strength: strong
+
+  - name: verify_host_2
+    pattern: 'CURLOPT_SSL_VERIFYHOST.*?2'
+    protects_against: [SSL_MISCONFIG]
+    strength: strong
+
+  - name: ssl_verifypeer_true
+    pattern: 'CURLOPT_SSL_VERIFYPEER.*?true'
+    protects_against: [SSL_MISCONFIG]
+    strength: strong
+
+ldap_sanitizers:
+  - name: ldap_escape
+    pattern: 'ldap_escape\s*\('
+    protects_against: [LDAP_INJECTION]
+    strength: strong
+
+xpath_sanitizers:
+  - name: xpath_registerNamespace
+    pattern: '->registerXPathNamespace\s*\('
+    protects_against: [XPATH_INJECTION]
+    strength: weak
+
+ssrf_sanitizers:
+  - name: ip_validation
+    pattern: 'filter_var\s*\([^)]*FILTER_VALIDATE_IP'
+    protects_against: [SSRF]
+    strength: strong
+
+  - name: hostname_whitelist
+    pattern: 'in_array\s*\([^)]*(?:host|domain|server)'
+    protects_against: [SSRF, OPEN_REDIRECT]
+    strength: strong
+
+  - name: parse_url_check
+    pattern: 'parse_url\s*\([^)]+\)\s*(?:===|\!==|==)'
+    protects_against: [SSRF, OPEN_REDIRECT]
+    strength: strong
 
 custom_sanitizers:
   - name: custom_safe_method

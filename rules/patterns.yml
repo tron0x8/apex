@@ -1,6 +1,3 @@
-# APEX Vulnerability Detection Patterns
-# Extracted from unified_scanner.py
-# Each pattern includes regex, severity, CWE, description, and remediation
 
 SQL_INJECTION:
 - regex: "(?:mysql_query|mysqli_query|pg_query|sqlite_query|oci_parse)\\s*\\([^)]*\\$_(GET|POST|REQUEST|COOKIE)"
@@ -742,3 +739,478 @@ REGEX_DOS:
   cwe: CWE-1333
   description: User-controlled regex replacement
   remediation: Never allow user-controlled patterns
+SSL_TLS_MISCONFIG:
+- regex: "verify_peer\\s*['\"]?\\s*=>\\s*false"
+  severity: HIGH
+  cwe: CWE-295
+  description: SSL peer verification disabled
+  remediation: Enable verify_peer for secure connections
+- regex: "verify_peer_name\\s*['\"]?\\s*=>\\s*false"
+  severity: HIGH
+  cwe: CWE-295
+  description: SSL peer name verification disabled
+  remediation: Enable verify_peer_name
+- regex: "allow_self_signed\\s*['\"]?\\s*=>\\s*true"
+  severity: HIGH
+  cwe: CWE-295
+  description: Self-signed certificates allowed
+  remediation: Use properly signed certificates
+- regex: "CURLOPT_SSL_VERIFYPEER\\s*,\\s*(?:false|0|FALSE)"
+  severity: HIGH
+  cwe: CWE-295
+  description: cURL SSL verification disabled
+  remediation: Enable CURLOPT_SSL_VERIFYPEER
+- regex: "CURLOPT_SSL_VERIFYHOST\\s*,\\s*(?:0|1|false|FALSE)"
+  severity: HIGH
+  cwe: CWE-295
+  description: cURL host verification disabled or weak
+  remediation: Set CURLOPT_SSL_VERIFYHOST to 2
+- regex: "GuzzleHttp.*verify.*false"
+  severity: HIGH
+  cwe: CWE-295
+  description: Guzzle SSL verification disabled
+  remediation: Enable SSL verification in Guzzle
+- regex: "stream_context_create.*verify_peer.*false"
+  severity: HIGH
+  cwe: CWE-295
+  description: Stream context SSL verification disabled
+  remediation: Enable verify_peer in stream context
+INSECURE_COOKIE:
+- regex: "setcookie\\s*\\([^)]*\\)\\s*;(?!.*(?:httponly|HttpOnly|true\\s*,\\s*true))"
+  severity: MEDIUM
+  cwe: CWE-614
+  description: Cookie set without secure flags
+  remediation: Set httponly and secure flags on cookies
+- regex: "setcookie\\s*\\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,\\s*false"
+  severity: MEDIUM
+  cwe: CWE-614
+  description: Cookie without secure flag
+  remediation: Set secure flag to true
+- regex: "session\\.cookie_httponly\\s*=\\s*(?:0|false|off)"
+  severity: MEDIUM
+  cwe: CWE-1004
+  description: Session cookie httponly disabled
+  remediation: Set session.cookie_httponly to 1
+- regex: "session\\.cookie_secure\\s*=\\s*(?:0|false|off)"
+  severity: MEDIUM
+  cwe: CWE-614
+  description: Session cookie secure flag disabled
+  remediation: Set session.cookie_secure to 1
+- regex: "session\\.use_only_cookies\\s*=\\s*(?:0|false|off)"
+  severity: HIGH
+  cwe: CWE-384
+  description: Session not restricted to cookies only
+  remediation: Set session.use_only_cookies to 1
+SESSION_FIXATION:
+- regex: "session_id\\s*\\(\\s*\\$_(GET|POST|REQUEST|COOKIE)"
+  severity: CRITICAL
+  cwe: CWE-384
+  description: Session ID from user input
+  remediation: Never set session_id from user input
+- regex: "session_id\\s*\\(\\s*\\$\\w+"
+  severity: HIGH
+  cwe: CWE-384
+  description: Session ID from variable
+  remediation: Use session_regenerate_id() instead
+- regex: "session_name\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-384
+  description: Session name from user input
+  remediation: Use fixed session names
+- regex: "session\\.use_trans_sid\\s*=\\s*(?:1|true|on)"
+  severity: HIGH
+  cwe: CWE-384
+  description: Transparent session ID in URLs
+  remediation: Disable session.use_trans_sid
+ENV_INJECTION:
+- regex: "putenv\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-78
+  description: Environment variable injection
+  remediation: Never use putenv with user input
+- regex: "putenv\\s*\\([^)]*\\$\\w+"
+  severity: HIGH
+  cwe: CWE-78
+  description: putenv with variable
+  remediation: Validate environment variable names and values
+- regex: "getenv\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: MEDIUM
+  cwe: CWE-78
+  description: Environment variable read from user-controlled name
+  remediation: Use fixed environment variable names
+PHP_CONFIG_MANIPULATION:
+- regex: "ini_set\\s*\\(\\s*['\"](?:allow_url_include|allow_url_fopen)['\"]\\s*,\\s*['\"]?(?:1|true|on)"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: Enabling remote file inclusion
+  remediation: Never enable allow_url_include
+- regex: "ini_set\\s*\\(\\s*['\"](?:open_basedir)['\"]\\s*,\\s*['\"]\\s*['\"]"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: Removing open_basedir restriction
+  remediation: Maintain open_basedir restrictions
+- regex: "ini_set\\s*\\(\\s*['\"](?:disable_functions)['\"]\\s*,\\s*['\"]\\s*['\"]"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: Clearing disabled functions
+  remediation: Keep dangerous functions disabled
+- regex: "ini_set\\s*\\(\\s*['\"](?:display_errors)['\"]\\s*,\\s*['\"]?(?:1|true|on)"
+  severity: MEDIUM
+  cwe: CWE-209
+  description: Enabling error display
+  remediation: Set display_errors to off in production
+- regex: "ini_set\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: PHP config from user input
+  remediation: Never use ini_set with user input
+SYMLINK_ATTACK:
+- regex: "symlink\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-59
+  description: Symlink creation with user input
+  remediation: Never create symlinks with user-controlled paths
+- regex: "symlink\\s*\\([^)]*\\$\\w+"
+  severity: HIGH
+  cwe: CWE-59
+  description: Symlink creation with variable
+  remediation: Validate symlink source and target paths
+- regex: "readlink\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: MEDIUM
+  cwe: CWE-59
+  description: Readlink with user-controlled path
+  remediation: Validate path before readlink
+UNSAFE_REFLECTION:
+- regex: "new\\s+ReflectionClass\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-470
+  description: Reflection with user-controlled class
+  remediation: Use whitelist for class names
+- regex: "new\\s+ReflectionMethod\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-470
+  description: Reflection method with user-controlled name
+  remediation: Use whitelist for method names
+- regex: "new\\s+ReflectionFunction\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-470
+  description: Reflection function with user input
+  remediation: Never reflect user-controlled function names
+- regex: "new\\s+\\$\\w+\\s*\\("
+  severity: HIGH
+  cwe: CWE-470
+  description: Dynamic class instantiation
+  remediation: Use whitelist for class names
+- regex: "\\$\\w+\\s*::\\s*\\$\\w+\\s*\\("
+  severity: HIGH
+  cwe: CWE-470
+  description: Dynamic static method call
+  remediation: Use whitelist for method names
+VARIABLE_VARIABLE:
+- regex: "\\$\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-914
+  description: Variable variable from user input
+  remediation: Never use variable variables with user input
+- regex: "\\$\\{\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-914
+  description: Variable variable via curly syntax
+  remediation: Never use variable variables with user input
+- regex: "\\$\\$\\w+\\s*="
+  severity: MEDIUM
+  cwe: CWE-914
+  description: Variable variable assignment
+  remediation: Avoid variable variables; use arrays instead
+TIMING_ATTACK:
+- regex: "(?:password|secret|token|hash|key|signature|api_key|auth)\\s*(?:==|!=)\\s*(?:\\$|['\"])"
+  severity: HIGH
+  cwe: CWE-208
+  description: Non-constant-time comparison for secret
+  remediation: Use hash_equals() for timing-safe comparison
+- regex: "(?:\\$|['\"])\\s*(?:==|!=)\\s*(?:password|secret|token|hash|key|signature|api_key|auth)"
+  severity: HIGH
+  cwe: CWE-208
+  description: Non-constant-time comparison for secret
+  remediation: Use hash_equals() for timing-safe comparison
+- regex: "strcmp\\s*\\([^)]*(?:password|secret|token|hash)\\s*\\)\\s*==\\s*0"
+  severity: HIGH
+  cwe: CWE-208
+  description: strcmp for secret comparison (timing + type juggling)
+  remediation: Use hash_equals() instead
+HTTP_RESPONSE_SPLITTING:
+- regex: "header\\s*\\([^)]*(?:\\\\r|\\\\n|%0[dD]|%0[aA])"
+  severity: HIGH
+  cwe: CWE-113
+  description: HTTP response splitting via CRLF
+  remediation: Strip newlines from header values
+- regex: "header\\s*\\([^)]*\\.\\s*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-113
+  description: Header with user input concatenation
+  remediation: Validate and strip newlines from header values
+INSECURE_CORS:
+- regex: "Access-Control-Allow-Origin:\\s*\\*"
+  severity: MEDIUM
+  cwe: CWE-942
+  description: Wildcard CORS origin
+  remediation: Restrict allowed origins to specific domains
+- regex: "Access-Control-Allow-Origin.*\\$_(GET|POST|REQUEST|SERVER)"
+  severity: HIGH
+  cwe: CWE-942
+  description: CORS origin from user input
+  remediation: Validate against whitelist of allowed origins
+- regex: "Access-Control-Allow-Credentials.*true.*Access-Control-Allow-Origin.*\\*"
+  severity: CRITICAL
+  cwe: CWE-942
+  description: CORS with credentials and wildcard origin
+  remediation: Never use wildcard with credentials
+JWT_WEAKNESS:
+- regex: "(?:jwt|JWT).*(?:alg|algorithm).*(?:none|HS256)"
+  severity: HIGH
+  cwe: CWE-347
+  description: JWT with weak or no algorithm
+  remediation: Use strong algorithms (RS256, ES256)
+- regex: "base64_decode\\s*\\(\\s*explode\\s*\\(\\s*[''\"]\\\\.[''\"]"
+  severity: MEDIUM
+  cwe: CWE-347
+  description: Manual JWT parsing without verification
+  remediation: Use a proper JWT library with signature verification
+- regex: "json_decode\\s*\\(\\s*base64_decode.*?\\$_(GET|POST|REQUEST|COOKIE)"
+  severity: HIGH
+  cwe: CWE-347
+  description: Decoding JWT payload from user input without verification
+  remediation: Always verify JWT signatures before trusting payload
+GRAPHQL_INJECTION:
+- regex: "(?:query|mutation|subscription)\\s*\\{[^}]*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-943
+  description: GraphQL query with user input
+  remediation: Use parameterized GraphQL queries
+- regex: "graphql.*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-943
+  description: GraphQL endpoint with user input
+  remediation: Validate and sanitize GraphQL inputs
+SSRF_DEEP:
+- regex: "new\\s+SoapClient\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-918
+  description: SOAP client with user-controlled WSDL
+  remediation: Use fixed WSDL URLs
+- regex: "new\\s+SoapClient\\s*\\(\\s*\\$\\w+"
+  severity: HIGH
+  cwe: CWE-918
+  description: SOAP client with variable WSDL
+  remediation: Validate WSDL URLs
+- regex: "stream_context_create.*proxy"
+  severity: MEDIUM
+  cwe: CWE-918
+  description: Stream context with proxy setting
+  remediation: Validate proxy configuration
+- regex: "gethostbyname\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-918
+  description: DNS lookup with user input
+  remediation: Validate hostnames; use allowlist
+- regex: "dns_get_record\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: MEDIUM
+  cwe: CWE-918
+  description: DNS record lookup with user input
+  remediation: Validate and restrict DNS lookups
+INSECURE_DOWNLOAD:
+- regex: "Content-Disposition.*attachment.*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-22
+  description: File download with user-controlled filename
+  remediation: Validate file paths; use basename()
+- regex: "readfile\\s*\\(\\s*\\$\\w+\\s*\\).*Content-Disposition"
+  severity: HIGH
+  cwe: CWE-22
+  description: File download with variable path
+  remediation: Validate file paths; restrict to upload directory
+PERMISSION_ISSUES:
+- regex: "chmod\\s*\\([^)]*0777"
+  severity: HIGH
+  cwe: CWE-732
+  description: World-writable file permissions
+  remediation: Use restrictive permissions (0644 or 0755)
+- regex: "chmod\\s*\\([^)]*0666"
+  severity: HIGH
+  cwe: CWE-732
+  description: World-readable/writable file permissions
+  remediation: Use restrictive permissions
+- regex: "chmod\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-732
+  description: File permissions from user input
+  remediation: Never use user input for permissions
+- regex: "umask\\s*\\(\\s*0\\s*\\)"
+  severity: HIGH
+  cwe: CWE-732
+  description: umask set to 0 (no restrictions)
+  remediation: Set appropriate umask
+SECOND_ORDER_INJECTION:
+- regex: "(?:fetch_assoc|fetch_row|fetch_array|fetch_object)\\s*\\([^)]*\\)[^;]*;[^}]*(?:mysql_query|mysqli_query|pg_query|->query)"
+  severity: HIGH
+  cwe: CWE-89
+  description: Database result used in another query (second-order SQLi)
+  remediation: Parameterize all queries, even with database values
+- regex: "(?:fetch_assoc|fetch_row)\\s*\\([^)]*\\)[^;]*;[^}]*(?:echo|print)\\s+"
+  severity: MEDIUM
+  cwe: CWE-79
+  description: Database result echoed without escaping (stored XSS)
+  remediation: Always escape output with htmlspecialchars()
+- regex: "\\$row\\s*\\[['\"]\\w+['\"]\\].*?(?:exec|system|shell_exec|passthru)\\s*\\("
+  severity: CRITICAL
+  cwe: CWE-78
+  description: Database result in command execution (second-order)
+  remediation: Never use database values in system commands
+INSECURE_DESERIALIZATION_DEEP:
+- regex: "\\$_COOKIE.*unserialize"
+  severity: CRITICAL
+  cwe: CWE-502
+  description: Cookie deserialization
+  remediation: Use signed/encrypted sessions instead
+- regex: "gzuncompress\\s*\\([^)]*\\).*unserialize"
+  severity: CRITICAL
+  cwe: CWE-502
+  description: Compressed data deserialization
+  remediation: Use JSON instead of serialize
+- regex: "base64_decode\\s*\\([^)]*\\).*unserialize"
+  severity: CRITICAL
+  cwe: CWE-502
+  description: Base64 deserialization chain
+  remediation: Use JSON instead of serialize
+- regex: "__(?:wakeup|destruct|toString)\\s*\\("
+  severity: MEDIUM
+  cwe: CWE-502
+  description: Magic method (deserialization gadget)
+  remediation: Audit magic methods for dangerous operations
+NOSQL_INJECTION_DEEP:
+- regex: "->(?:find|findOne|findOneAndUpdate|findOneAndDelete|aggregate|count|distinct)\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-943
+  description: MongoDB operation with user input
+  remediation: Use MongoDB driver parameter binding
+- regex: "new\\s+MongoDB\\\\BSON\\\\Regex\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-943
+  description: MongoDB regex from user input
+  remediation: Escape user input for regex operations
+- regex: "\\$where\\s*.*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-943
+  description: MongoDB $where with user input (JavaScript injection)
+  remediation: Never use $where with user input
+- regex: "(?:redis|Redis).*(?:eval|rawCommand)\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-943
+  description: Redis command injection
+  remediation: Use parameterized Redis commands
+- regex: "(?:memcache|Memcached).*(?:set|get|delete)\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-943
+  description: Memcache key injection
+  remediation: Validate cache keys
+EMAIL_INJECTION_DEEP:
+- regex: "mail\\s*\\([^,]*,[^,]*,[^,]*,[^)]*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-93
+  description: Email additional headers from user input
+  remediation: Sanitize headers; remove newlines
+- regex: "mail\\s*\\([^,]*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-93
+  description: Email recipient from user input
+  remediation: Validate email addresses
+- regex: "(?:SwiftMailer|PHPMailer|->send).*(?:From|To|Subject|Reply-To).*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-93
+  description: Email library with user-controlled headers
+  remediation: Validate email addresses; strip newlines
+CALLBACK_INJECTION:
+- regex: "ob_start\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: Output buffer callback from user input
+  remediation: Never use user input as callback
+- regex: "register_shutdown_function\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: Shutdown function from user input
+  remediation: Never use user input as callback
+- regex: "spl_autoload_register\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: Autoloader from user input
+  remediation: Never use user input as callback
+- regex: "array_walk\\s*\\([^,]+,\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: array_walk callback from user input
+  remediation: Never use user input as callback
+- regex: "set_error_handler\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-94
+  description: Error handler from user input
+  remediation: Never use user input as callback
+MEMORY_EXHAUSTION:
+- regex: "str_repeat\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-400
+  description: String repeat with user-controlled length
+  remediation: Validate and cap length parameter
+- regex: "array_fill\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-400
+  description: Array fill with user-controlled count
+  remediation: Validate and cap count parameter
+- regex: "str_pad\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: MEDIUM
+  cwe: CWE-400
+  description: String padding with user-controlled length
+  remediation: Validate and cap length parameter
+- regex: "range\\s*\\([^)]*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-400
+  description: range() with user-controlled bounds
+  remediation: Validate and cap range bounds
+CLICKJACKING:
+- regex: "(?:echo|print|header).*X-Frame-Options.*ALLOW"
+  severity: MEDIUM
+  cwe: CWE-1021
+  description: Permissive X-Frame-Options
+  remediation: Set X-Frame-Options to DENY or SAMEORIGIN
+OPEN_REDIRECT_DEEP:
+- regex: "header\\s*\\(\\s*['\"]Location:.*?\\$\\w+['\"]"
+  severity: MEDIUM
+  cwe: CWE-601
+  description: Redirect with variable in string
+  remediation: Validate redirect URLs against whitelist
+- regex: "header\\s*\\(.*Location.*?(?:urldecode|rawurldecode|base64_decode)\\s*\\("
+  severity: HIGH
+  cwe: CWE-601
+  description: Redirect with decoded URL
+  remediation: Validate redirect URLs after decoding
+- regex: "(?:wp_redirect|redirect)\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: HIGH
+  cwe: CWE-601
+  description: Framework redirect with user input
+  remediation: Use wp_safe_redirect() or validate URLs
+FILE_DELETE:
+- regex: "unlink\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-22
+  description: File delete with user-controlled path
+  remediation: Validate paths; restrict to specific directories
+- regex: "rmdir\\s*\\(\\s*\\$_(GET|POST|REQUEST)"
+  severity: CRITICAL
+  cwe: CWE-22
+  description: Directory delete with user-controlled path
+  remediation: Validate paths; use realpath()
+- regex: "unlink\\s*\\([^)]*\\$\\w+\\s*\\)"
+  severity: MEDIUM
+  cwe: CWE-22
+  description: File delete with variable path
+  remediation: Validate paths; restrict to specific directories

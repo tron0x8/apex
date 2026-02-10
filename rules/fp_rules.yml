@@ -1,5 +1,3 @@
-# APEX Rule Engine - False Positive Filtering Rules
-# Patterns that indicate a finding is likely a false positive
 
 comment_patterns:
   - name: single_line_comment
@@ -310,3 +308,186 @@ cms_safe_patterns:
     pattern: '(?:private|protected)\s+(?:static\s+)?function\s+'
     applies_to: [SSRF]
     description: "Internal/private function"
+
+framework_safe_patterns:
+  - name: laravel_validated
+    category: framework
+    pattern: '\$request->validated\s*\('
+    applies_to: [SQL_INJECTION, XSS, COMMAND_INJECTION, MASS_ASSIGNMENT]
+    description: "Laravel validated input"
+
+  - name: laravel_authorize
+    category: framework
+    pattern: '\$this->authorize\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Laravel authorization"
+
+  - name: laravel_middleware
+    category: framework
+    pattern: 'middleware\s*\(\s*[''"]auth'
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Laravel auth middleware"
+
+  - name: symfony_param_converter
+    category: framework
+    pattern: '@ParamConverter'
+    applies_to: [SQL_INJECTION, IDOR]
+    description: "Symfony ParamConverter"
+
+  - name: symfony_security
+    category: framework
+    pattern: '@IsGranted\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Symfony security annotation"
+
+  - name: ci_active_record
+    category: framework
+    pattern: '\$this->db->(?:where|get|insert|update)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "CodeIgniter Active Record"
+
+  - name: yii_active_record
+    category: framework
+    pattern: '::find\(\)->(?:where|andWhere)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "Yii Active Record"
+
+  - name: cakephp_orm
+    category: framework
+    pattern: '->find\s*\(\s*[''"]all[''"]'
+    applies_to: [SQL_INJECTION]
+    description: "CakePHP ORM find"
+
+ssl_context_patterns:
+  - name: dev_environment
+    category: ssl_context
+    pattern: '(?:dev|development|local|test|staging|sandbox)'
+    applies_to: [SSL_TLS_MISCONFIG]
+    description: "Development environment context"
+
+  - name: docker_internal
+    category: ssl_context
+    pattern: '(?:localhost|127\.0\.0\.1|::1|docker|container)'
+    applies_to: [SSL_TLS_MISCONFIG]
+    description: "Internal/docker connection"
+
+cookie_context_patterns:
+  - name: cookie_options_array
+    category: cookie_context
+    pattern: 'session_set_cookie_params\s*\(\s*\['
+    applies_to: [INSECURE_COOKIE]
+    description: "PHP 7.3+ cookie options array"
+
+  - name: session_strict_mode
+    category: cookie_context
+    pattern: 'session\.use_strict_mode\s*=\s*(?:1|true|on)'
+    applies_to: [SESSION_FIXATION]
+    description: "Session strict mode enabled"
+
+constant_patterns:
+  - name: constant_string_only
+    category: constant
+    pattern: '(?:echo|print)\s+[''"][^$]+[''"]'
+    applies_to: [XSS]
+    description: "Output of constant string only"
+
+  - name: static_file_path
+    category: constant
+    pattern: '(?:include|require)(?:_once)?\s*[\(]?\s*[''"][^$]+[''"]'
+    applies_to: [FILE_INCLUSION]
+    description: "Static file path (no variables)"
+
+  - name: config_constant
+    category: constant
+    pattern: '(?:define|const)\s+\w+\s*=\s*[''"][^$]+[''"]'
+    applies_to: [HARDCODED_CREDS]
+    description: "Configuration constant"
+
+migration_patterns:
+  - name: migration_file
+    category: migration
+    pattern: '(?:Migration|migration|migrate|schema|CreateTable|AlterTable)'
+    applies_to: [SQL_INJECTION]
+    description: "Database migration file"
+
+  - name: seeder_file
+    category: migration
+    pattern: '(?:Seeder|Factory|factory|seed)'
+    applies_to: [SQL_INJECTION, HARDCODED_CREDS]
+    description: "Database seeder/factory"
+
+  - name: fixture_file
+    category: migration
+    pattern: '(?:fixture|Fixture|mock|Mock|stub|Stub)'
+    applies_to: [SQL_INJECTION, HARDCODED_CREDS, WEAK_CRYPTO]
+    description: "Test fixture/mock"
+
+crypto_context_patterns:
+  - name: bcrypt_hash
+    category: crypto
+    pattern: 'password_hash\s*\('
+    applies_to: [WEAK_CRYPTO]
+    description: "Already using password_hash"
+
+  - name: argon2_hash
+    category: crypto
+    pattern: 'PASSWORD_ARGON2'
+    applies_to: [WEAK_CRYPTO]
+    description: "Using Argon2 hashing"
+
+  - name: sodium_crypto
+    category: crypto
+    pattern: 'sodium_crypto_'
+    applies_to: [WEAK_CRYPTO, INSECURE_RANDOM]
+    description: "Using libsodium"
+
+  - name: random_bytes_usage
+    category: crypto
+    pattern: 'random_bytes\s*\('
+    applies_to: [INSECURE_RANDOM]
+    description: "Using CSPRNG"
+
+deserialization_safe_patterns:
+  - name: allowed_classes_false
+    category: deser_safe
+    pattern: 'allowed_classes.*false'
+    applies_to: [DESERIALIZATION]
+    description: "Restricted deserialization"
+
+  - name: allowed_classes_list
+    category: deser_safe
+    pattern: 'allowed_classes.*\['
+    applies_to: [DESERIALIZATION]
+    description: "Whitelist deserialization"
+
+  - name: json_alternative
+    category: deser_safe
+    pattern: 'json_decode\s*\('
+    applies_to: [DESERIALIZATION]
+    description: "Using JSON instead of serialize"
+
+permission_context_patterns:
+  - name: installer_context
+    category: permission_context
+    pattern: '(?:install|setup|installer|Setup)'
+    applies_to: [PERMISSION_ISSUES]
+    description: "Installer context"
+
+  - name: cache_directory
+    category: permission_context
+    pattern: '(?:cache|tmp|temp|upload)/'
+    applies_to: [PERMISSION_ISSUES]
+    description: "Cache/temp directory"
+
+nosql_safe_patterns:
+  - name: mongodb_type_check
+    category: nosql_safe
+    pattern: '(?:is_string|is_int|is_numeric|ctype_)\s*\('
+    applies_to: [NOSQL_INJECTION]
+    description: "Type check before NoSQL operation"
+
+  - name: mongodb_operator_filter
+    category: nosql_safe
+    pattern: 'array_filter.*\$(?!where)'
+    applies_to: [NOSQL_INJECTION]
+    description: "Filtering MongoDB operators"

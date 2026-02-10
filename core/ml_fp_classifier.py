@@ -111,6 +111,14 @@ class FileAnalysisResults:
     framework: str = ""
     middleware: Set[str] = dataclass_field(default_factory=set)
     orm_vars: Set[str] = dataclass_field(default_factory=set)
+    # v5.0: extended analysis results
+    taint_info_details: Dict[str, Dict] = dataclass_field(default_factory=dict)
+    cfg_metrics: Dict[str, Dict] = dataclass_field(default_factory=dict)
+    phi_nodes_per_block: Dict[int, int] = dataclass_field(default_factory=dict)
+    string_sink_contexts: Dict[int, Dict] = dataclass_field(default_factory=dict)
+    call_graph_metrics: Dict[str, Dict] = dataclass_field(default_factory=dict)
+    context_results: Dict[int, Dict] = dataclass_field(default_factory=dict)
+    middleware_list: List[str] = dataclass_field(default_factory=list)
 
 
 def build_file_analysis(file_path: str, code: str,
@@ -538,6 +546,57 @@ class FeatureVector:
     # Framework models: Laravel/Symfony validation applied to input
     framework_validated: bool = False
 
+    # --- v5.0 features (enhanced ML) ---
+    # AST/CFG structural
+    ast_depth_to_sink: int = 0          # Tree depth from root to sink node
+    cfg_block_count: int = 0            # CFG blocks in enclosing function
+    cyclomatic_complexity: int = 0      # Cyclomatic complexity of function
+    branch_count_between: int = 0       # if/switch nodes between source→sink
+    loop_nesting_depth: int = 0         # for/while/foreach nesting at sink
+    function_param_count: int = 0       # Enclosing function param count
+    is_in_closure: bool = False         # Sink inside anonymous function
+    lines_from_func_start: int = 0      # Distance from function start
+
+    # Abstract interpretation
+    taint_lattice_level: int = 0        # 0=BOTTOM..4=TOP for sink var
+    effective_taint_type_count: int = 0  # Remaining taint types after sanitization
+    taint_source_count: int = 0         # Distinct sources merged into var
+    has_partial_sanitization: bool = False  # Some types sanitized, not all
+
+    # String domain
+    string_fragment_count: int = 0      # Fragments in constructed string
+    string_literal_ratio: float = 0.0   # Literal fragments / total
+    string_sink_risk_level: int = 0     # 0=safe, 1=medium, 2=high (WHERE)
+    string_position_dangerous: bool = False  # Tainted part in dangerous pos
+
+    # Interprocedural
+    call_depth: int = 0                 # Call chain depth from entry
+    callee_is_sanitizer: bool = False   # Called function wraps sanitizer
+    param_reaches_sink_count: int = 0   # Params reaching sinks in callee
+    scc_size: int = 0                   # Recursive function group size
+    call_graph_in_degree: int = 0       # Callers of this function
+
+    # Context analyzer v2
+    whitelist_check_present: bool = False  # in_array/switch-case validation
+    dead_code_detected: bool = False    # Finding in unreachable code
+    data_flow_sanitizer_count: int = 0  # Sanitizer nodes on data flow path
+    custom_func_sanitizes: bool = False  # Custom function has sanitizer
+
+    # Framework deep
+    middleware_count: int = 0           # Middleware layers on route
+    validation_rule_strength: int = 0   # 0=none, 1=exists, 2=typed, 3=strict
+    framework_confidence: float = 0.0   # Framework detection confidence
+
+    # Code complexity
+    file_function_count: int = 0        # Total functions in file
+    enclosing_func_line_count: int = 0  # Lines in enclosing function
+    nesting_depth: int = 0              # Brace nesting at sink
+    has_error_handler: bool = False     # try/catch nearby
+    distance_from_entry: int = 0        # Lines from file/function start
+
+    # Code context for TF-IDF (not serialized to numeric)
+    code_context_raw: str = ""          # Raw code ±10 lines for TF-IDF
+
     def to_dict(self) -> Dict:
         """Convert to dict for ML model input."""
         return {
@@ -573,6 +632,40 @@ class FeatureVector:
             'interproc_flow_to_sink': int(self.interproc_flow_to_sink),
             'interproc_sanitized': int(self.interproc_sanitized),
             'framework_validated': int(self.framework_validated),
+            # v5.0 features
+            'ast_depth_to_sink': min(self.ast_depth_to_sink, 20),
+            'cfg_block_count': min(self.cfg_block_count, 100),
+            'cyclomatic_complexity': min(self.cyclomatic_complexity, 50),
+            'branch_count_between': min(self.branch_count_between, 20),
+            'loop_nesting_depth': min(self.loop_nesting_depth, 5),
+            'function_param_count': min(self.function_param_count, 15),
+            'is_in_closure': int(self.is_in_closure),
+            'lines_from_func_start': min(self.lines_from_func_start, 500),
+            'taint_lattice_level': self.taint_lattice_level,
+            'effective_taint_type_count': min(self.effective_taint_type_count, 16),
+            'taint_source_count': min(self.taint_source_count, 10),
+            'has_partial_sanitization': int(self.has_partial_sanitization),
+            'string_fragment_count': min(self.string_fragment_count, 20),
+            'string_literal_ratio': self.string_literal_ratio,
+            'string_sink_risk_level': self.string_sink_risk_level,
+            'string_position_dangerous': int(self.string_position_dangerous),
+            'call_depth': min(self.call_depth, 10),
+            'callee_is_sanitizer': int(self.callee_is_sanitizer),
+            'param_reaches_sink_count': min(self.param_reaches_sink_count, 10),
+            'scc_size': min(self.scc_size, 10),
+            'call_graph_in_degree': min(self.call_graph_in_degree, 20),
+            'whitelist_check_present': int(self.whitelist_check_present),
+            'dead_code_detected': int(self.dead_code_detected),
+            'data_flow_sanitizer_count': min(self.data_flow_sanitizer_count, 10),
+            'custom_func_sanitizes': int(self.custom_func_sanitizes),
+            'middleware_count': min(self.middleware_count, 10),
+            'validation_rule_strength': self.validation_rule_strength,
+            'framework_confidence': self.framework_confidence,
+            'file_function_count': min(self.file_function_count, 100),
+            'enclosing_func_line_count': min(self.enclosing_func_line_count, 1000),
+            'nesting_depth': min(self.nesting_depth, 15),
+            'has_error_handler': int(self.has_error_handler),
+            'distance_from_entry': min(self.distance_from_entry, 500),
         }
 
     def to_numeric_array(self) -> List[float]:
@@ -754,6 +847,11 @@ class FeatureExtractor:
             fv.framework_validated = self._detect_framework_validation(
                 context_text, code_line
             )
+
+        # --- v5.0 enhanced feature extraction ---
+        self._extract_v5_features(fv, code_line, line_num, filepath,
+                                   file_lines, context_text, context_lines,
+                                   ctx_start, analysis)
 
         return fv
 
@@ -1171,6 +1269,214 @@ class FeatureExtractor:
             if re.search(rf'{re.escape(var_name)}\s*=', line):
                 return True
         return False
+
+    def _extract_v5_features(self, fv: FeatureVector, code_line: str,
+                              line_num: int, filepath: str,
+                              file_lines: List[str], context_text: str,
+                              context_lines: List[str], ctx_start: int,
+                              analysis: Optional[FileAnalysisResults] = None):
+        """Extract v5.0 enhanced features (AST, CFG, analysis modules, complexity)."""
+
+        # --- Code complexity features (always available from text) ---
+        fv.nesting_depth = self._calc_nesting_depth(file_lines, line_num)
+        fv.distance_from_entry = line_num
+        fv.has_error_handler = bool(re.search(
+            r'\b(?:try\s*\{|set_error_handler|set_exception_handler)\b', context_text
+        ))
+
+        # Count functions in file
+        if file_lines:
+            fv.file_function_count = sum(
+                1 for l in file_lines if re.search(r'\bfunction\s+\w+\s*\(', l)
+            )
+
+        # Find enclosing function
+        func_start, func_end, func_params = self._find_enclosing_function(file_lines, line_num)
+        if func_start > 0:
+            fv.lines_from_func_start = line_num - func_start
+            fv.enclosing_func_line_count = func_end - func_start
+            fv.function_param_count = func_params
+            fv.distance_from_entry = line_num - func_start
+
+        # Closure detection
+        if file_lines and 0 < line_num <= len(file_lines):
+            above = '\n'.join(file_lines[max(0, line_num - 10):line_num])
+            fv.is_in_closure = bool(re.search(
+                r'function\s*\(.*\)\s*(?:use\s*\(.*\)\s*)?\{', above
+            ))
+
+        # Branch/loop counting between source and sink
+        if file_lines and line_num > 0:
+            search_start = max(0, line_num - 30)
+            before_sink = '\n'.join(file_lines[search_start:line_num])
+            fv.branch_count_between = len(re.findall(
+                r'\b(?:if|switch|elseif|else\s*if)\s*\(', before_sink
+            ))
+            fv.loop_nesting_depth = len(re.findall(
+                r'\b(?:for|foreach|while|do)\s*[\(\{]', before_sink
+            ))
+
+        # Cyclomatic complexity approximation (from enclosing function)
+        if func_start > 0 and func_end > func_start and file_lines:
+            func_code = '\n'.join(file_lines[func_start:func_end])
+            fv.cyclomatic_complexity = 1 + len(re.findall(
+                r'\b(?:if|elseif|else\s*if|while|for|foreach|case|catch|&&|\|\||\?)\b',
+                func_code
+            ))
+            fv.cfg_block_count = 1 + len(re.findall(
+                r'\b(?:if|else|while|for|foreach|switch|case|try|catch|finally)\b',
+                func_code
+            ))
+
+        # AST depth approximation from nesting
+        fv.ast_depth_to_sink = fv.nesting_depth + 2  # minimum depth
+
+        # Whitelist/switch check
+        fv.whitelist_check_present = bool(re.search(
+            r'\b(?:in_array|array_key_exists)\s*\(.*\$|switch\s*\(\s*\$',
+            context_text, re.IGNORECASE
+        ))
+
+        # Dead code detection
+        if file_lines and line_num > 1:
+            prev_lines = file_lines[max(0, line_num - 5):line_num - 1]
+            for pl in prev_lines:
+                if re.search(r'^\s*(?:return|die|exit)\s*[\(;]', pl):
+                    fv.dead_code_detected = True
+                    break
+
+        # Custom function sanitizer detection
+        fv.custom_func_sanitizes = bool(re.search(
+            r'\b(?:clean|sanitize|purify|safe|escape|filter)_?\w*\s*\(',
+            context_text, re.IGNORECASE
+        ))
+
+        # Data flow sanitizer count
+        fv.data_flow_sanitizer_count = fv.sanitizer_count  # reuse existing count
+
+        # Code context for TF-IDF
+        tfidf_start = max(0, line_num - 10)
+        tfidf_end = min(len(file_lines), line_num + 10)
+        fv.code_context_raw = '\n'.join(file_lines[tfidf_start:tfidf_end]) if file_lines else code_line
+
+        # --- Analysis-dependent features (from FileAnalysisResults) ---
+        if analysis:
+            self._extract_analysis_features(fv, code_line, line_num, analysis)
+
+    def _extract_analysis_features(self, fv: FeatureVector, code_line: str,
+                                    line_num: int, analysis: FileAnalysisResults):
+        """Extract features from pre-computed v4/v5 analysis modules."""
+        # Abstract interpretation features
+        var_name = self._extract_var_name(code_line)
+        if var_name and var_name in analysis.taint_levels:
+            fv.taint_lattice_level = analysis.taint_levels[var_name]
+        if var_name and analysis.taint_info_details.get(var_name):
+            info = analysis.taint_info_details[var_name]
+            fv.effective_taint_type_count = info.get('effective_count', 0)
+            fv.taint_source_count = info.get('source_count', 0)
+            san_types = info.get('sanitized_types', set())
+            taint_types = info.get('taint_types', set())
+            fv.has_partial_sanitization = bool(san_types) and bool(taint_types - san_types)
+
+        # String domain features
+        if line_num in analysis.string_sink_contexts:
+            ctx = analysis.string_sink_contexts[line_num]
+            fv.string_fragment_count = ctx.get('fragment_count', 0)
+            fv.string_literal_ratio = ctx.get('literal_ratio', 0.0)
+            risk = ctx.get('risk_level', 'low')
+            fv.string_sink_risk_level = {'low': 0, 'medium': 1, 'high': 2}.get(risk, 0)
+            fv.string_position_dangerous = ctx.get('dangerous', False)
+
+        # CFG metrics
+        func_name = self._find_func_name_for_line(code_line, line_num)
+        if func_name and func_name in analysis.cfg_metrics:
+            m = analysis.cfg_metrics[func_name]
+            fv.cfg_block_count = m.get('block_count', fv.cfg_block_count)
+            fv.cyclomatic_complexity = m.get('complexity', fv.cyclomatic_complexity)
+
+        # Phi nodes (SSA)
+        for block_id, count in analysis.phi_nodes_per_block.items():
+            fv.phi_node_count = max(fv.phi_node_count, count) if hasattr(fv, 'phi_node_count') else count
+
+        # Interprocedural features
+        if func_name and func_name in analysis.call_graph_metrics:
+            cg = analysis.call_graph_metrics[func_name]
+            fv.call_depth = cg.get('call_depth', 0)
+            fv.call_graph_in_degree = cg.get('in_degree', 0)
+            fv.scc_size = cg.get('scc_size', 0)
+
+        if func_name and func_name in analysis.func_summaries:
+            fs = analysis.func_summaries[func_name]
+            fv.callee_is_sanitizer = bool(fs.get('sanitizer_for'))
+            fv.param_reaches_sink_count = len(fs.get('params_to_sink', set()))
+
+        # Context analyzer features
+        if line_num in analysis.context_results:
+            cr = analysis.context_results[line_num]
+            fv.whitelist_check_present = cr.get('whitelist', fv.whitelist_check_present)
+            fv.dead_code_detected = cr.get('dead_code', fv.dead_code_detected)
+            fv.custom_func_sanitizes = cr.get('custom_sanitizer', fv.custom_func_sanitizes)
+            if cr.get('orm_safe'):
+                fv.orm_detected = True
+
+        # Framework features
+        fv.middleware_count = len(analysis.middleware_list) if analysis.middleware_list else len(analysis.middleware)
+        fv.framework_confidence = 0.9 if analysis.framework else 0.0
+
+        # Validation rule strength
+        if analysis.validated_vars:
+            var = self._extract_var_name(code_line)
+            if var and var in analysis.validated_vars:
+                fv.validation_rule_strength = 2  # type-specific validation
+
+    def _calc_nesting_depth(self, file_lines: List[str], line_num: int) -> int:
+        """Calculate brace nesting depth at given line."""
+        if not file_lines or line_num <= 0:
+            return 0
+        depth = 0
+        for i in range(min(line_num, len(file_lines))):
+            line = file_lines[i]
+            depth += line.count('{') - line.count('}')
+        return max(0, depth)
+
+    def _find_enclosing_function(self, file_lines: List[str],
+                                  line_num: int) -> Tuple[int, int, int]:
+        """Find the enclosing function's start, end, and param count."""
+        if not file_lines or line_num <= 0:
+            return 0, 0, 0
+        # Search backwards for function definition
+        func_start = 0
+        func_params = 0
+        for i in range(min(line_num - 1, len(file_lines) - 1), -1, -1):
+            m = re.search(r'\bfunction\s+\w+\s*\(([^)]*)\)', file_lines[i])
+            if m:
+                func_start = i + 1
+                params = m.group(1).strip()
+                func_params = len([p for p in params.split(',') if p.strip()]) if params else 0
+                break
+        if func_start == 0:
+            return 0, 0, 0
+        # Find function end by tracking braces
+        depth = 0
+        func_end = len(file_lines)
+        for i in range(func_start - 1, len(file_lines)):
+            depth += file_lines[i].count('{') - file_lines[i].count('}')
+            if depth <= 0 and i > func_start:
+                func_end = i + 1
+                break
+        return func_start, func_end, func_params
+
+    @staticmethod
+    def _extract_var_name(code_line: str) -> str:
+        """Extract primary variable name from code line."""
+        m = re.search(r'\$(\w+)', code_line)
+        return f'${m.group(1)}' if m else ''
+
+    @staticmethod
+    def _find_func_name_for_line(code_line: str, line_num: int) -> str:
+        """Try to extract function name context."""
+        m = re.search(r'\b(\w+)\s*\(', code_line)
+        return m.group(1) if m else ''
 
 
 # =========================================================================
@@ -1690,15 +1996,30 @@ class FPClassifier:
     def __init__(self, model_dir: str = None, use_ml: bool = True):
         self.extractor = FeatureExtractor()
         self.heuristic = HeuristicClassifier()
-        self.ml = MLClassifier(model_dir) if use_ml else None
+        self.ml = None
+        self.ml_v3 = None
         self.stats = {
             'total_classified': 0,
             'true_positives': 0,
             'false_positives': 0,
             'method': 'heuristic',
         }
-        if self.ml and self.ml.is_trained():
-            self.stats['method'] = 'ml'
+        if use_ml:
+            # Try v5 model (ensemble) first
+            try:
+                from core.ml_ensemble import MLClassifierV3
+                self.ml_v3 = MLClassifierV3(model_dir)
+                if self.ml_v3.is_trained():
+                    self.stats['method'] = 'ml_v3'
+                else:
+                    self.ml_v3 = None
+            except Exception:
+                self.ml_v3 = None
+            # Fall back to v4 model
+            if self.ml_v3 is None:
+                self.ml = MLClassifier(model_dir)
+                if self.ml and self.ml.is_trained():
+                    self.stats['method'] = 'ml'
 
     @dataclass
     class Result:
@@ -1744,13 +2065,13 @@ class FPClassifier:
             and not _PROPER_FILE_SANITIZERS.search(code_line)
         )
 
-        # Try ML first, fall back to heuristic
-        if self.ml and self.ml.is_trained():
+        # Try ML v3 (ensemble) first, then v4, then heuristic
+        if self.ml_v3 and self.ml_v3.is_trained():
             try:
-                is_tp, prob = self.ml.predict(features)
+                feat_dict = features.to_dict()
+                code_ctx = features.code_context_raw if hasattr(features, 'code_context_raw') else ''
+                is_tp, prob = self.ml_v3.predict(feat_dict, code_ctx)
 
-                # Critical sink override: never let ML mark dangerous
-                # sinks as SAFE - at minimum keep as SUSPICIOUS
                 if needs_critical_override and not is_tp:
                     is_tp = True
                     prob = max(prob, 0.35)
@@ -1761,7 +2082,38 @@ class FPClassifier:
                 else:
                     self.stats['false_positives'] += 1
 
-                # 3-class classification from probability
+                if prob < 0.25:
+                    classification = 'safe'
+                elif prob < 0.50:
+                    classification = 'suspicious'
+                else:
+                    classification = 'vulnerable'
+
+                return self.Result(
+                    is_tp=is_tp,
+                    confidence=abs(prob - 0.5) * 2,
+                    reasoning=f"ML v3 ensemble (prob={prob:.2f}, class={classification})",
+                    score=prob,
+                    method='ml_v3',
+                    classification=classification,
+                )
+            except Exception:
+                pass
+
+        if self.ml and self.ml.is_trained():
+            try:
+                is_tp, prob = self.ml.predict(features)
+
+                if needs_critical_override and not is_tp:
+                    is_tp = True
+                    prob = max(prob, 0.35)
+
+                self.stats['total_classified'] += 1
+                if is_tp:
+                    self.stats['true_positives'] += 1
+                else:
+                    self.stats['false_positives'] += 1
+
                 if prob < 0.30:
                     classification = 'safe'
                 elif prob < 0.55:

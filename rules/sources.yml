@@ -1,5 +1,3 @@
-# APEX Rule Engine - Taint Sources
-# All PHP input sources that can introduce tainted data
 
 superglobals:
   - name: "$_GET"
@@ -78,6 +76,93 @@ weak_sources:
     pattern: '\$params\b'
     taint_level: LOW
     taint_types: [SQL, XSS]
+
+  - name: "$_SERVER_AUTH"
+    pattern: '\$_SERVER\s*\[\s*[''"](?:PHP_AUTH_USER|PHP_AUTH_PW|PHP_AUTH_DIGEST)[''"]'
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, AUTH_BYPASS]
+
+  - name: "$HTTP_RAW_POST_DATA"
+    pattern: '\$HTTP_RAW_POST_DATA'
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, CODE, XXE, SERIALIZATION]
+
+http_functions:
+  - name: "getallheaders"
+    pattern: 'getallheaders\s*\('
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, SSRF, HEADER_INJECTION]
+
+  - name: "apache_request_headers"
+    pattern: 'apache_request_headers\s*\('
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, SSRF, HEADER_INJECTION]
+
+  - name: "get_headers"
+    pattern: 'get_headers\s*\('
+    taint_level: MEDIUM
+    taint_types: [SSRF]
+
+stream_sources:
+  - name: "stream_get_contents_stdin"
+    pattern: 'stream_get_contents\s*\(\s*STDIN'
+    taint_level: MEDIUM
+    taint_types: [SQL, XSS, COMMAND]
+
+  - name: "stream_get_contents"
+    pattern: 'stream_get_contents\s*\('
+    taint_level: MEDIUM
+    taint_types: [SQL, XSS, COMMAND, SERIALIZATION]
+
+  - name: "php_filter_wrapper"
+    pattern: 'php://filter'
+    taint_level: HIGH
+    taint_types: [FILE_PATH, FILE_INCLUDE, CODE]
+
+  - name: "data_wrapper"
+    pattern: 'data://'
+    taint_level: HIGH
+    taint_types: [CODE, FILE_INCLUDE, XSS]
+
+  - name: "expect_wrapper"
+    pattern: 'expect://'
+    taint_level: CRITICAL
+    taint_types: [COMMAND, CODE]
+
+database_sources:
+  - name: "db_fetch_row"
+    pattern: '(?:fetch_row|fetch_assoc|fetch_array|fetch_object|fetchAll|fetchColumn|fetch)\s*\('
+    taint_level: LOW
+    taint_types: [SQL, XSS, COMMAND]
+    description: "Second-order: database values may contain stored user input"
+
+  - name: "db_result"
+    pattern: '(?:mysql_result|mysqli_fetch|pg_fetch|sqlite_fetch)\s*\('
+    taint_level: LOW
+    taint_types: [SQL, XSS]
+    description: "Second-order: database result"
+
+cli_sources:
+  - name: "$argv"
+    pattern: '\$(?:_SERVER\s*\[\s*[''"]argv|argv)\b'
+    taint_level: MEDIUM
+    taint_types: [SQL, COMMAND, FILE_PATH]
+
+  - name: "$argc"
+    pattern: '\$(?:_SERVER\s*\[\s*[''"]argc|argc)\b'
+    taint_level: LOW
+    taint_types: [SQL]
+
+json_sources:
+  - name: "json_decode_input"
+    pattern: 'json_decode\s*\(\s*(?:file_get_contents\s*\(\s*[''"]php://input|\$_(?:POST|GET|REQUEST))'
+    taint_level: HIGH
+    taint_types: [SQL, XSS, COMMAND, CODE, NOSQL, SERIALIZATION]
+
+  - name: "simplexml_input"
+    pattern: 'simplexml_load_string\s*\(\s*(?:file_get_contents\s*\(\s*[''"]php://input|\$)'
+    taint_level: HIGH
+    taint_types: [SQL, XSS, XXE, XPATH]
 
 tainted_server_keys:
   - HTTP_HOST

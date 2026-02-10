@@ -527,9 +527,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Log injection",
         confidence=0.7,
     ),
-    # ============================================================
-    # NEW PATTERNS - CWE-95: Code Injection via Callbacks
-    # ============================================================
     VulnPattern(
         name="CODE_INJECTION_ARRAY_MAP",
         pattern=r'array_map\s*\(\s*\$(?:_GET|_POST|_REQUEST|_COOKIE)',
@@ -570,9 +567,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Variable function call with user input",
         confidence=0.99,
     ),
-    # ============================================================
-    # CWE-434: File Upload Vulnerabilities
-    # ============================================================
     VulnPattern(
         name="FILE_UPLOAD_NO_VALIDATION",
         pattern=r'move_uploaded_file\s*\(\s*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]tmp_name[\'"]\]\s*,\s*[^)]*\$_FILES\s*\[[^\]]+\]\s*\[[\'"]name[\'"]\]',
@@ -615,9 +609,6 @@ VULN_PATTERNS: List[VulnPattern] = [
             r'in_array.*allowed',
         ]
     ),
-    # ============================================================
-    # CWE-639: IDOR - Authorization Bypass
-    # ============================================================
     VulnPattern(
         name="IDOR_DIRECT_OBJECT",
         pattern=r'(?:WHERE|AND)\s+(?:id|user_id|account_id|order_id)\s*=\s*[\'"]?\s*\.\s*\$(?:_GET|_POST|_REQUEST)',
@@ -645,9 +636,6 @@ VULN_PATTERNS: List[VulnPattern] = [
             r'in_array',
         ]
     ),
-    # ============================================================
-    # CWE-362: Race Condition / TOCTOU
-    # ============================================================
     VulnPattern(
         name="TOCTOU_FILE_EXISTS",
         pattern=r'if\s*\(\s*file_exists\s*\([^)]+\)\s*\)[^{]*\{[^}]*(?:unlink|rename|copy|file_put_contents|fopen)',
@@ -664,9 +652,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="TOCTOU in file operation",
         confidence=0.5,
     ),
-    # ============================================================
-    # CWE-843: Type Juggling
-    # ============================================================
     VulnPattern(
         name="TYPE_JUGGLING_PASSWORD",
         pattern=r'(?:\$password|\$pass|\$pwd)\s*==\s*(?:\$|[\'"])',
@@ -699,9 +684,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Loose comparison with zero string (magic hash bypass)",
         confidence=0.4,
     ),
-    # ============================================================
-    # Modern PHP Vulnerabilities
-    # ============================================================
     VulnPattern(
         name="NAMED_ARGS_INJECTION",
         pattern=r'\.{3}\s*\$(?:_GET|_POST|_REQUEST)',
@@ -734,9 +716,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Recursive array merge with user input (prototype pollution)",
         confidence=0.7,
     ),
-    # ============================================================
-    # Regex DoS (ReDoS)
-    # ============================================================
     VulnPattern(
         name="REGEX_DOS_PATTERN",
         pattern=r'preg_(?:match|replace)\s*\(\s*[\'"][^\'"]*(?:\+|\*)\+[^\'"]*[\'"]',
@@ -753,9 +732,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="User-controlled regex pattern (ReDoS/injection)",
         confidence=0.9,
     ),
-    # ============================================================
-    # Session Security
-    # ============================================================
     VulnPattern(
         name="SESSION_FIXATION",
         pattern=r'session_id\s*\(\s*\$(?:_GET|_POST|_REQUEST|_COOKIE)',
@@ -772,9 +748,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Login without session regeneration",
         confidence=0.5,
     ),
-    # ============================================================
-    # Insecure Randomness
-    # ============================================================
     VulnPattern(
         name="WEAK_RANDOM_TOKEN",
         pattern=r'(?:md5|sha1)\s*\(\s*(?:time|microtime|uniqid)\s*\(',
@@ -795,9 +768,6 @@ VULN_PATTERNS: List[VulnPattern] = [
             r'random_bytes',
         ]
     ),
-    # ============================================================
-    # HTTP Security Headers
-    # ============================================================
     VulnPattern(
         name="MISSING_CONTENT_TYPE",
         pattern=r'echo\s+[\'"]<\?xml|echo\s+[\'"]<html',
@@ -806,9 +776,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="HTML/XML output without Content-Type header",
         confidence=0.4,
     ),
-    # ============================================================
-    # Email Header Injection
-    # ============================================================
     VulnPattern(
         name="EMAIL_HEADER_INJECTION",
         pattern=r'mail\s*\([^,]*\$(?:_GET|_POST|_REQUEST)',
@@ -817,9 +784,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Email header injection via user input",
         confidence=0.85,
     ),
-    # ============================================================
-    # NoSQL Injection
-    # ============================================================
     VulnPattern(
         name="NOSQL_INJECTION_MONGO",
         pattern=r'(?:find|findOne|aggregate)\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
@@ -836,9 +800,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="NoSQL injection via JSON input",
         confidence=0.7,
     ),
-    # ============================================================
-    # Template Injection
-    # ============================================================
     VulnPattern(
         name="SSTI_SMARTY",
         pattern=r'(?:Smarty|->assign)\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
@@ -855,9 +816,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Laravel Blade template injection",
         confidence=0.9,
     ),
-    # ============================================================
-    # Object Injection / Deserialization
-    # ============================================================
     VulnPattern(
         name="PHAR_WRAPPER",
         pattern=r'phar://\s*\.\s*\$|phar://[\'"]?\s*\.\s*\$',
@@ -874,9 +832,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="YAML parsing with user input (object injection)",
         confidence=0.95,
     ),
-    # ============================================================
-    # Business Logic
-    # ============================================================
     VulnPattern(
         name="PRICE_MANIPULATION",
         pattern=r'(?:price|amount|total|cost)\s*=\s*\$(?:_GET|_POST|_REQUEST)',
@@ -898,9 +853,6 @@ VULN_PATTERNS: List[VulnPattern] = [
             r'>=\s*0',
         ]
     ),
-    # ============================================================
-    # ARBITRARY FILE WRITE - RCE via file operations
-    # ============================================================
     VulnPattern(
         name="ARBITRARY_FILE_WRITE_DIRECT",
         pattern=r'file_put_contents\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
@@ -942,9 +894,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="fwrite with user-controlled content",
         confidence=0.85,
     ),
-    # ============================================================
-    # ARBITRARY FILE READ - Information Disclosure
-    # ============================================================
     VulnPattern(
         name="ARBITRARY_FILE_READ_VAR",
         pattern=r'(?:file_get_contents|readfile|file|fread|fgets)\s*\(\s*\$[a-zA-Z_]\w*\s*\)',
@@ -969,9 +918,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Direct file content output - potential LFI",
         confidence=0.85,
     ),
-    # ============================================================
-    # BASE64 DECODE + FILE OPERATIONS - Common bypass pattern
-    # ============================================================
     VulnPattern(
         name="BASE64_FILE_PATH",
         pattern=r'base64_decode\s*\(\s*\$(?:_GET|_POST|_REQUEST|post|get)\s*\[',
@@ -988,9 +934,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         description="Base64 decoded value used in file operation",
         confidence=0.9,
     ),
-    # ============================================================
-    # MISSING AUTHENTICATION - Sensitive operations without auth
-    # ============================================================
     VulnPattern(
         name="AUTH_BYPASS_FILE_WRITE",
         pattern=r'file_put_contents\s*\(\s*\$[a-zA-Z_]\w*\s*,\s*\$(?:post|_POST|content|data)',
@@ -1031,9 +974,6 @@ VULN_PATTERNS: List[VulnPattern] = [
             r'session',
         ]
     ),
-    # ============================================================
-    # AJAX ENDPOINT VULNERABILITIES
-    # ============================================================
     VulnPattern(
         name="AJAX_NO_AUTH_FILE",
         pattern=r'(?:ajax|api).*?\.php.*?(?:file_put_contents|file_get_contents|unlink|rename)',
@@ -1056,9 +996,6 @@ VULN_PATTERNS: List[VulnPattern] = [
             r'verify',
         ]
     ),
-    # ============================================================
-    # DANGEROUS SINK PATTERNS - Generic
-    # ============================================================
     VulnPattern(
         name="DANGEROUS_SINK_WRITE",
         pattern=r'(?:file_put_contents|fwrite|fputs)\s*\([^)]*\$(?:post|content|data|body|input)\s*\[',
@@ -1076,9 +1013,6 @@ VULN_PATTERNS: List[VulnPattern] = [
         confidence=0.7,
         requires_taint_check=True,
     ),
-    # ============================================================
-    # WRAPPER FUNCTION BYPASS - Detecting indirect input
-    # ============================================================
     VulnPattern(
         name="WRAPPER_DECODE_USE",
         pattern=r'\$\w+\s*=\s*(?:base64_decode|urldecode|rawurldecode|json_decode)\s*\(\s*\$(?:post|get|request|_POST|_GET)',
@@ -1094,6 +1028,581 @@ VULN_PATTERNS: List[VulnPattern] = [
         cwe="CWE-20",
         description="POST wrapper function - trace to sinks",
         confidence=0.5,
+    ),
+    VulnPattern(
+        name="SSL_VERIFY_PEER_FALSE",
+        pattern=r'verify_peer["\']?\s*=>\s*false',
+        severity="HIGH",
+        cwe="CWE-295",
+        description="SSL peer verification disabled",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="SSL_CURL_VERIFY_OFF",
+        pattern=r'CURLOPT_SSL_VERIFYPEER\s*,\s*(?:false|0|FALSE)',
+        severity="HIGH",
+        cwe="CWE-295",
+        description="cURL SSL verification disabled",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="SSL_CURL_HOST_OFF",
+        pattern=r'CURLOPT_SSL_VERIFYHOST\s*,\s*(?:0|1|false|FALSE)',
+        severity="HIGH",
+        cwe="CWE-295",
+        description="cURL host verification disabled/weak",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="SSL_SELF_SIGNED",
+        pattern=r'allow_self_signed["\']?\s*=>\s*true',
+        severity="HIGH",
+        cwe="CWE-295",
+        description="Self-signed SSL certificates accepted",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="SSL_GUZZLE_OFF",
+        pattern=r'GuzzleHttp.*verify.*false|["\']verify["\'].*false',
+        severity="HIGH",
+        cwe="CWE-295",
+        description="Guzzle HTTP SSL verification disabled",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="COOKIE_NO_HTTPONLY",
+        pattern=r'setcookie\s*\([^)]+,\s*[^)]+,\s*[^)]+,\s*[^)]+,\s*[^)]+,\s*(?:false|0)\s*,\s*(?:false|0)\s*\)',
+        severity="MEDIUM",
+        cwe="CWE-1004",
+        description="Cookie without HttpOnly and Secure flags",
+        confidence=0.75,
+    ),
+    VulnPattern(
+        name="SESSION_COOKIE_INSECURE",
+        pattern=r'session\.cookie_httponly\s*=\s*(?:0|false|off)',
+        severity="MEDIUM",
+        cwe="CWE-1004",
+        description="Session cookie HttpOnly disabled",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="SESSION_USE_COOKIES_OFF",
+        pattern=r'session\.use_only_cookies\s*=\s*(?:0|false|off)',
+        severity="HIGH",
+        cwe="CWE-384",
+        description="Session not restricted to cookies only",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="ENV_INJECTION_DIRECT",
+        pattern=r'putenv\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-78",
+        description="Environment variable injection from user input",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="PHP_CONFIG_ALLOW_URL_INCLUDE",
+        pattern=r'ini_set\s*\(\s*["\']allow_url_include["\']\s*,\s*["\']?(?:1|true|on)',
+        severity="CRITICAL",
+        cwe="CWE-94",
+        description="Enabling remote file inclusion via ini_set",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="PHP_CONFIG_DISABLE_FUNCTIONS",
+        pattern=r'ini_set\s*\(\s*["\']disable_functions["\']\s*,\s*["\']\\s*["\']',
+        severity="CRITICAL",
+        cwe="CWE-94",
+        description="Clearing disabled functions list",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="PHP_CONFIG_USER_INPUT",
+        pattern=r'ini_set\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-94",
+        description="PHP config from user input",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="REFLECTION_CLASS_USER",
+        pattern=r'new\s+ReflectionClass\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-470",
+        description="ReflectionClass with user-controlled name",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="DYNAMIC_CLASS_INSTANTIATION",
+        pattern=r'new\s+\$[a-zA-Z_]\w*\s*\(',
+        severity="HIGH",
+        cwe="CWE-470",
+        description="Dynamic class instantiation from variable",
+        confidence=0.7,
+        requires_taint_check=True,
+        false_positive_patterns=[
+            r'in_array',
+            r'class_exists.*whitelist',
+            r'allowed_classes',
+        ]
+    ),
+    VulnPattern(
+        name="DYNAMIC_METHOD_CALL",
+        pattern=r'->\$[a-zA-Z_]\w*\s*\(',
+        severity="HIGH",
+        cwe="CWE-470",
+        description="Dynamic method call from variable",
+        confidence=0.65,
+        requires_taint_check=True,
+        false_positive_patterns=[
+            r'in_array',
+            r'method_exists',
+        ]
+    ),
+    VulnPattern(
+        name="VARIABLE_VARIABLE_USER",
+        pattern=r'\$\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-914",
+        description="Variable variable from user input",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="VARIABLE_VARIABLE_CURLY",
+        pattern=r'\$\{\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-914",
+        description="Variable variable via curly syntax from user input",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="TIMING_ATTACK_PASSWORD",
+        pattern=r'\$(?:password|pass|pwd|passwd)\s*===?\s*\$',
+        severity="HIGH",
+        cwe="CWE-208",
+        description="Password comparison without constant-time function",
+        confidence=0.8,
+        false_positive_patterns=[
+            r'hash_equals',
+            r'password_verify',
+        ]
+    ),
+    VulnPattern(
+        name="TIMING_ATTACK_TOKEN",
+        pattern=r'\$(?:token|secret|key|signature|api_key|hmac)\s*===?\s*\$',
+        severity="HIGH",
+        cwe="CWE-208",
+        description="Token comparison without constant-time function",
+        confidence=0.75,
+        false_positive_patterns=[
+            r'hash_equals',
+        ]
+    ),
+    VulnPattern(
+        name="CRLF_INJECTION",
+        pattern=r'header\s*\(\s*[^)]*\$(?:_GET|_POST|_REQUEST).*(?:\\r|\\n|%0[dDaA])',
+        severity="HIGH",
+        cwe="CWE-113",
+        description="HTTP response splitting via CRLF",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="CORS_WILDCARD",
+        pattern=r'Access-Control-Allow-Origin:\s*\*',
+        severity="MEDIUM",
+        cwe="CWE-942",
+        description="Wildcard CORS origin allowing all domains",
+        confidence=0.7,
+        false_positive_patterns=[
+            r'public\s+api',
+            r'cdn',
+        ]
+    ),
+    VulnPattern(
+        name="CORS_USER_INPUT",
+        pattern=r'Access-Control-Allow-Origin.*\$(?:_GET|_POST|_REQUEST|_SERVER)',
+        severity="HIGH",
+        cwe="CWE-942",
+        description="CORS origin from user input",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="CALLBACK_OB_START",
+        pattern=r'ob_start\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-94",
+        description="ob_start callback from user input",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="CALLBACK_SHUTDOWN",
+        pattern=r'register_shutdown_function\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-94",
+        description="Shutdown function from user input",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="CALLBACK_AUTOLOAD",
+        pattern=r'spl_autoload_register\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-94",
+        description="Autoloader from user input",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="CALLBACK_ARRAY_WALK",
+        pattern=r'array_walk\s*\([^,]+,\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-95",
+        description="array_walk callback from user input",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="SYMLINK_USER_INPUT",
+        pattern=r'symlink\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-59",
+        description="Symlink creation with user-controlled path",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="CHMOD_WORLD_WRITABLE",
+        pattern=r'chmod\s*\([^)]*0777',
+        severity="HIGH",
+        cwe="CWE-732",
+        description="World-writable file permissions (0777)",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="CHMOD_USER_INPUT",
+        pattern=r'chmod\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-732",
+        description="File permissions from user input",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="MEMORY_STR_REPEAT",
+        pattern=r'str_repeat\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-400",
+        description="str_repeat with user-controlled length (DoS)",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="MEMORY_ARRAY_FILL",
+        pattern=r'array_fill\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-400",
+        description="array_fill with user-controlled count (DoS)",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="MEMORY_RANGE",
+        pattern=r'range\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-400",
+        description="range() with user-controlled bounds (DoS)",
+        confidence=0.8,
+    ),
+    VulnPattern(
+        name="SECOND_ORDER_SQL",
+        pattern=r'(?:fetch_assoc|fetch_row|fetch_array|fetchAll)\s*\([^)]*\).*?(?:mysql_query|mysqli_query|->query)\s*\(',
+        severity="HIGH",
+        cwe="CWE-89",
+        description="Database result used in another query (second-order SQLi)",
+        confidence=0.7,
+        requires_taint_check=True,
+    ),
+    VulnPattern(
+        name="SECOND_ORDER_XSS",
+        pattern=r'\$row\s*\[[\'"][^\'"]+[\'"]\].*?(?:echo|print)\s+',
+        severity="MEDIUM",
+        cwe="CWE-79",
+        description="Database result echoed without escaping (stored XSS)",
+        confidence=0.5,
+        false_positive_patterns=[
+            r'htmlspecialchars',
+            r'htmlentities',
+            r'esc_html',
+        ]
+    ),
+    VulnPattern(
+        name="SECOND_ORDER_CMDI",
+        pattern=r'\$row\s*\[[\'"][^\'"]+[\'"]\].*?(?:exec|system|shell_exec|passthru)\s*\(',
+        severity="CRITICAL",
+        cwe="CWE-78",
+        description="Database result in command (second-order command injection)",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="SSRF_SOAP_CLIENT",
+        pattern=r'new\s+SoapClient\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-918",
+        description="SOAP client with user-controlled WSDL URL",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="SSRF_SOAP_VAR",
+        pattern=r'new\s+SoapClient\s*\(\s*\$[a-zA-Z_]\w*',
+        severity="HIGH",
+        cwe="CWE-918",
+        description="SOAP client with variable WSDL",
+        confidence=0.65,
+        requires_taint_check=True,
+    ),
+    VulnPattern(
+        name="SSRF_DNS_LOOKUP",
+        pattern=r'gethostbyname\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-918",
+        description="DNS lookup with user input (SSRF/DNS rebinding)",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="SSRF_STREAM_SOCKET",
+        pattern=r'stream_socket_client\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-918",
+        description="Socket connection with user-controlled address",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="NOSQL_MONGODB_WHERE",
+        pattern=r'\$where.*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-943",
+        description="MongoDB $where with user input (JS injection)",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="NOSQL_REDIS_EVAL",
+        pattern=r'(?:redis|Redis).*eval\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-943",
+        description="Redis eval with user input",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="JWT_NONE_ALGORITHM",
+        pattern=r'(?:jwt|JWT).*(?:alg|algorithm).*none',
+        severity="CRITICAL",
+        cwe="CWE-347",
+        description="JWT with 'none' algorithm (no verification)",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="JWT_MANUAL_DECODE",
+        pattern=r'base64_decode\s*\(\s*explode\s*\(\s*[\'"]\.[\'"]\s*,',
+        severity="MEDIUM",
+        cwe="CWE-347",
+        description="Manual JWT parsing without signature verification",
+        confidence=0.7,
+    ),
+    VulnPattern(
+        name="FILE_DELETE_USER_INPUT",
+        pattern=r'unlink\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-22",
+        description="File deletion with user-controlled path",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="RMDIR_USER_INPUT",
+        pattern=r'rmdir\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-22",
+        description="Directory deletion with user-controlled path",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="DESER_COOKIE",
+        pattern=r'unserialize\s*\(\s*\$_COOKIE',
+        severity="CRITICAL",
+        cwe="CWE-502",
+        description="Cookie deserialization (object injection)",
+        confidence=0.99,
+    ),
+    VulnPattern(
+        name="DESER_GZUNCOMPRESS",
+        pattern=r'unserialize\s*\(\s*gzuncompress',
+        severity="CRITICAL",
+        cwe="CWE-502",
+        description="Deserialization of compressed data",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="MAGIC_METHOD_DESTRUCT",
+        pattern=r'function\s+__destruct\s*\([^)]*\)\s*\{[^}]*(?:exec|system|eval|unlink|file_put_contents|include|require)',
+        severity="HIGH",
+        cwe="CWE-502",
+        description="Dangerous operation in __destruct (deserialization gadget)",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="MAGIC_METHOD_WAKEUP",
+        pattern=r'function\s+__wakeup\s*\([^)]*\)\s*\{[^}]*(?:exec|system|eval|file_put_contents|include|require)',
+        severity="HIGH",
+        cwe="CWE-502",
+        description="Dangerous operation in __wakeup (deserialization gadget)",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="MAGIC_METHOD_TOSTRING",
+        pattern=r'function\s+__toString\s*\([^)]*\)\s*\{[^}]*(?:exec|system|eval|include|require)',
+        severity="MEDIUM",
+        cwe="CWE-502",
+        description="Dangerous operation in __toString (deserialization gadget)",
+        confidence=0.7,
+    ),
+    VulnPattern(
+        name="EMAIL_RECIPIENT_USER",
+        pattern=r'mail\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-93",
+        description="Email recipient from user input",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="EMAIL_HEADERS_USER",
+        pattern=r'mail\s*\([^,]*,[^,]*,[^,]*,[^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-93",
+        description="Email headers from user input",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="REDIRECT_FRAMEWORK",
+        pattern=r'(?:wp_redirect|redirect)\s*\(\s*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-601",
+        description="Framework redirect with user input",
+        confidence=0.85,
+        false_positive_patterns=[
+            r'wp_safe_redirect',
+            r'wp_validate_redirect',
+        ]
+    ),
+    VulnPattern(
+        name="REDIRECT_DECODED",
+        pattern=r'header\s*\(.*Location.*(?:urldecode|rawurldecode|base64_decode)\s*\(',
+        severity="HIGH",
+        cwe="CWE-601",
+        description="Redirect with decoded URL (bypass attempt)",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="GRAPHQL_USER_INPUT",
+        pattern=r'(?:query|mutation)\s*\{[^}]*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-943",
+        description="GraphQL query with user input",
+        confidence=0.8,
+    ),
+    VulnPattern(
+        name="INSECURE_DOWNLOAD",
+        pattern=r'Content-Disposition.*attachment.*\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-22",
+        description="File download with user-controlled filename",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="AUTOLOAD_USER_CLASS",
+        pattern=r'(?:spl_autoload|__autoload|class_exists)\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-470",
+        description="Class autoload with user-controlled name",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="SQL_INJECTION_SPRINTF",
+        pattern=r'sprintf\s*\(\s*["\'](?:SELECT|INSERT|UPDATE|DELETE)\s+.*?%s.*?["\'].*?\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-89",
+        description="SQL with sprintf %s formatting (not parameterized)",
+        confidence=0.8,
+        false_positive_patterns=[
+            r'%d',
+            r'intval',
+        ]
+    ),
+    VulnPattern(
+        name="SQL_INJECTION_HEREDOC",
+        pattern=r'<<<\w+\s+(?:SELECT|INSERT|UPDATE|DELETE)\b.*?\$(?:_GET|_POST|_REQUEST)',
+        severity="HIGH",
+        cwe="CWE-89",
+        description="SQL in heredoc with user input interpolation",
+        confidence=0.85,
+    ),
+    VulnPattern(
+        name="SQL_INJECTION_OCI",
+        pattern=r'oci_parse\s*\([^)]*\$(?:_GET|_POST|_REQUEST)',
+        severity="CRITICAL",
+        cwe="CWE-89",
+        description="Oracle query with user input",
+        confidence=0.9,
+    ),
+    VulnPattern(
+        name="HARDCODED_DB_PASSWORD",
+        pattern=r'(?:DB_PASSWORD|db_pass|database.*password)\s*[=:]\s*["\'][^"\']{4,}["\']',
+        severity="HIGH",
+        cwe="CWE-798",
+        description="Hardcoded database password",
+        confidence=0.7,
+        false_positive_patterns=[
+            r'example',
+            r'env\s*\(',
+            r'getenv',
+            r'\.env',
+        ]
+    ),
+    VulnPattern(
+        name="HARDCODED_AWS_KEY",
+        pattern=r'(?:AKIA[0-9A-Z]{16})',
+        severity="CRITICAL",
+        cwe="CWE-798",
+        description="AWS access key ID detected",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="HARDCODED_PRIVATE_KEY",
+        pattern=r'-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----',
+        severity="CRITICAL",
+        cwe="CWE-798",
+        description="Embedded private key",
+        confidence=0.95,
+    ),
+    VulnPattern(
+        name="INFO_DISCLOSURE_ERROR_REPORTING",
+        pattern=r'error_reporting\s*\(\s*E_ALL\s*\)',
+        severity="LOW",
+        cwe="CWE-209",
+        description="Full error reporting enabled",
+        confidence=0.5,
+        false_positive_patterns=[
+            r'display_errors.*off',
+            r'display_errors.*0',
+        ]
+    ),
+    VulnPattern(
+        name="INFO_DISCLOSURE_EXCEPTION",
+        pattern=r'(?:echo|print|die|exit)\s+[^;]*(?:getMessage|getTraceAsString|__toString)\s*\(',
+        severity="MEDIUM",
+        cwe="CWE-209",
+        description="Exception details exposed to user",
+        confidence=0.75,
+    ),
+    VulnPattern(
+        name="INFO_DISCLOSURE_STACK_TRACE",
+        pattern=r'(?:echo|print)\s+[^;]*(?:debug_backtrace|debug_print_backtrace)\s*\(',
+        severity="HIGH",
+        cwe="CWE-209",
+        description="Stack trace exposed to user",
+        confidence=0.9,
     ),
 ]
 
