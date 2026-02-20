@@ -1,0 +1,381 @@
+{
+  "scan_date": "2026-02-20T18:53:58.219014",
+  "target": "C:/Users/User/Desktop/vuln_datasets/impresspages/",
+  "total_files": 461,
+  "total_findings": 17,
+  "critical": 0,
+  "high": 13,
+  "medium": 4,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Unsafe Callback Injection",
+      "severity": "HIGH",
+      "line": 58,
+      "code": "call_user_func($callable, $params['id']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\Grid\\Model\\Actions.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "Unsafe Callback Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.17,
+      "ml_reasoning": "ML v3 ensemble (prob=0.59, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.585,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Unsafe Callback Injection",
+      "severity": "HIGH",
+      "line": 61,
+      "code": "call_user_func($callables, $params['id']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\Grid\\Model\\Actions.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "Unsafe Callback Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.18,
+      "ml_reasoning": "ML v3 ensemble (prob=0.41, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.41,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Unsafe Callback Injection",
+      "severity": "HIGH",
+      "line": 84,
+      "code": "call_user_func($callable, $params['id']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\Grid\\Model\\Actions.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "Unsafe Callback Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.17,
+      "ml_reasoning": "ML v3 ensemble (prob=0.42, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.417,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "PHAR Deserialization",
+      "severity": "HIGH",
+      "line": 170,
+      "code": "if (isset($_POST['newImage']) && is_file(ipFile('file/repository/' . $_POST['newImage']))) {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\InlineManagement\\AdminController.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "PHAR Deserialization",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "PHAR Deserialization",
+      "severity": "HIGH",
+      "line": 293,
+      "code": "if (isset($_POST['newImage']) && is_file(ipFile('file/repository/' . $_POST['newImage']))) {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\InlineManagement\\AdminController.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "PHAR Deserialization",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 181,
+      "code": "unlink($realFile);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\Repository\\AdminController.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.44,
+      "ml_reasoning": "ML v3 ensemble (prob=0.72, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.72,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 77,
+      "code": "unlink($absoluteFilename);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\Repository\\ReflectionModel.php",
+      "confidence": "55%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.28,
+      "ml_reasoning": "ML v3 ensemble (prob=0.36, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.359,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 65,
+      "code": "chmod($path, $permissions);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\Update\\Helper\\FileSystem.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.93,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.965,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 111,
+      "code": "chmod($dir, 0777);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Internal\\Update\\Helper\\FileSystem.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.96,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Weak Cryptography",
+      "severity": "HIGH",
+      "line": 135,
+      "code": "$hash = md5($salt . $password, TRUE);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\PasswordHash.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Weak Cryptography",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.961,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Weak Cryptography",
+      "severity": "HIGH",
+      "line": 137,
+      "code": "$hash = md5($hash . $password, TRUE);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\PasswordHash.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Weak Cryptography",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.88,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.942,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 13,
+      "code": "return substr(sha1(rand()), 0, $length);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\Random.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.71,
+      "ml_reasoning": "ML v3 ensemble (prob=0.85, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.854,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "MEDIUM",
+      "line": 657,
+      "code": "if($this->debug) echo \"\\n<br>-Captcha-Debug: Keep this params from original GET-request: (\".$this->Q",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\HnCaptcha\\HnCaptcha.php",
+      "confidence": "50%",
+      "source": "SERVER",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [
+        "strip_tags"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.07,
+      "ml_reasoning": "ML v3 ensemble (prob=0.47, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.467,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 676,
+      "code": "$this->public_key = substr(md5(uniqid(rand(),true)), 0, $this->chars);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\HnCaptcha\\HnCaptcha.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Unsafe Object Instantiation",
+      "severity": "MEDIUM",
+      "line": 2447,
+      "code": "$obj = new $class( $args[0], $args[1] );",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\less.php\\Less.php",
+      "confidence": "55%",
+      "source": "WEAK_INPUT",
+      "sink": "Unsafe Object Instantiation",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.44,
+      "ml_reasoning": "ML v3 ensemble (prob=0.28, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.278,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Unsafe Object Instantiation",
+      "severity": "MEDIUM",
+      "line": 2455,
+      "code": "$obj = new $class( $args[0], $args[1], $args[2] );",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\less.php\\Less.php",
+      "confidence": "55%",
+      "source": "WEAK_INPUT",
+      "sink": "Unsafe Object Instantiation",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.42,
+      "ml_reasoning": "ML v3 ensemble (prob=0.29, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.289,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Unsafe Object Instantiation",
+      "severity": "MEDIUM",
+      "line": 2463,
+      "code": "$obj = new $class( $args[0], $args[1], $args[2], $args[3] );",
+      "file": "C:/Users/User/Desktop/vuln_datasets/impresspages\\Ip\\Lib\\less.php\\Less.php",
+      "confidence": "55%",
+      "source": "WEAK_INPUT",
+      "sink": "Unsafe Object Instantiation",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.41,
+      "ml_reasoning": "ML v3 ensemble (prob=0.29, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.293,
+      "ml_classification": "suspicious"
+    }
+  ],
+  "skipped_vendor_files": 19,
+  "scan_time_seconds": 7.45,
+  "cross_file_stats": {
+    "include_edges": 15,
+    "global_vars": 61,
+    "namespace_mappings": 321,
+    "cross_file_findings": 0
+  },
+  "ml_fps_eliminated": 3,
+  "scan_mode": "standard"
+}

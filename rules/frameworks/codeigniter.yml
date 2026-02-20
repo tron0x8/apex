@@ -1,0 +1,49 @@
+name: CodeIgniter
+detect_patterns:
+  - "system/core/CodeIgniter.php"
+  - "CI_Controller"
+  - "application/controllers"
+  - "BASEPATH"
+sanitizers:
+  SQL:
+    - "$this->db->query"
+    - "$this->db->where"
+    - "$this->db->get"
+    - "$this->db->insert"
+    - "$this->db->update"
+    - "$this->db->delete"
+    - "$this->db->escape"
+    - "$this->db->escape_str"
+    - "->getWhere"
+    - "->countAllResults"
+  XSS:
+    - "xss_clean"
+    - "esc("
+    - "html_escape"
+    - "$this->security->xss_clean"
+  CSRF:
+    - "csrf_token"
+    - "csrf_hash"
+    - "csrf_field"
+sources:
+  "$this->input->get": GET
+  "$this->input->post": POST
+  "$this->input->cookie": COOKIE
+  "$this->input->server": SERVER
+  "$this->request->getGet": GET
+  "$this->request->getPost": POST
+  "$this->request->getVar": REQUEST
+  "$this->request->getFile": FILES
+sinks:
+  "->query(": SQL_INJECTION
+  "$this->db->simple_query": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "system": COMMAND_INJECTION
+  "redirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "unserialize": DESERIALIZATION
+safe_patterns:
+  - '$this->db->escape\('
+  - '->where\('

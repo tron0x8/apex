@@ -1,0 +1,58 @@
+name: WordPress
+detect_patterns:
+  - "wp-config.php"
+  - "wp-content"
+  - "wp-includes"
+  - "add_action"
+  - "add_filter"
+  - "WP_Query"
+sanitizers:
+  SQL:
+    - "$wpdb->prepare"
+    - "$wpdb->insert"
+    - "$wpdb->update"
+    - "$wpdb->delete"
+    - "$wpdb->replace"
+    - "esc_sql"
+    - "absint"
+    - "intval"
+    - "sanitize_key"
+  XSS:
+    - "esc_html"
+    - "esc_attr"
+    - "esc_url"
+    - "esc_js"
+    - "esc_textarea"
+    - "wp_kses"
+    - "wp_kses_post"
+    - "sanitize_text_field"
+    - "sanitize_email"
+    - "sanitize_file_name"
+    - "sanitize_title"
+  NONCE:
+    - "wp_nonce_field"
+    - "wp_verify_nonce"
+    - "check_admin_referer"
+    - "check_ajax_referer"
+sources:
+  "$_GET": GET
+  "$_POST": POST
+  "$_REQUEST": REQUEST
+  "$_COOKIE": COOKIE
+  "get_query_var": GET
+sinks:
+  "$wpdb->query": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "system": COMMAND_INJECTION
+  "wp_redirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "wp_remote_get": SSRF
+  "wp_remote_post": SSRF
+  "unserialize": DESERIALIZATION
+  "maybe_unserialize": DESERIALIZATION
+safe_patterns:
+  - '$wpdb->prepare\('
+  - 'wp_verify_nonce\('
+  - 'current_user_can\('

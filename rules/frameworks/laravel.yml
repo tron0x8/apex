@@ -1,0 +1,128 @@
+name: Laravel
+detect_patterns:
+  - "artisan"
+  - "Illuminate\\"
+  - "Laravel\\"
+  - "app/Http/Controllers"
+  - "routes/web.php"
+  - "composer.json:laravel/framework"
+sanitizers:
+  SQL:
+    - "DB::select"
+    - "DB::insert"
+    - "DB::update"
+    - "DB::delete"
+    - "DB::statement"
+    - "->where"
+    - "->whereIn"
+    - "->whereRaw"
+    - "->pluck"
+    - "->find"
+    - "->findOrFail"
+    - "->first"
+    - "->get"
+    - "->paginate"
+    - "->select"
+    - "->join"
+    - "Model::find"
+    - "Model::where"
+    - "Eloquent"
+    - "query()->where"
+    - "->whereColumn"
+    - "->orWhere"
+  XSS:
+    - "e("
+    - "{{"
+    - "{!!"
+    - "@csrf"
+    - "@method"
+    - "htmlspecialchars"
+    - "Blade::render"
+    - "->with"
+    - "view("
+    - "response()->json"
+  FILE:
+    - "Storage::put"
+    - "Storage::get"
+    - "Storage::delete"
+    - "Storage::exists"
+    - "Storage::path"
+  AUTH:
+    - "Auth::check"
+    - "Auth::user"
+    - "Gate::allows"
+    - "->authorize"
+    - "@can"
+    - "Policy"
+sources:
+  "$request->input": REQUEST
+  "$request->get": GET
+  "$request->post": POST
+  "$request->all": REQUEST
+  "$request->query": GET
+  "$request->file": FILES
+  "$request->cookie": COOKIE
+  "Request::input": REQUEST
+  "Request::get": GET
+  "Input::get": GET
+  "Input::all": REQUEST
+sinks:
+  "DB::raw": SQL_INJECTION
+  "->whereRaw": SQL_INJECTION
+  "->selectRaw": SQL_INJECTION
+  "->orderByRaw": SQL_INJECTION
+  "->groupByRaw": SQL_INJECTION
+  "->havingRaw": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "system": COMMAND_INJECTION
+  "passthru": COMMAND_INJECTION
+  "proc_open": COMMAND_INJECTION
+  "popen": COMMAND_INJECTION
+  "{!!": XSS
+  "->header": HEADER_INJECTION
+  "redirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "curl_exec": SSRF
+  "unserialize": DESERIALIZATION
+  "include": FILE_INCLUSION
+  "require": FILE_INCLUSION
+safe_patterns:
+  - '\$request->validate\('
+  - 'Validator::make\('
+  - '->validated\(\)'
+  - 'FormRequest'
+validation_type_map:
+  integer:
+    php_type: INT
+    safe_for: [SQL_INJECTION, XSS]
+  numeric:
+    php_type: [INT, FLOAT]
+    safe_for: [SQL_INJECTION, XSS]
+  email:
+    php_type: STRING
+    safe_for: [SQL_INJECTION]
+  boolean:
+    php_type: BOOL
+    safe_for: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+  "in:*":
+    php_type: STRING
+    safe_for: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+  url:
+    php_type: STRING
+    safe_for: [XSS]
+  ip:
+    php_type: STRING
+    safe_for: [SQL_INJECTION, XSS]
+middleware_effects:
+  auth:
+    ensures: AUTHENTICATED
+  csrf:
+    ensures: CSRF_PROTECTED
+  throttle:
+    ensures: RATE_LIMITED
+template_escaping:
+  blade:
+    escaped: "{{ }}"
+    raw: "{!! !!}"

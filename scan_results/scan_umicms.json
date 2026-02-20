@@ -1,0 +1,148 @@
+{
+  "scan_date": "2026-02-20T18:55:06.063906",
+  "target": "C:/Users/User/Desktop/vuln_datasets/umi.cms.3-dev/",
+  "total_files": 1371,
+  "total_findings": 6,
+  "critical": 0,
+  "high": 6,
+  "medium": 0,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Insecure PHP Configuration",
+      "severity": "HIGH",
+      "line": 14,
+      "code": "ini_set('display_errors', 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/umi.cms.3-dev\\configuration\\core.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure PHP Configuration",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.8,
+      "ml_reasoning": "ML v3 ensemble (prob=0.90, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.9,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Error Handling",
+      "severity": "HIGH",
+      "line": 14,
+      "code": "ini_set('display_errors', 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/umi.cms.3-dev\\configuration\\core.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Error Handling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.8,
+      "ml_reasoning": "ML v3 ensemble (prob=0.90, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.9,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure PHP Configuration",
+      "severity": "HIGH",
+      "line": 15,
+      "code": "ini_set('display_errors', 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/umi.cms.3-dev\\umicms\\bootstrap.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure PHP Configuration",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.45,
+      "ml_reasoning": "ML v3 ensemble (prob=0.73, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.726,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Error Handling",
+      "severity": "HIGH",
+      "line": 15,
+      "code": "ini_set('display_errors', 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/umi.cms.3-dev\\umicms\\bootstrap.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Error Handling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.45,
+      "ml_reasoning": "ML v3 ensemble (prob=0.73, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.726,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 506,
+      "code": "chmod($path, $this->options['tmbPathMode']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/umi.cms.3-dev\\umicms\\project\\module\\files\\admin\\manager\\elfinder\\elFinderVolumeDriver.class.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.2,
+      "ml_reasoning": "ML v3 ensemble (prob=0.40, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.4,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 3180,
+      "code": "file_exists($tmb) && @unlink($tmb);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/umi.cms.3-dev\\umicms\\project\\module\\files\\admin\\manager\\elfinder\\elFinderVolumeDriver.class.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.13,
+      "ml_reasoning": "ML v3 ensemble (prob=0.43, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.433,
+      "ml_classification": "suspicious"
+    }
+  ],
+  "skipped_vendor_files": 3,
+  "scan_time_seconds": 17.87,
+  "cross_file_stats": {
+    "include_edges": 144,
+    "global_vars": 13,
+    "namespace_mappings": 494,
+    "cross_file_findings": 0
+  },
+  "ml_fps_eliminated": 0,
+  "scan_mode": "standard"
+}

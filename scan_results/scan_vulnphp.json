@@ -1,0 +1,262 @@
+{
+  "scan_date": "2026-02-20T18:52:12.765929",
+  "target": "C:/Users/User/Desktop/vuln_datasets/vulnphp/",
+  "total_files": 9,
+  "total_findings": 11,
+  "critical": 0,
+  "high": 11,
+  "medium": 0,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 194,
+      "code": "exec ($cmd,$output);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case002-backdoor.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.2,
+      "ml_reasoning": "ML v3 ensemble (prob=0.40, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.399,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Cross-Site Request Forgery",
+      "severity": "HIGH",
+      "line": 182,
+      "code": "if (isset($_POST['remove']))  {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case002-backdoor.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Cross-Site Request Forgery",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 279,
+      "code": "print \"<td id=\\\"cell\\\"><input type=\\\"submit\\\" name=\\\"dirname\\\" value=\\\"\".$dir[$i].",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case002-backdoor.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [
+        "htmlspecialchars",
+        "htmlentities"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.94,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.969,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 291,
+      "code": "print \"<td id=\\\"cell\\\"><input type=\\\"submit\\\" name=\\\"fname\\\" value=\\\"$dir[$i]\\\" class=\\\"buttons\\\"></",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case002-backdoor.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [
+        "htmlspecialchars",
+        "htmlentities"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 292,
+      "code": "print \"<td id=\\\"cell\\\">\".getperms($dir[$i]).\"</td></tr>\\n\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case002-backdoor.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [
+        "htmlspecialchars",
+        "htmlentities"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Weak Cryptography",
+      "severity": "HIGH",
+      "line": 3,
+      "code": "$password = md5($_POST['password']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case003-weakhash.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Weak Cryptography",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.8,
+      "ml_reasoning": "ML v3 ensemble (prob=0.90, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.902,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 3,
+      "code": "$password = md5($_POST['password']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case003-weakhash.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 3,
+      "code": "passthru('SomeApp.exe '.$cmd);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case004-rce.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 3,
+      "code": "header(\"Location: \" . $redirect_url);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case005-unvredir.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.987,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 3,
+      "code": "$result=mysql_query('SELECT * FROM users WHERE username=\"'.$username.'\"');",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case006-sqli.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Direct Object Reference",
+      "severity": "HIGH",
+      "line": 2,
+      "code": "$var = $_GET['id'];",
+      "file": "C:/Users/User/Desktop/vuln_datasets/vulnphp\\case009-xss_short.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "Insecure Direct Object Reference",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.49,
+      "ml_reasoning": "ML v3 ensemble (prob=0.74, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.745,
+      "ml_classification": "vulnerable"
+    }
+  ],
+  "skipped_vendor_files": 0,
+  "scan_time_seconds": 0.13,
+  "cross_file_stats": {
+    "include_edges": 1,
+    "global_vars": 15,
+    "namespace_mappings": 0,
+    "cross_file_findings": 0
+  },
+  "ml_fps_eliminated": 0,
+  "scan_mode": "standard"
+}

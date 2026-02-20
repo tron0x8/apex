@@ -1,0 +1,869 @@
+
+sql_sanitizers:
+  - name: mysql_real_escape_string
+    pattern: 'mysql_real_escape_string\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: mysqli_real_escape_string
+    pattern: 'mysqli_real_escape_string\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: pg_escape_string
+    pattern: 'pg_escape_string\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: sqlite_escape_string
+    pattern: 'sqlite_escape_string\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: addslashes
+    pattern: 'addslashes\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: weak
+
+  - name: safesql
+    pattern: 'safesql\s*\('
+    protects_against: [SQL_INJECTION, XSS, IDOR]
+    strength: strong
+
+  - name: PDO_quote
+    pattern: '->quote\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: esc_sql
+    pattern: 'esc_sql\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: prepare
+    pattern: '->prepare\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: bindParam
+    pattern: '->bind(?:Param|Value)\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: pdo_placeholder
+    pattern: '\?\s*,|\:\w+'
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+type_casting:
+  - name: intval
+    pattern: 'intval\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, FILE_PATH, NOSQL, IDOR]
+    strength: strong
+
+  - name: int_cast
+    pattern: '\(int\)\s*\$'
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, IDOR]
+    strength: strong
+
+  - name: integer_cast
+    pattern: '\(integer\)\s*'
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+  - name: floatval
+    pattern: 'floatval\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, NOSQL]
+    strength: strong
+
+  - name: float_cast
+    pattern: '\(float\)\s*\$'
+    protects_against: [SQL_INJECTION, XSS]
+    strength: strong
+
+  - name: abs
+    pattern: '\babs\s*\('
+    protects_against: [SQL_INJECTION, XSS, IDOR]
+    strength: strong
+
+  - name: ctype_digit
+    pattern: 'ctype_digit\s*\('
+    protects_against: [SQL_INJECTION, XSS, IDOR, COMMAND_INJECTION]
+    strength: strong
+
+  - name: ctype_alnum
+    pattern: 'ctype_alnum\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, CODE_INJECTION]
+    strength: strong
+
+  - name: ctype_alpha
+    pattern: 'ctype_alpha\s*\('
+    protects_against: [SQL_INJECTION, COMMAND_INJECTION]
+    strength: strong
+
+  - name: is_numeric
+    pattern: 'is_numeric\s*\('
+    protects_against: [SQL_INJECTION, IDOR, COMMAND_INJECTION]
+    strength: strong
+
+  - name: floor
+    pattern: '\bfloor\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: ceil
+    pattern: '\bceil\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: round
+    pattern: '\bround\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: min
+    pattern: '\bmin\s*\('
+    protects_against: [SQL_INJECTION, IDOR]
+    strength: strong
+
+  - name: max
+    pattern: '\bmax\s*\('
+    protects_against: [SQL_INJECTION, IDOR]
+    strength: strong
+
+xss_sanitizers:
+  - name: htmlspecialchars
+    pattern: 'htmlspecialchars\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: htmlentities
+    pattern: 'htmlentities\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: strip_tags
+    pattern: 'strip_tags\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: esc_html
+    pattern: 'esc_html\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: esc_attr
+    pattern: 'esc_attr\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: wp_kses
+    pattern: 'wp_kses\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: wp_kses_post
+    pattern: 'wp_kses_post\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: sanitize_text_field
+    pattern: 'sanitize_text_field\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: Html_encode
+    pattern: 'Html::encode\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: Escaper_escapeHtml
+    pattern: 'Escaper::escapeHtml\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: e_helper
+    pattern: '\be\s*\(\s*\$'
+    protects_against: [XSS]
+    strength: strong
+
+  - name: purify
+    pattern: '(?:purify|clean|sanitize)\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: json_encode
+    pattern: 'json_encode\s*\('
+    protects_against: [XSS, TEMPLATE_INJECTION]
+    strength: strong
+
+  - name: json_header
+    pattern: 'application/json'
+    protects_against: [XSS]
+    strength: strong
+
+  - name: api_response
+    pattern: '(?:return|echo)\s+(?:json_|Response::json)'
+    protects_against: [XSS]
+    strength: strong
+
+command_sanitizers:
+  - name: escapeshellarg
+    pattern: 'escapeshellarg\s*\('
+    protects_against: [COMMAND_INJECTION, RCE]
+    strength: strong
+
+  - name: escapeshellcmd
+    pattern: 'escapeshellcmd\s*\('
+    protects_against: [COMMAND_INJECTION, RCE]
+    strength: strong
+
+path_sanitizers:
+  - name: basename
+    pattern: 'basename\s*\('
+    protects_against: [FILE_INCLUSION, PATH_TRAVERSAL, FILE_READ, FILE_WRITE]
+    strength: strong
+
+  - name: realpath
+    pattern: 'realpath\s*\('
+    protects_against: [FILE_INCLUSION, PATH_TRAVERSAL]
+    strength: strong
+
+  - name: pathinfo
+    pattern: 'pathinfo\s*\('
+    protects_against: [FILE_INCLUSION]
+    strength: weak
+
+url_sanitizers:
+  - name: filter_var
+    pattern: 'filter_var\s*\('
+    protects_against: [SQL_INJECTION, XSS, SSRF, OPEN_REDIRECT]
+    strength: strong
+
+  - name: filter_input
+    pattern: 'filter_input\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+  - name: urlencode
+    pattern: 'urlencode\s*\('
+    protects_against: [XSS, OPEN_REDIRECT]
+    strength: strong
+
+  - name: rawurlencode
+    pattern: 'rawurlencode\s*\('
+    protects_against: [XSS, OPEN_REDIRECT]
+    strength: strong
+
+  - name: filter_validate_url
+    pattern: 'FILTER_VALIDATE_URL'
+    protects_against: [SSRF, OPEN_REDIRECT]
+    strength: strong
+
+  - name: parse_url
+    pattern: 'parse_url\s*\('
+    protects_against: [SSRF, OPEN_REDIRECT]
+    strength: weak
+
+validation_sanitizers:
+  - name: in_array_strict
+    pattern: 'in_array\s*\([^)]*,\s*true\s*\)'
+    protects_against: [FILE_INCLUSION, COMMAND_INJECTION, RCE, OPEN_REDIRECT, CODE_INJECTION]
+    strength: strong
+
+  - name: in_array
+    pattern: 'in_array\s*\('
+    protects_against: [FILE_INCLUSION, OPEN_REDIRECT]
+    strength: weak
+
+  - name: preg_match
+    pattern: 'preg_match\s*\(\s*[''"][/^]'
+    protects_against: [SQL_INJECTION, COMMAND_INJECTION, XSS, CODE_INJECTION]
+    strength: strong
+
+email_sanitizers:
+  - name: filter_var_email
+    pattern: 'filter_var.*FILTER_VALIDATE_EMAIL'
+    protects_against: [EMAIL_INJECTION]
+    strength: strong
+
+  - name: sanitize_email
+    pattern: 'sanitize_email\s*\('
+    protects_against: [EMAIL_INJECTION]
+    strength: strong
+
+regex_sanitizers:
+  - name: preg_quote
+    pattern: 'preg_quote\s*\('
+    protects_against: [REGEX_DOS]
+    strength: strong
+
+hash_sanitizers:
+  - name: hash_equals
+    pattern: 'hash_equals\s*\('
+    protects_against: [CODE_INJECTION, TYPE_JUGGLING]
+    strength: strong
+
+security_functions:
+  - name: password_hash
+    pattern: 'password_hash\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: password_verify
+    pattern: 'password_verify\s*\('
+    protects_against: [WEAK_CRYPTO, TYPE_JUGGLING]
+    strength: strong
+
+  - name: random_bytes
+    pattern: 'random_bytes\s*\('
+    protects_against: [WEAK_CRYPTO, INSECURE_RANDOM]
+    strength: strong
+
+  - name: random_int
+    pattern: 'random_int\s*\('
+    protects_against: [WEAK_CRYPTO, INSECURE_RANDOM]
+    strength: strong
+
+  - name: openssl
+    pattern: 'openssl_\w+\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: openssl_random
+    pattern: 'openssl_random_pseudo_bytes\s*\('
+    protects_against: [INSECURE_RANDOM]
+    strength: strong
+
+auth_sanitizers:
+  - name: isAuthenticated
+    pattern: '(?:isAuthenticated|is_authenticated|checkAuth|isLoggedIn)\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: hasPermission
+    pattern: '(?:hasPermission|has_permission|checkPermission|can)\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: session_check
+    pattern: '\$_SESSION\s*\[\s*[''"](?:user|admin|logged)'
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: member_id
+    pattern: '\$member_id\s*\[\s*[''"]user_group'
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: is_admin
+    pattern: '(?:is_admin|isAdmin|user_group\s*==\s*1)'
+    protects_against: [AUTH_BYPASS]
+    strength: strong
+
+csrf_sanitizers:
+  - name: csrf_token
+    pattern: '(?:csrf_token|_token|csrfToken|csrf)'
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: verify_nonce
+    pattern: '(?:verify_nonce|check_nonce|wp_verify_nonce)'
+    protects_against: [CSRF]
+    strength: strong
+
+type_comparison:
+  - name: strict_compare
+    pattern: '==='
+    protects_against: [TYPE_JUGGLING]
+    strength: strong
+
+  - name: strcmp
+    pattern: 'strcmp\s*\('
+    protects_against: [TYPE_JUGGLING]
+    strength: strong
+
+upload_sanitizers:
+  - name: allowed_extensions
+    pattern: '(?:allowed_ext|valid_ext|mime_types|whitelist)'
+    protects_against: [UNSAFE_UPLOAD]
+    strength: strong
+
+  - name: getimagesize
+    pattern: 'getimagesize\s*\('
+    protects_against: [UNSAFE_UPLOAD]
+    strength: strong
+
+  - name: finfo
+    pattern: 'finfo_(?:open|file)\s*\('
+    protects_against: [UNSAFE_UPLOAD]
+    strength: strong
+
+  - name: mime_check
+    pattern: 'mime_content_type\s*\('
+    protects_against: [UNSAFE_UPLOAD]
+    strength: strong
+
+deserialization_sanitizers:
+  - name: allowed_classes
+    pattern: 'allowed_classes'
+    protects_against: [DESERIALIZATION]
+    strength: strong
+
+  - name: json_decode
+    pattern: 'json_decode\s*\('
+    protects_against: [DESERIALIZATION]
+    strength: strong
+
+header_sanitizers:
+  - name: header_remove
+    pattern: 'header_remove\s*\('
+    protects_against: [HEADER_INJECTION]
+    strength: strong
+
+  - name: str_replace_newline
+    pattern: 'str_replace\s*\([^)]*(?:\\r|\\n)'
+    protects_against: [HEADER_INJECTION]
+    strength: strong
+
+mass_assignment_sanitizers:
+  - name: fillable
+    pattern: '\$fillable\s*='
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: guarded
+    pattern: '\$guarded\s*='
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: only
+    pattern: '->only\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+xxe_sanitizers:
+  - name: disable_entities
+    pattern: '(?:LIBXML_NOENT|libxml_disable_entity_loader)'
+    protects_against: [XXE]
+    strength: strong
+
+log_sanitizers:
+  - name: log_sanitize
+    pattern: '(?:preg_replace|str_replace)\s*\([^)]*(?:\\r|\\n|[\r\n])'
+    protects_against: [LOG_INJECTION]
+    strength: strong
+
+  - name: log_filter
+    pattern: '(?:filter_var|htmlspecialchars|addslashes)\s*\('
+    protects_against: [LOG_INJECTION]
+    strength: weak
+
+race_condition_sanitizers:
+  - name: flock
+    pattern: 'flock\s*\('
+    protects_against: [RACE_CONDITION]
+    strength: strong
+
+  - name: mutex
+    pattern: '(?:mutex|lock|semaphore|synchronized)\s*\('
+    protects_against: [RACE_CONDITION]
+    strength: strong
+
+regex_dos_sanitizers:
+  - name: preg_timeout
+    pattern: '(?:pcre\.backtrack_limit|set_time_limit|ini_set)'
+    protects_against: [REGEX_DOS]
+    strength: weak
+
+encoding_sanitizers:
+  - name: mb_convert_encoding
+    pattern: 'mb_convert_encoding\s*\('
+    protects_against: [XSS, SQL_INJECTION]
+    strength: weak
+
+  - name: iconv
+    pattern: 'iconv\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: mb_detect_encoding
+    pattern: 'mb_detect_encoding\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: utf8_encode
+    pattern: 'utf8_encode\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+modern_crypto_sanitizers:
+  - name: sodium_crypto_secretbox
+    pattern: 'sodium_crypto_\w+\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: hash_hmac
+    pattern: 'hash_hmac\s*\('
+    protects_against: [WEAK_CRYPTO, TYPE_JUGGLING]
+    strength: strong
+
+  - name: hash_pbkdf2
+    pattern: 'hash_pbkdf2\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: argon2
+    pattern: 'PASSWORD_ARGON2'
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+  - name: bcrypt
+    pattern: 'PASSWORD_BCRYPT'
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+laravel_sanitizers:
+  - name: laravel_validated
+    pattern: '\$request->validated\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: laravel_only
+    pattern: '\$request->only\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: laravel_except
+    pattern: '\$request->except\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: laravel_validator_make
+    pattern: 'Validator::make\s*\('
+    protects_against: [SQL_INJECTION, XSS]
+    strength: strong
+
+  - name: laravel_authorize
+    pattern: '\$this->authorize\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: laravel_middleware_auth
+    pattern: 'middleware\s*\(\s*[''"]auth'
+    protects_against: [AUTH_BYPASS]
+    strength: strong
+
+  - name: laravel_policy
+    pattern: '->can\s*\(\s*[''"]'
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: laravel_crypt
+    pattern: 'Crypt::(?:encrypt|decrypt)\s*\('
+    protects_against: [WEAK_CRYPTO]
+    strength: strong
+
+wordpress_sanitizers:
+  - name: wp_esc_url
+    pattern: 'esc_url\s*\('
+    protects_against: [XSS, OPEN_REDIRECT, SSRF]
+    strength: strong
+
+  - name: wp_esc_url_raw
+    pattern: 'esc_url_raw\s*\('
+    protects_against: [XSS, OPEN_REDIRECT, SSRF]
+    strength: strong
+
+  - name: wp_absint
+    pattern: 'absint\s*\('
+    protects_against: [SQL_INJECTION, XSS, IDOR]
+    strength: strong
+
+  - name: wp_sanitize_file_name
+    pattern: 'sanitize_file_name\s*\('
+    protects_against: [FILE_PATH, PATH_TRAVERSAL, FILE_INCLUSION]
+    strength: strong
+
+  - name: wp_sanitize_key
+    pattern: 'sanitize_key\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+  - name: wp_sanitize_title
+    pattern: 'sanitize_title\s*\('
+    protects_against: [XSS, SQL_INJECTION]
+    strength: strong
+
+  - name: wp_sanitize_user
+    pattern: 'sanitize_user\s*\('
+    protects_against: [SQL_INJECTION, XSS]
+    strength: strong
+
+  - name: wp_sanitize_email
+    pattern: 'sanitize_email\s*\('
+    protects_against: [EMAIL_INJECTION, XSS]
+    strength: strong
+
+  - name: wp_check_admin_referer
+    pattern: 'check_admin_referer\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: wp_check_ajax_referer
+    pattern: 'check_ajax_referer\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: wp_nonce_field
+    pattern: 'wp_nonce_field\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: wp_sanitize_redirect
+    pattern: 'wp_sanitize_redirect\s*\('
+    protects_against: [OPEN_REDIRECT]
+    strength: strong
+
+  - name: wp_validate_redirect
+    pattern: 'wp_validate_redirect\s*\('
+    protects_against: [OPEN_REDIRECT]
+    strength: strong
+
+symfony_sanitizers:
+  - name: symfony_param_converter
+    pattern: '@ParamConverter'
+    protects_against: [SQL_INJECTION, IDOR]
+    strength: strong
+
+  - name: symfony_form_valid
+    pattern: '->isValid\s*\('
+    protects_against: [SQL_INJECTION, XSS]
+    strength: weak
+
+  - name: symfony_csrf
+    pattern: 'isCsrfTokenValid\s*\('
+    protects_against: [CSRF]
+    strength: strong
+
+  - name: symfony_voter
+    pattern: 'denyAccessUnlessGranted\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+  - name: symfony_security
+    pattern: '@IsGranted\s*\('
+    protects_against: [AUTH_BYPASS, IDOR]
+    strength: strong
+
+php8_sanitizers:
+  - name: str_contains
+    pattern: 'str_contains\s*\('
+    protects_against: [FILE_INCLUSION, OPEN_REDIRECT]
+    strength: weak
+
+  - name: str_starts_with
+    pattern: 'str_starts_with\s*\('
+    protects_against: [FILE_INCLUSION, OPEN_REDIRECT, PATH_TRAVERSAL]
+    strength: weak
+
+  - name: str_ends_with
+    pattern: 'str_ends_with\s*\('
+    protects_against: [FILE_INCLUSION, UNSAFE_UPLOAD]
+    strength: weak
+
+  - name: match_expression
+    pattern: 'match\s*\(\s*\$'
+    protects_against: [FILE_INCLUSION, OPEN_REDIRECT, CODE_INJECTION]
+    strength: strong
+
+  - name: enum_from
+    pattern: '::from\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+  - name: enum_tryFrom
+    pattern: '::tryFrom\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    strength: strong
+
+doctrine_sanitizers:
+  - name: doctrine_createQueryBuilder
+    pattern: 'createQueryBuilder\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: doctrine_setParameter
+    pattern: '->setParameter\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: doctrine_setParameters
+    pattern: '->setParameters\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: doctrine_expr
+    pattern: '->expr\s*\(\s*\)->'
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+ci_sanitizers:
+  - name: ci_xss_clean
+    pattern: 'xss_clean\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+  - name: ci_escape
+    pattern: '\$this->db->escape\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: ci_escape_str
+    pattern: '\$this->db->escape_str\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: ci_escape_like_str
+    pattern: '\$this->db->escape_like_str\s*\('
+    protects_against: [SQL_INJECTION]
+    strength: strong
+
+  - name: ci_security
+    pattern: '\$this->security->xss_clean\s*\('
+    protects_against: [XSS]
+    strength: strong
+
+output_sanitizers:
+  - name: sprintf_safe
+    pattern: 'sprintf\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: number_format
+    pattern: 'number_format\s*\('
+    protects_against: [XSS, SQL_INJECTION]
+    strength: strong
+
+  - name: wordwrap
+    pattern: 'wordwrap\s*\('
+    protects_against: [XSS]
+    strength: weak
+
+  - name: nl2br
+    pattern: 'nl2br\s*\('
+    protects_against: []
+    strength: weak
+
+array_sanitizers:
+  - name: array_intersect_key
+    pattern: 'array_intersect_key\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: array_keys_whitelist
+    pattern: 'array_flip\s*\(\s*\[.*?\]\s*\)'
+    protects_against: [MASS_ASSIGNMENT]
+    strength: strong
+
+  - name: array_column
+    pattern: 'array_column\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: weak
+
+  - name: compact
+    pattern: 'compact\s*\('
+    protects_against: [MASS_ASSIGNMENT]
+    strength: weak
+
+session_sanitizers:
+  - name: session_regenerate_id
+    pattern: 'session_regenerate_id\s*\('
+    protects_against: [SESSION_FIXATION]
+    strength: strong
+
+  - name: session_destroy
+    pattern: 'session_destroy\s*\('
+    protects_against: [SESSION_FIXATION]
+    strength: strong
+
+ssl_sanitizers:
+  - name: verify_peer_true
+    pattern: 'verify_peer.*?true'
+    protects_against: [SSL_MISCONFIG]
+    strength: strong
+
+  - name: verify_host_2
+    pattern: 'CURLOPT_SSL_VERIFYHOST.*?2'
+    protects_against: [SSL_MISCONFIG]
+    strength: strong
+
+  - name: ssl_verifypeer_true
+    pattern: 'CURLOPT_SSL_VERIFYPEER.*?true'
+    protects_against: [SSL_MISCONFIG]
+    strength: strong
+
+ldap_sanitizers:
+  - name: ldap_escape
+    pattern: 'ldap_escape\s*\('
+    protects_against: [LDAP_INJECTION]
+    strength: strong
+
+xpath_sanitizers:
+  - name: xpath_registerNamespace
+    pattern: '->registerXPathNamespace\s*\('
+    protects_against: [XPATH_INJECTION]
+    strength: weak
+
+ssrf_sanitizers:
+  - name: ip_validation
+    pattern: 'filter_var\s*\([^)]*FILTER_VALIDATE_IP'
+    protects_against: [SSRF]
+    strength: strong
+
+  - name: hostname_whitelist
+    pattern: 'in_array\s*\([^)]*(?:host|domain|server)'
+    protects_against: [SSRF, OPEN_REDIRECT]
+    strength: strong
+
+  - name: parse_url_check
+    pattern: 'parse_url\s*\([^)]+\)\s*(?:===|\!==|==)'
+    protects_against: [SSRF, OPEN_REDIRECT]
+    strength: strong
+
+custom_sanitizers:
+  - name: custom_safe_method
+    pattern: '->\w*(?:safe|escape|clean|sanitize|filter|validate|secure|protect)\w*\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, IDOR, CODE_INJECTION]
+    strength: weak
+
+  - name: custom_safe_func
+    pattern: '\b\w*(?:safe|escape|clean|sanitize|filter|validate|secure|protect|purify)\w*\s*\('
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, IDOR, CODE_INJECTION]
+    strength: weak
+
+whitelist_patterns:
+  - name: whitelist_alnum
+    pattern: 'preg_replace\s*\(\s*[''"]\/\[\^a-z0-9[^\]]*\]'
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, FILE_PATH, FILE_INCLUDE, CODE_INJECTION]
+    strength: strong
+
+  - name: whitelist_alnum_case
+    pattern: 'preg_replace\s*\(\s*[''"]\/\[\^a-zA-Z0-9[^\]]*\]'
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, FILE_PATH, FILE_INCLUDE, CODE_INJECTION]
+    strength: strong
+
+  - name: whitelist_word
+    pattern: 'preg_replace\s*\(\s*[''"]\/\[\^\\w[^\]]*\]'
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, FILE_PATH, FILE_INCLUDE, CODE_INJECTION]
+    strength: strong
+
+  - name: whitelist_digits
+    pattern: 'preg_replace\s*\(\s*[''"]\/\[\^0-9\]'
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, FILE_PATH, CODE_INJECTION]
+    strength: strong
+
+  - name: whitelist_digits_d
+    pattern: 'preg_replace\s*\(\s*[''"]\/\[\^\\d\]'
+    protects_against: [SQL_INJECTION, XSS, COMMAND_INJECTION, FILE_PATH, CODE_INJECTION]
+    strength: strong

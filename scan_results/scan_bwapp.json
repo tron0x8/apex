@@ -1,0 +1,5700 @@
+{
+  "scan_date": "2026-02-20T18:50:50.906722",
+  "target": "C:/Users/User/Desktop/vuln_datasets/bwapp/",
+  "total_files": 198,
+  "total_findings": 266,
+  "critical": 5,
+  "high": 258,
+  "medium": 3,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_captcha_bypass.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 66,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_captcha_bypass.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 45,
+      "code": "$sql = \"SELECT * FROM users WHERE email = '\" . $email . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_forgotten.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.94,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.968,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 183,
+      "code": "$sql = \"UPDATE users SET reset_code = '\" . $reset_code . \"' WHERE email = '\" . $email . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_forgotten.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 188,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_forgotten.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_1.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 289,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.54,
+      "ml_reasoning": "ML v3 ensemble (prob=0.77, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.77,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_2.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 338,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_2.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.59,
+      "ml_reasoning": "ML v3 ensemble (prob=0.79, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.793,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_2.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 137,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_3.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_3.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 292,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_3.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.54,
+      "ml_reasoning": "ML v3 ensemble (prob=0.77, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.77,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_insecure_login_3.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 137,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_1.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_1.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 290,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.54,
+      "ml_reasoning": "ML v3 ensemble (prob=0.77, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.77,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 141,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_2.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_2.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 308,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_2.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.54,
+      "ml_reasoning": "ML v3 ensemble (prob=0.77, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.77,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_2.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 141,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_3.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_3.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 312,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_3.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.54,
+      "ml_reasoning": "ML v3 ensemble (prob=0.77, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.77,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_3.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_4.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_4.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 307,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_4.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.54,
+      "ml_reasoning": "ML v3 ensemble (prob=0.77, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.77,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_pwd_attacks_4.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Hardcoded Credentials",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "$password = \"test\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_weak_pwd.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Hardcoded Credentials",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Hardcoded Credentials",
+      "severity": "HIGH",
+      "line": 37,
+      "code": "$password = \"test123\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_weak_pwd.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Hardcoded Credentials",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.982,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Hardcoded Credentials",
+      "severity": "HIGH",
+      "line": 42,
+      "code": "$password = \"Test123\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_weak_pwd.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Hardcoded Credentials",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.973,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 127,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ba_weak_pwd.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 141,
+      "code": "echo shell_exec(\"./apps/movie_search \" . $title);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\bof_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.19,
+      "ml_reasoning": "ML v3 ensemble (prob=0.41, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.406,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 141,
+      "code": "echo shell_exec(\"./apps/movie_search \" . $title);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\bof_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 111,
+      "code": "echo \"<p>You ordered <b>\" . $ticket_quantity . \"</b> movie tickets. Total amount charged from your a",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\clickjacking.php",
+      "confidence": "98%",
+      "source": "REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [
+        "abs"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.38,
+      "ml_reasoning": "ML v3 ensemble (prob=0.31, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.311,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "echo \"<p align=\\\"left\\\">\" . shell_exec(\"nslookup  \" . commandi($target)) . \"</p>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\commandi.php",
+      "confidence": "98%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "echo \"<p align=\\\"left\\\">\" . shell_exec(\"nslookup  \" . commandi($target)) . \"</p>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\commandi.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.18,
+      "ml_reasoning": "ML v3 ensemble (prob=0.41, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.408,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 149,
+      "code": "shell_exec(\"ping -n 1 \" . commandi($target));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\commandi_blind.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.2,
+      "ml_reasoning": "ML v3 ensemble (prob=0.40, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.401,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 160,
+      "code": "shell_exec(\"ping -c 1 \" . commandi($target));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\commandi_blind.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.19,
+      "ml_reasoning": "ML v3 ensemble (prob=0.41, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.407,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 65,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_1.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 93,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_1.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 120,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_1.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "if($password_new == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_1.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 86,
+      "code": "$password_curr = hash(\"sha1\", $password_curr, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_1.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.987,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 53,
+      "code": "$token = sha1(uniqid(mt_rand(0,100000)));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_2.php",
+      "confidence": "70%",
+      "source": "GET",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.91,
+      "ml_reasoning": "ML v3 ensemble (prob=0.95, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.953,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 108,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_3.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 59,
+      "code": "$sql = \"UPDATE users SET secret = '\" . $secret . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_3.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 103,
+      "code": "$sql = \"UPDATE users SET secret = '\" . $secret . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_3.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.982,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 213,
+      "code": "<input type=\"hidden\" name=\"login\" value=\"<?php echo $login;?>\">",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_3.php",
+      "confidence": "95%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.994,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "$token = sha1(uniqid(mt_rand(0,100000)));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\csrf_3.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.93,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.964,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 107,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\cs_validation.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 134,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\cs_validation.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 129,
+      "code": "$sql = \"UPDATE users SET password = '\" . $password_new . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\cs_validation.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 96,
+      "code": "$password_new = hash(\"sha1\", $password_new, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\cs_validation.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.958,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 100,
+      "code": "$password_curr = hash(\"sha1\", $password_curr, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\cs_validation.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.96,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 307,
+      "code": "<?php echo $message;?>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\cs_validation.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_1.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 367,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.59,
+      "ml_reasoning": "ML v3 ensemble (prob=0.79, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.793,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 277,
+      "code": "echo $directory_traversal_error;",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_1.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_1.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_2.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 359,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_2.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.59,
+      "ml_reasoning": "ML v3 ensemble (prob=0.79, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.793,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 275,
+      "code": "echo $directory_traversal_error;",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_2.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.994,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\directory_traversal_2.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 38,
+      "code": "<link rel=\"stylesheet\" type=\"text/css\" href=\"http://<?php echo $_SERVER[\"HTTP_HOST\"]?>/bWAPP/stylesh",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\hostheader_1.php",
+      "confidence": "98%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.99,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 45,
+      "code": "$sql = \"SELECT * FROM users WHERE email = '\" . $email . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\hostheader_2.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.94,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.968,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 135,
+      "code": "$sql = \"UPDATE users SET reset_code = '\" . $reset_code . \"' WHERE email = '\" . $email . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\hostheader_2.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\hostheader_2.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 189,
+      "code": "<td align=\"center\"> <a href=hpp-3.php?movie=<?php echo $row[\"id\"]; ?>&name=<?php echo hpp($name);?>&",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\hpp-2.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 133,
+      "code": "<?php echo $message ?>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\hpp-2.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 49,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\hpp-3.php",
+      "confidence": "98%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "echo \"Welcome \" . htmli($firstname) . \" \" . htmli($lastname);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\htmli_get.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "echo \"Welcome \" . htmli($firstname) . \" \" .  htmli($lastname);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\htmli_post.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 109,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\htmli_stored.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 43,
+      "code": "header(\"Location: \" . $_GET[\"url\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_response_splitting.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 31,
+      "code": "header(\"Location: \" . url_check_1($_GET[\"url\"]));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_response_splitting.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 43,
+      "code": "header(\"Location: \" . $_GET[\"url\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_response_splitting.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 36,
+      "code": "if($password_new == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_verb_tampering.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 117,
+      "code": "if($password_new == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_verb_tampering.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "MEDIUM",
+      "line": 140,
+      "code": "$password_new = hash(\"sha1\", $password_new, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_verb_tampering.php",
+      "confidence": "55%",
+      "source": null,
+      "sink": "Insecure Password Storage",
+      "sanitizers": [
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.32,
+      "ml_reasoning": "ML v3 ensemble (prob=0.34, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.34,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 158,
+      "code": "$sql = \"UPDATE users SET password = '\" . $password_new . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_verb_tampering.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.973,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 160,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\http_verb_tampering.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.987,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 126,
+      "code": "<iframe frameborder=\"0\" src=\"robots.txt\" height=\"<?php echo xss($_GET[\"ParamHeight\"])?>\" width=\"<?ph",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\iframei.php",
+      "confidence": "95%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 135,
+      "code": "<iframe frameborder=\"0\" src=\"<?php echo xss($_GET[\"ParamUrl\"])?>\" height=\"<?php echo xss($_GET[\"Para",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\iframei.php",
+      "confidence": "95%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.91,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.955,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 30,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\information_disclosure_1.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 45,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\information_disclosure_1.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.976,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "PHPInfo Exposure",
+      "severity": "HIGH",
+      "line": 30,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\information_disclosure_1.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "PHPInfo Exposure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "PHPInfo Exposure",
+      "severity": "HIGH",
+      "line": 45,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\information_disclosure_1.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "PHPInfo Exposure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.98,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 70,
+      "code": "localStorage.secret = \"<?php if($_COOKIE[\"security_level\"] != \"1\" and $_COOKIE[\"security_level\"] != ",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_crypt_storage_1.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Weak Cryptography",
+      "severity": "HIGH",
+      "line": 55,
+      "code": "$password = sha1($password, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_crypt_storage_2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Weak Cryptography",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.91,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.957,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 33,
+      "code": "if($username == \"\" or $password == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_crypt_storage_2.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 64,
+      "code": "$salt = md5(uniqid());",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_crypt_storage_2.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.02,
+      "ml_reasoning": "ML v3 ensemble (prob=0.49, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.489,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 55,
+      "code": "$password = sha1($password, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_crypt_storage_2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 67,
+      "code": "$password = hash(\"sha256\", $salt . $password, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_crypt_storage_2.php",
+      "confidence": "75%",
+      "source": null,
+      "sink": "Insecure Password Storage",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.83,
+      "ml_reasoning": "ML v3 ensemble (prob=0.91, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.915,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 108,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_direct_object_ref_1.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 59,
+      "code": "$sql = \"UPDATE users SET secret = '\" . $secret . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_direct_object_ref_1.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 103,
+      "code": "$sql = \"UPDATE users SET secret = '\" . $secret . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_direct_object_ref_1.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.982,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 213,
+      "code": "<input type=\"hidden\" name=\"login\" value=\"<?php echo $login;?>\">",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_direct_object_ref_1.php",
+      "confidence": "95%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.994,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "$token = sha1(uniqid(mt_rand(0,100000)));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_direct_object_ref_1.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.93,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.964,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 84,
+      "code": "<iframe sandbox src=\"http://<?php echo \"$_SERVER[SERVER_ADDR]\";?>/evil/sandbox.htm\" height=\"250\" wid",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_iframe.php",
+      "confidence": "95%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 93,
+      "code": "<iframe src=\"http://<?php echo \"$_SERVER[SERVER_ADDR]\";?>/evil/sandbox.htm\" height=\"500\" width=\"500\"",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insecure_iframe.php",
+      "confidence": "95%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 55,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\insuff_transp_layer_protect_1.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "LDAP Injection",
+      "severity": "HIGH",
+      "line": 240,
+      "code": "$r = ldap_bind($ds, $login, $password);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldapi.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "LDAP Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "LDAP Injection",
+      "severity": "HIGH",
+      "line": 237,
+      "code": "$ds = ldap_connect($server);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldapi.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "LDAP Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "LDAP Injection",
+      "severity": "HIGH",
+      "line": 238,
+      "code": "ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);// Sets the LDAP Protocol used by the AD service",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldapi.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "LDAP Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 297,
+      "code": "<td align=\"center\"><?php echo $objectsid?></td>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldapi.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.59,
+      "ml_reasoning": "ML v3 ensemble (prob=0.80, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.795,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 158,
+      "code": "if($login == \"\" || $password == \"\" || $server == \"\" || $dn == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "LDAP Injection",
+      "severity": "HIGH",
+      "line": 169,
+      "code": "$ds = ldap_connect($server);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "LDAP Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "LDAP Injection",
+      "severity": "HIGH",
+      "line": 170,
+      "code": "ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);// Sets the LDAP protocol used by the AD service",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "LDAP Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "LDAP Injection",
+      "severity": "HIGH",
+      "line": 172,
+      "code": "$r = @ldap_bind($ds, $login, $password);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "LDAP Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 398,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.6,
+      "ml_reasoning": "ML v3 ensemble (prob=0.80, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.801,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 316,
+      "code": "<input type=\"text\" id=\"login\" name=\"login\" value=\"<?php echo isset($_SESSION[\"ldap\"][\"login\"])?$_SES",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 319,
+      "code": "<input type=\"password\" id=\"password\" name=\"password\" value=\"<?php echo isset($_SESSION[\"ldap\"][\"pass",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\ldap_connect.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 44,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\login.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 36,
+      "code": "$sql = \"SELECT * FROM users WHERE login = '\" . $login;",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\login.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.93,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.964,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "MEDIUM",
+      "line": 37,
+      "code": "$sql.= \"' AND BINARY password = '\" . $password . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\login.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.4,
+      "ml_reasoning": "ML v3 ensemble (prob=0.30, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.298,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 66,
+      "code": "$token = sha1(uniqid(mt_rand(0,100000)));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\login.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.961,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 34,
+      "code": "$password = hash(\"sha1\", $password, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\login.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.89,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.945,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 66,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\password_change.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 93,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\password_change.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 88,
+      "code": "$sql = \"UPDATE users SET password = '\" . $password_new . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\password_change.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "if($password_new == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\password_change.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "MEDIUM",
+      "line": 55,
+      "code": "$password_new = hash(\"sha1\", $password_new, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\password_change.php",
+      "confidence": "55%",
+      "source": null,
+      "sink": "Insecure Password Storage",
+      "sanitizers": [
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.39,
+      "ml_reasoning": "ML v3 ensemble (prob=0.31, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.307,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 59,
+      "code": "$password_curr = hash(\"sha1\", $password_curr, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\password_change.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.72,
+      "ml_reasoning": "ML v3 ensemble (prob=0.86, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.86,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 90,
+      "code": "<p><i><?php @eval (\"echo \" . $_REQUEST[\"message\"] . \";\");?></i></p>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\phpi.php",
+      "confidence": "70%",
+      "source": "REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.89,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.943,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 19,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\phpinfo.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.7,
+      "ml_reasoning": "ML v3 ensemble (prob=0.85, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.851,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "PHPInfo Exposure",
+      "severity": "HIGH",
+      "line": 19,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\phpinfo.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "PHPInfo Exposure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.68,
+      "ml_reasoning": "ML v3 ensemble (prob=0.84, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.839,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Code Injection",
+      "severity": "HIGH",
+      "line": 82,
+      "code": "@eval($_REQUEST[\"eval\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\php_eval.php",
+      "confidence": "95%",
+      "source": "REQUEST",
+      "sink": "Code Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 33,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\portal.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.994,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 116,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\portal.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.55,
+      "ml_reasoning": "ML v3 ensemble (prob=0.78, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.777,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 212,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\portal.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.54,
+      "ml_reasoning": "ML v3 ensemble (prob=0.77, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.769,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 33,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\portal.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.994,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 101,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\reset.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 58,
+      "code": "unlink($file);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\reset.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.91,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.955,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 68,
+      "code": "unlink($file);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\reset.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.981,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 78,
+      "code": "unlink($file);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\reset.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.981,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Arbitrary File Read",
+      "severity": "HIGH",
+      "line": 59,
+      "code": "readfile($file) or die(\"Couldn't open $file.\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\restrict_folder_access.php",
+      "confidence": "60%",
+      "source": "$_GET",
+      "sink": "Arbitrary File Read",
+      "sanitizers": [
+        "basename"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.3,
+      "ml_reasoning": "ML v3 ensemble (prob=0.35, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.35,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 53,
+      "code": "header(\"Content-Length: \" . filesize($file));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\restrict_folder_access.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.91,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.956,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 167,
+      "code": "if(in_array($language, $available_languages)) include($language);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\rlfi.php",
+      "confidence": "90%",
+      "source": "GET",
+      "sink": "File Inclusion",
+      "sanitizers": [
+        "in_array"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.16,
+      "ml_reasoning": "ML v3 ensemble (prob=0.42, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.421,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 174,
+      "code": "include($language);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\rlfi.php",
+      "confidence": "90%",
+      "source": "GET",
+      "sink": "File Inclusion",
+      "sanitizers": [
+        "in_array"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.986,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 40,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\secret_change.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 71,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\secret_change.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.987,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "$sql = \"SELECT * FROM users WHERE email = '\" . $email . \"' AND BINARY reset_code = '\" . $reset_code ",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\secret_change.php",
+      "confidence": "60%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.94,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.972,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 67,
+      "code": "header(\"Location: \" . $_SERVER[\"SCRIPT_NAME\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\security_level_set.php",
+      "confidence": "85%",
+      "source": "SERVER",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\selections.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 82,
+      "code": "header(\"Location: \" . $_SERVER[\"SCRIPT_NAME\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\selections.php",
+      "confidence": "85%",
+      "source": "SERVER",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.89,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.943,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\selections.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Authentication Bypass",
+      "severity": "HIGH",
+      "line": 62,
+      "code": "if((isset($_COOKIE[\"admin\"])))",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_admin_portal.php",
+      "confidence": "70%",
+      "source": "COOKIE",
+      "sink": "Authentication Bypass",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Authentication Bypass",
+      "severity": "HIGH",
+      "line": 65,
+      "code": "if($_COOKIE[\"admin\"] == \"1\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_admin_portal.php",
+      "confidence": "70%",
+      "source": "COOKIE",
+      "sink": "Authentication Bypass",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 52,
+      "code": "header(\"Location: \" . $_SERVER[\"SCRIPT_NAME\"] . \"?admin=0\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_admin_portal.php",
+      "confidence": "70%",
+      "source": "SERVER",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.976,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 87,
+      "code": "header(\"Location: \" . $_SERVER[\"SCRIPT_NAME\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_admin_portal.php",
+      "confidence": "70%",
+      "source": "SERVER",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.84,
+      "ml_reasoning": "ML v3 ensemble (prob=0.92, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.918,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "header(\"Location: \" . $_SERVER[\"SCRIPT_NAME\"] . \"?admin=0\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_admin_portal.php",
+      "confidence": "70%",
+      "source": "SERVER",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.81,
+      "ml_reasoning": "ML v3 ensemble (prob=0.91, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.906,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 170,
+      "code": "<td><?php echo $key;?></td>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_cookies_httponly.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.962,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 171,
+      "code": "<td><?php echo $cookie;?></td>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_cookies_httponly.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.962,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 178,
+      "code": "<td><?php echo $key;?></td>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_cookies_secure.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.94,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.969,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 179,
+      "code": "<td><?php echo $cookie;?></td>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_cookies_secure.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.962,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 33,
+      "code": "header(\"Location: smgmt_sessionid_url.php?PHPSESSID=\". $session_id );",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_sessionid_url.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.994,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 56,
+      "code": "header(\"Location: smgmt_sessionid_url.php?PHPSESSID=\". $session_id );",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_sessionid_url.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 220,
+      "code": "<td><?php echo $key;?></td>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_strong_sessions.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.91,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.957,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 221,
+      "code": "<td><?php echo $cookie;?></td>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_strong_sessions.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.958,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 69,
+      "code": "$token = uniqid(mt_rand(0,100000));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_strong_sessions.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.977,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 106,
+      "code": "$token = uniqid(mt_rand(0,100000));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\smgmt_strong_sessions.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.974,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 55,
+      "code": "if($_POST[\"login\"] == $login && $_POST[\"password\"] == $password)",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sm_mitm_1.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 48,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sm_mitm_2.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 145,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_1.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 67,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_10-2.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 155,
+      "code": "$recordset = $db->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_11.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 177,
+      "code": "$db->exec($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_12.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 37,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_13-ps.php",
+      "confidence": "65%",
+      "source": "COOKIE",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.17,
+      "ml_reasoning": "ML v3 ensemble (prob=0.58, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.585,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 37,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_13.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.975,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 177,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_13.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "$recordset = $db->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_14.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 67,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_15.php",
+      "confidence": "98%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 80,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_15.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 148,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_16.php",
+      "confidence": "98%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "$sql = \"SELECT * FROM users WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_16.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 142,
+      "code": "$password = hash(\"sha1\", $password, false);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_16.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 97,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_17.php",
+      "confidence": "85%",
+      "source": "SERVER",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 37,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_2-ps.php",
+      "confidence": "65%",
+      "source": "COOKIE",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.17,
+      "ml_reasoning": "ML v3 ensemble (prob=0.58, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.585,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 37,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.975,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 177,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_2.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_3.php",
+      "confidence": "98%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "$sql = \"SELECT * FROM heroes WHERE login = '\" . $login . \"' AND password = '\" . $password . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_3.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 133,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_4.php",
+      "confidence": "98%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 161,
+      "code": "echo \"We have <b>\" . $tickets_stock . \"</b> movie tickets available in our stock.\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_5.php",
+      "confidence": "98%",
+      "source": "REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 145,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_6.php",
+      "confidence": "98%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "XML External Entity",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "$xml = simplexml_load_string($body);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_8-2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "XML External Entity",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "XML External Entity",
+      "severity": "HIGH",
+      "line": 76,
+      "code": "$xml = simplexml_load_string($body);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_8-2.php",
+      "confidence": "75%",
+      "source": "$_INPUT",
+      "sink": "XML External Entity",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.979,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure PHP Configuration",
+      "severity": "HIGH",
+      "line": 30,
+      "code": "ini_set(\"display_errors\",1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_8-2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Insecure PHP Configuration",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Error Handling",
+      "severity": "HIGH",
+      "line": 30,
+      "code": "ini_set(\"display_errors\",1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_8-2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Improper Error Handling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 183,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\sqli_9.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 150,
+      "code": "echo \"The image has been uploaded <a href=\\\"images/\" . $_FILES[\"file\"][\"name\"] . \"\\\" target=\\\"_blank",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unrestricted_file_upload.php",
+      "confidence": "95%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Unsafe File Upload",
+      "severity": "CRITICAL",
+      "line": 34,
+      "code": "move_uploaded_file($_FILES[\"file\"][\"tmp_name\"], \"images/\" . $_FILES[\"file\"][\"name\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unrestricted_file_upload.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Unsafe File Upload",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Unsafe File Upload",
+      "severity": "CRITICAL",
+      "line": 45,
+      "code": "move_uploaded_file($_FILES[\"file\"][\"tmp_name\"], \"images/\" . $_FILES[\"file\"][\"name\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unrestricted_file_upload.php",
+      "confidence": "85%",
+      "source": "FILES",
+      "sink": "Unsafe File Upload",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Unsafe File Upload",
+      "severity": "CRITICAL",
+      "line": 58,
+      "code": "move_uploaded_file($_FILES[\"file\"][\"tmp_name\"], \"images/\" . $_FILES[\"file\"][\"name\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unrestricted_file_upload.php",
+      "confidence": "85%",
+      "source": "FILES",
+      "sink": "Unsafe File Upload",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Unsafe File Upload",
+      "severity": "CRITICAL",
+      "line": 66,
+      "code": "move_uploaded_file($_FILES[\"file\"][\"tmp_name\"],\"images/\" . $_FILES[\"file\"][\"name\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unrestricted_file_upload.php",
+      "confidence": "85%",
+      "source": "FILES",
+      "sink": "Unsafe File Upload",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 82,
+      "code": "header(\"Location: \" . $_REQUEST[\"url\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unvalidated_redir_fwd_1.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 82,
+      "code": "header(\"Location: \" . $_REQUEST[\"url\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unvalidated_redir_fwd_1.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 39,
+      "code": "header(\"Location: \" . $_REQUEST[\"ReturnUrl\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unvalidated_redir_fwd_2.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 39,
+      "code": "header(\"Location: \" . $_REQUEST[\"ReturnUrl\"]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\unvalidated_redir_fwd_2.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 42,
+      "code": "unlink($file);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\update.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.9,
+      "ml_reasoning": "ML v3 ensemble (prob=0.95, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.948,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 52,
+      "code": "unlink($file);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\update.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.94,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.972,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 62,
+      "code": "unlink($file);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\update.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.975,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 37,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_activation.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 64,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_activation.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "$sql = \"SELECT * FROM users WHERE login = '\" . $login . \"' AND BINARY activation_code = '\" . $activa",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_activation.php",
+      "confidence": "60%",
+      "source": "$_GET",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.59,
+      "ml_reasoning": "ML v3 ensemble (prob=0.80, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.796,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 38,
+      "code": "if($login == \"\" or $email == \"\" or $password == \"\" or $secret == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_extra.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 212,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_extra.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 109,
+      "code": "$sql = \"SELECT * FROM users WHERE login = '\" . $login . \"' OR email = '\" . $email . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_extra.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.9,
+      "ml_reasoning": "ML v3 ensemble (prob=0.95, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.952,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "$sql = \"INSERT INTO users (login, password, email, secret, activated) VALUES ('\" . $login . \"','\" . ",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_extra.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.983,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Type Juggling",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "if($login == \"\" or $email == \"\" or $password == \"\" or $secret == \"\")",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_new.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Type Juggling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.99,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 209,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_new.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 106,
+      "code": "$sql = \"SELECT * FROM users WHERE login = '\" . $login . \"' OR email = '\" . $email . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_new.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.9,
+      "ml_reasoning": "ML v3 ensemble (prob=0.95, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.951,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 137,
+      "code": "$sql = \"INSERT INTO users (login, password, email, secret, activated) VALUES ('\" . $login . \"','\" . ",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\user_new.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.983,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "XPath Injection",
+      "severity": "HIGH",
+      "line": 78,
+      "code": "$result = $xml->xpath(\"/heroes/hero[login='\" . $login . \"' and password='\" . $password . \"']\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xmli_1.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "XPath Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure PHP Configuration",
+      "severity": "HIGH",
+      "line": 24,
+      "code": "ini_set(\"display_errors\", 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xmli_1.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure PHP Configuration",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.84,
+      "ml_reasoning": "ML v3 ensemble (prob=0.92, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.92,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Error Handling",
+      "severity": "HIGH",
+      "line": 24,
+      "code": "ini_set(\"display_errors\", 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xmli_1.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Error Handling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.84,
+      "ml_reasoning": "ML v3 ensemble (prob=0.92, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.92,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 237,
+      "code": "echo $message;",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xmli_1.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "XPath Injection",
+      "severity": "HIGH",
+      "line": 158,
+      "code": "$result = $xml->xpath(\"//hero[contains(genre, '$genre')]/movie\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xmli_2.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "XPath Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure PHP Configuration",
+      "severity": "HIGH",
+      "line": 24,
+      "code": "ini_set(\"display_errors\", 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xmli_2.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure PHP Configuration",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.8,
+      "ml_reasoning": "ML v3 ensemble (prob=0.90, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.9,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Error Handling",
+      "severity": "HIGH",
+      "line": 24,
+      "code": "ini_set(\"display_errors\", 1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xmli_2.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Error Handling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.8,
+      "ml_reasoning": "ML v3 ensemble (prob=0.90, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.9,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 79,
+      "code": "echo xss($title) . \"??? Sorry, we don't have that movie :(\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_ajax_1-2.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.978,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 105,
+      "code": "echo '{\"movies\":[{\"response\":\"' . $title . '??? Sorry, we don\\'t have that movie :(\"}]}';",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_ajax_2-2.php",
+      "confidence": "98%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.94,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.969,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Code Injection",
+      "severity": "HIGH",
+      "line": 240,
+      "code": "eval(\"document.write(<?php echo xss($_GET[\"date\"])?>)\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_eval.php",
+      "confidence": "70%",
+      "source": "GET",
+      "sink": "Code Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.19,
+      "ml_reasoning": "ML v3 ensemble (prob=0.40, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.404,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Code Injection",
+      "severity": "CRITICAL",
+      "line": 261,
+      "code": "eval(\"document.write(<?php echo xss($_GET[\"date\"])?>)\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_eval.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "Code Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.19,
+      "ml_reasoning": "ML v3 ensemble (prob=0.40, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.404,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 240,
+      "code": "eval(\"document.write(<?php echo xss($_GET[\"date\"])?>)\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_eval.php",
+      "confidence": "95%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 261,
+      "code": "eval(\"document.write(<?php echo xss($_GET[\"date\"])?>)\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_eval.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 346,
+      "code": "echo \"<option value='$key'>$bug[0]</option>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_eval.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.59,
+      "ml_reasoning": "ML v3 ensemble (prob=0.79, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.793,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_eval.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 35,
+      "code": "header(\"Location: \" . $bug[1]);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_eval.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "echo \"Welcome \" . xss($firstname) . \" \" . xss($lastname);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_get.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 189,
+      "code": "<td align=\"center\"> <a href=xss_href-3.php?movie=<?php echo $row[\"id\"]; ?>&name=<?php echo hpp($name",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_href-2.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 133,
+      "code": "<?php echo $message ?>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_href-2.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 49,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_href-3.php",
+      "confidence": "98%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 131,
+      "code": "var JSONResponseString = '<?php echo $string ?>';",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_json.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.25,
+      "ml_reasoning": "ML v3 ensemble (prob=0.62, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.625,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "$recordset = mysql_query($sql, $link);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_login.php",
+      "confidence": "98%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 140,
+      "code": "$sql = \"SELECT * FROM heroes WHERE login = '\" . $login . \"' AND password = '\" . $password . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_login.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 1.0,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "echo \"Welcome \" . xss($firstname) . \" \" . xss($lastname);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_php_self.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 144,
+      "code": "echo \"Welcome \" . xss($firstname) . \" \" . xss($lastname);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_post.php",
+      "confidence": "85%",
+      "source": "$_POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 120,
+      "code": "echo \"<p>The referer: <i>\" . xss($referer) . \"</i></p>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_referer.php",
+      "confidence": "98%",
+      "source": "SERVER",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 109,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_stored_1.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 97,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_stored_3.php",
+      "confidence": "85%",
+      "source": "REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "mysqli_real_escape_string",
+        "custom_safe_func",
+        "mysqli_real_escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 141,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_stored_3.php",
+      "confidence": "85%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 92,
+      "code": "$sql = \"UPDATE users SET secret = '\" . $secret . \"' WHERE login = '\" . $login . \"'\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_stored_3.php",
+      "confidence": "60%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "escape_string"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 246,
+      "code": "<input type=\"hidden\" name=\"login\" value=\"<?php echo $login;?>\">",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_stored_3.php",
+      "confidence": "95%",
+      "source": "COOKIE",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 173,
+      "code": "$token = sha1(uniqid(mt_rand(0,100000)));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_stored_3.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.976,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 63,
+      "code": "$recordset = $link->query($sql);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_stored_4.php",
+      "confidence": "85%",
+      "source": "SERVER",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 120,
+      "code": "echo \"<p>Your User-Agent: <i>\" . xss($user_agent) . \"</i></p>\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xss_user_agent.php",
+      "confidence": "98%",
+      "source": "SERVER",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "XML External Entity",
+      "severity": "HIGH",
+      "line": 32,
+      "code": "$xml = simplexml_load_string($body);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xxe-2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "XML External Entity",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.989,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "XML External Entity",
+      "severity": "HIGH",
+      "line": 79,
+      "code": "$xml = simplexml_load_string($body);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xxe-2.php",
+      "confidence": "75%",
+      "source": "$_INPUT",
+      "sink": "XML External Entity",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.979,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure PHP Configuration",
+      "severity": "HIGH",
+      "line": 30,
+      "code": "ini_set(\"display_errors\",1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xxe-2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Insecure PHP Configuration",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Error Handling",
+      "severity": "HIGH",
+      "line": 30,
+      "code": "ini_set(\"display_errors\",1);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\xxe-2.php",
+      "confidence": "85%",
+      "source": "COOKIE",
+      "sink": "Improper Error Handling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.988,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 875,
+      "code": "var_dump($data);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\class.nusoap_base.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.979,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Certificate Validation",
+      "severity": "HIGH",
+      "line": 325,
+      "code": "$this->setCurlOption(CURLOPT_SSL_VERIFYPEER, 0);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\class.soap_transport_http.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Certificate Validation",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Certificate Validation",
+      "severity": "HIGH",
+      "line": 326,
+      "code": "$this->setCurlOption(CURLOPT_SSL_VERIFYHOST, 0);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\class.soap_transport_http.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Certificate Validation",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 87,
+      "code": "unlink($filename);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\class.wsdlcache.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.08,
+      "ml_reasoning": "ML v3 ensemble (prob=0.46, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.46,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 875,
+      "code": "var_dump($data);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\nusoap.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.991,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Certificate Validation",
+      "severity": "HIGH",
+      "line": 2479,
+      "code": "$this->setCurlOption(CURLOPT_SSL_VERIFYPEER, 0);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\nusoap.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Certificate Validation",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.997,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Certificate Validation",
+      "severity": "HIGH",
+      "line": 2480,
+      "code": "$this->setCurlOption(CURLOPT_SSL_VERIFYHOST, 0);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\nusoap.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Certificate Validation",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 90,
+      "code": "$cid = md5(uniqid(time()));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\nusoapmime.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.28,
+      "ml_reasoning": "ML v3 ensemble (prob=0.64, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.641,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 320,
+      "code": "$cid = md5(uniqid(time()));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/bwapp\\soap\\nusoapmime.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.28,
+      "ml_reasoning": "ML v3 ensemble (prob=0.64, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.641,
+      "ml_classification": "vulnerable"
+    }
+  ],
+  "skipped_vendor_files": 0,
+  "scan_time_seconds": 8.68,
+  "cross_file_stats": {
+    "include_edges": 169,
+    "global_vars": 208,
+    "namespace_mappings": 20,
+    "cross_file_findings": 0
+  },
+  "ml_fps_eliminated": 4,
+  "scan_mode": "standard"
+}

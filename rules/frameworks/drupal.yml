@@ -1,0 +1,50 @@
+name: Drupal
+detect_patterns:
+  - "core/includes/bootstrap.inc"
+  - "Drupal\\"
+  - "sites/default/settings.php"
+  - "drupal_"
+sanitizers:
+  SQL:
+    - "db_query"
+    - "db_select"
+    - "->condition"
+    - "->fields"
+    - "->execute"
+    - "Database::getConnection"
+    - "->select("
+    - "->insert("
+    - "->update("
+    - "->delete("
+    - "::load"
+    - "::loadMultiple"
+    - "EntityQuery"
+  XSS:
+    - "Html::escape"
+    - "Xss::filter"
+    - "check_plain"
+    - "t("
+    - "\\Drupal::translation"
+    - "SafeMarkup::checkPlain"
+    - "SafeMarkup::format"
+  CSRF:
+    - "\\Drupal::csrfToken"
+    - "CsrfTokenGenerator"
+sources:
+  "\\Drupal::request()->query->get": GET
+  "\\Drupal::request()->request->get": POST
+  "$request->query->get": GET
+  "$request->request->get": POST
+sinks:
+  "db_query": SQL_INJECTION
+  "->where(": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "file_get_contents": SSRF
+  "\\Drupal::httpClient": SSRF
+  "unserialize": DESERIALIZATION
+safe_patterns:
+  - '->condition\('
+  - '::load\('
+  - 't\(\s*[''"]'

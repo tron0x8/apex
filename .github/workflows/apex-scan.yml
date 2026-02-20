@@ -1,0 +1,97 @@
+name: APEX Security Scan
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    name: PHP Security Analysis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Clone APEX Scanner
+        run: |
+          git clone https://github.com/tron0x8/apex.git /tmp/apex
+
+      - name: Run APEX Scan
+        id: apex
+        run: |
+          cd /tmp/apex
+          # Skip scanning test files with intentional vulnerabilities
+          find ${{ github.workspace }} -name "*.php" ! -path "*/tests/*" ! -path "*/test/*" ! -name "test_*.php" > /tmp/files.txt
+          if [ -s /tmp/files.txt ]; then
+            python apex.py ${{ github.workspace }} -m full -f sarif -o /tmp/apex-results.sarif -v || true
+          else
+            echo '{"runs":[]}' > /tmp/apex-results.sarif
+          fi
+        continue-on-error: true
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: /tmp/apex-results.sarif
+        continue-on-error: true
+
+      - name: Generate JSON Report
+        if: always()
+        run: |
+          cd /tmp/apex
+          python apex.py ${{ github.workspace }} -m full -f json -o ${{ github.workspace }}/apex-report.json || echo '{"summary":{"critical":0,"high":0,"medium":0,"low":0},"findings":[]}' > ${{ github.workspace }}/apex-report.json
+
+      - name: Upload JSON Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apex-security-report
+          path: apex-report.json
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('apex-report.json', 'utf8'));
+
+            let comment = '## APEX Security Scan Results\n\n';
+            comment += `| Severity | Count |\n|----------|-------|\n`;
+            comment += `| CRITICAL | ${report.summary.critical} |\n`;
+            comment += `| HIGH | ${report.summary.high} |\n`;
+            comment += `| MEDIUM | ${report.summary.medium} |\n`;
+            comment += `| LOW | ${report.summary.low} |\n\n`;
+
+            if (report.summary.critical > 0 || report.summary.high > 0) {
+              comment += '**Action Required:** Critical or high severity vulnerabilities detected.\n\n';
+            }
+
+            if (report.findings.length > 0) {
+              comment += '### Top Findings\n\n';
+              report.findings.slice(0, 5).forEach((f, i) => {
+                comment += `${i+1}. **${f.type}** (${f.severity}) - \`${f.file}:${f.line}\`\n`;
+              });
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

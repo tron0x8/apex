@@ -1,0 +1,1000 @@
+{
+  "scan_date": "2026-02-20T18:52:53.599340",
+  "target": "C:/Users/User/Desktop/vuln_datasets/geeklog/",
+  "total_files": 837,
+  "total_findings": 46,
+  "critical": 1,
+  "high": 43,
+  "medium": 2,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 8599,
+      "code": "var_dump($errContext);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\lib-common.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.976,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 324,
+      "code": "$reqid = substr(md5(uniqid(rand(), 1)), 1, 16);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\usersettings.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.88,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.939,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 400,
+      "code": "$reqid = substr(md5(uniqid(rand(), 1)), 1, 16);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\usersettings.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.977,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 642,
+      "code": "require_once $filename;",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\configuration.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "File Inclusion",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 719,
+      "code": "@unlink($path);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\envcheck.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.985,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 773,
+      "code": "rename($plugin_dir, $plugin_dir . '.previous');",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\plugins.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.43,
+      "ml_reasoning": "ML v3 ensemble (prob=0.72, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.716,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 781,
+      "code": "rename($public_dir, $public_dir . '.previous');",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\plugins.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.11,
+      "ml_reasoning": "ML v3 ensemble (prob=0.44, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.444,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 789,
+      "code": "rename($admin_dir, $admin_dir . '.previous');",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\plugins.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.14,
+      "ml_reasoning": "ML v3 ensemble (prob=0.43, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.428,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 69,
+      "code": "@unlink($feedfile);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\syndication.php",
+      "confidence": "70%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.09,
+      "ml_reasoning": "ML v3 ensemble (prob=0.55, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.546,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "MEDIUM",
+      "line": 451,
+      "code": ". urlencode($currentFileName) . '&foffset=' . $fOffset . '&totalqueries=' . $totalQueries . '&db_con",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\bigdump.php",
+      "confidence": "50%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "quote"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.58,
+      "ml_reasoning": "ML v3 ensemble (prob=0.79, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.791,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "MEDIUM",
+      "line": 453,
+      "code": ". ' <p><a href=\"' . $_SERVER['PHP_SELF'] . '?start=' . $lineNumber . '&fn=' . urlencode($currentFile",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\bigdump.php",
+      "confidence": "50%",
+      "source": "$_REQUEST",
+      "sink": "SQL Injection",
+      "sanitizers": [
+        "quote"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.1,
+      "ml_reasoning": "ML v3 ensemble (prob=0.55, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.55,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "CRITICAL",
+      "line": 274,
+      "code": "$sql = sprintf(\"UPDATE %s SET value = '%s' WHERE name = '%s'\", $_TABLES['conf_values'], serialize($_",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\rescue.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.27,
+      "ml_reasoning": "ML v3 ensemble (prob=0.63, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.634,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Deserialization",
+      "severity": "HIGH",
+      "line": 118,
+      "code": "$rows[$A['name']] = unserialize($A['value']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\rescue.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Insecure Deserialization",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.69,
+      "ml_reasoning": "ML v3 ensemble (prob=0.84, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.843,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 288,
+      "code": "$passwd = md5($passwd);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\rescue.php",
+      "confidence": "70%",
+      "source": "POST",
+      "sink": "Insecure Password Storage",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.93,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.965,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 272,
+      "code": "header('Location: index.php?mode=' . $_GET['op']",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\classes\\installer.class.php",
+      "confidence": "70%",
+      "source": "GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.93,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.966,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 631,
+      "code": "header('Location: bigdump.php?start=1&foffset=0&totalqueries=0'",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\classes\\Migrate.php",
+      "confidence": "50%",
+      "source": "$_REQUEST",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [
+        "str_replace"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.19,
+      "ml_reasoning": "ML v3 ensemble (prob=0.40, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.405,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Open Redirect",
+      "severity": "HIGH",
+      "line": 631,
+      "code": "header('Location: bigdump.php?start=1&foffset=0&totalqueries=0'",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\classes\\Migrate.php",
+      "confidence": "75%",
+      "source": "$_REQUEST",
+      "sink": "Open Redirect",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.05,
+      "ml_reasoning": "ML v3 ensemble (prob=0.47, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.474,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 56,
+      "code": "@mysql_query(\"SET NAMES {$args['charset']}\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\classes\\mysql.class.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.21,
+      "ml_reasoning": "ML v3 ensemble (prob=0.39, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.393,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "SQL Injection",
+      "severity": "HIGH",
+      "line": 53,
+      "code": "@$this->conn->query(\"SET NAMES {$args['charset']}\");",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\admin\\install\\classes\\mysqli.class.php",
+      "confidence": "60%",
+      "source": "WEAK_INPUT",
+      "sink": "SQL Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.21,
+      "ml_reasoning": "ML v3 ensemble (prob=0.40, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.396,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Weak Session Management",
+      "severity": "HIGH",
+      "line": 210,
+      "code": "@session_start();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\public_html\\filemanager\\libs\\jQuery-File-Upload\\server\\php\\UploadHandler.php",
+      "confidence": "65%",
+      "source": "SERVER",
+      "sink": "Weak Session Management",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.66,
+      "ml_reasoning": "ML v3 ensemble (prob=0.83, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.831,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 1082,
+      "code": "if (!@unlink($lFilename_large_complete)) {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-article.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.982,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 1104,
+      "code": "@unlink($thumb_path);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-article.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.984,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 361,
+      "code": "unlink($fullpath);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-plugins.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.998,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 1449,
+      "code": "$token = md5($uid . $pageURL . uniqid(rand(), 1));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-security.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.67,
+      "ml_reasoning": "ML v3 ensemble (prob=0.83, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.833,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 1710,
+      "code": "if (!@unlink($orphan)) {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-security.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.19,
+      "ml_reasoning": "ML v3 ensemble (prob=0.60, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.597,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 1466,
+      "code": "$emailconfirmid = substr(md5(uniqid(rand(), 1)), 1, 16);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-user.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.979,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 652,
+      "code": "if (!@unlink($fileToDelete)) {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-user.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.88,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.94,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 192,
+      "code": "header('Location: ' . $_CONF['site_url'] . '/webservices/atom/?plugin=' . $WS_PLUGIN . '&id' . '=' .",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\lib-webservices.php",
+      "confidence": "85%",
+      "source": "SERVER",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.996,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 2451,
+      "code": "if (@rename($old_filepath, $new_filepath)) {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\article.class.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.992,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 2469,
+      "code": "if (!@rename($old_filepath_large, $new_filepath_large)) {",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\article.class.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.98,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 2548,
+      "code": "@rename($old_thumb_path, $new_thumb_path);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\article.class.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.981,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 546,
+      "code": "unlink($image);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\oauthhelper.class.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.63,
+      "ml_reasoning": "ML v3 ensemble (prob=0.82, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.815,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 438,
+      "code": "var_dump($value);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\Session.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.84,
+      "ml_reasoning": "ML v3 ensemble (prob=0.92, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.92,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 526,
+      "code": "var_dump($retval);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\Session.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.6,
+      "ml_reasoning": "ML v3 ensemble (prob=0.80, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.8,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Weak Session Management",
+      "severity": "HIGH",
+      "line": 92,
+      "code": "ini_set('session.sid_length', 40);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\Session.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Weak Session Management",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.88,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.942,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Unsafe Callback Injection",
+      "severity": "HIGH",
+      "line": 191,
+      "code": "uasort($timezones, array('TimeZoneConfig', '_sort_by_timezone'));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\timezoneconfig.class.php",
+      "confidence": "50%",
+      "source": "$_COOKIE",
+      "sink": "Unsafe Callback Injection",
+      "sanitizers": [
+        "in_array",
+        "is_callable"
+      ],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.1,
+      "ml_reasoning": "ML v3 ensemble (prob=0.45, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.451,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 135,
+      "code": "$password_cyphertext = md5($password);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\authentication\\LDAP.auth.class.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Password Storage",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Password Storage",
+      "severity": "HIGH",
+      "line": 141,
+      "code": "$password_cyphertext = md5($password . $salt);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\authentication\\LDAP.auth.class.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure Password Storage",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure PHP Configuration",
+      "severity": "HIGH",
+      "line": 845,
+      "code": "ini_set('display_errors', '1');",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\htmLawed\\htmLawed.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Insecure PHP Configuration",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Improper Error Handling",
+      "severity": "HIGH",
+      "line": 845,
+      "code": "ini_set('display_errors', '1');",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\htmLawed\\htmLawed.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Improper Error Handling",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Insecure Randomness",
+      "severity": "HIGH",
+      "line": 113,
+      "code": "$_SESSION['token'] = md5(uniqid(rand(), 1));",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\htmLawed\\htmLawedTest.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "Insecure Randomness",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.86,
+      "ml_reasoning": "ML v3 ensemble (prob=0.93, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.928,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 21,
+      "code": "print_r($this);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\Text\\Wiki\\Render\\Latex\\Html.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.24,
+      "ml_reasoning": "ML v3 ensemble (prob=0.62, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.619,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 1505,
+      "code": "var_dump($XML_RPC_xh[$parser]['value']);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\system\\classes\\XML\\RPC.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Race Condition",
+      "severity": "HIGH",
+      "line": 312,
+      "code": "unlink ($fullpath);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\tests\\files\\dummy\\system\\lib-plugins.php",
+      "confidence": "80%",
+      "source": "base64_decode",
+      "sink": "Race Condition",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 1.0,
+      "ml_reasoning": "ML v3 ensemble (prob=1.00, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.999,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 46,
+      "code": "var_dump($v);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/geeklog\\tests\\system\\classes\\PluginClassTest.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.97, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.974,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Code Injection",
+      "severity": "HIGH",
+      "line": 108,
+      "code": "$language = preg_replace('/[^a-z0-9\\-_]/', '', $language);",
+      "file": "C:\\Users\\User\\Desktop\\vuln_datasets\\geeklog\\public_html\\admin\\install\\success.php",
+      "confidence": "90%",
+      "source": "$_COOKIE",
+      "sink": "Code Injection",
+      "sanitizers": [],
+      "cross_file": true,
+      "source_file": "C:\\Users\\User\\Desktop\\vuln_datasets\\geeklog\\public_html\\lib-common.php",
+      "source_line": 494,
+      "flow_path": [
+        "C:\\Users\\User\\Desktop\\vuln_datasets\\geeklog\\public_html\\lib-common.php",
+        "C:\\Users\\User\\Desktop\\vuln_datasets\\geeklog\\public_html\\admin\\install\\success.php"
+      ],
+      "ml_is_tp": true,
+      "ml_confidence": 0.95,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.976,
+      "ml_classification": "vulnerable"
+    }
+  ],
+  "skipped_vendor_files": 1246,
+  "scan_time_seconds": 41.46,
+  "cross_file_stats": {
+    "include_edges": 320,
+    "global_vars": 3557,
+    "namespace_mappings": 343,
+    "cross_file_findings": 4
+  },
+  "ml_fps_eliminated": 3,
+  "scan_mode": "standard"
+}

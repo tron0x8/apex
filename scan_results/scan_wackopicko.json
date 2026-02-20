@@ -1,0 +1,421 @@
+{
+  "scan_date": "2026-02-20T18:52:16.575020",
+  "target": "C:/Users/User/Desktop/vuln_datasets/wackopicko/",
+  "total_files": 49,
+  "total_findings": 19,
+  "critical": 0,
+  "high": 19,
+  "medium": 0,
+  "low": 0,
+  "findings": [
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 11,
+      "code": "exec($command, $output, $ret);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\passcheck.php",
+      "confidence": "98%",
+      "source": "POST",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.995,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 20,
+      "code": "<h2>Checking your file <?= $name ?></h2>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\piccheck.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.98,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.99,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 19,
+      "code": "Your favorite color is <?= $_GET['value'] ?>! and you've been entered in our contest!",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\submitname.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.994,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 8,
+      "code": "<head><?php echo $head; ?> <title><?php echo $title; ?></title></head>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\test.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.982,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 10,
+      "code": "<a href=\"http://<?php echo $href; ?>\">text</a>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\test.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.96,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.982,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 12,
+      "code": "<?php echo $script; ?>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\test.php",
+      "confidence": "98%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.986,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "File Inclusion",
+      "severity": "HIGH",
+      "line": 4,
+      "code": "require_once($page);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\admin\\index.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "File Inclusion",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.987,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Hardcoded Credentials",
+      "severity": "HIGH",
+      "line": 4,
+      "code": "$pass = \"webvuln!@#\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\include\\ourdb.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Hardcoded Credentials",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.86,
+      "ml_reasoning": "ML v3 ensemble (prob=0.93, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.932,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 5,
+      "code": "print_r($res);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\include\\test.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.8,
+      "ml_reasoning": "ML v3 ensemble (prob=0.90, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.898,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Information Disclosure",
+      "severity": "HIGH",
+      "line": 3,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\include\\test.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "Information Disclosure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.92,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.962,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "PHPInfo Exposure",
+      "severity": "HIGH",
+      "line": 3,
+      "code": "phpinfo();",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\include\\test.php",
+      "confidence": "65%",
+      "source": null,
+      "sink": "PHPInfo Exposure",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": false
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.91,
+      "ml_reasoning": "ML v3 ensemble (prob=0.96, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.956,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 22,
+      "code": "<h2>Pictures that are tagged as '<?= $_GET['query']  ?>'</h2>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\pictures\\search.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.99,
+      "ml_reasoning": "ML v3 ensemble (prob=0.99, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.993,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "HTTP Header Injection",
+      "severity": "HIGH",
+      "line": 19,
+      "code": "<?php our_header(\"\", $_GET['query']); ?>",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\pictures\\search.php",
+      "confidence": "85%",
+      "source": "GET",
+      "sink": "HTTP Header Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.983,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 25,
+      "code": "if (!file_exists(\"../upload/{$_POST['tag']}/\"))",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\pictures\\upload.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.25,
+      "ml_reasoning": "ML v3 ensemble (prob=0.37, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.373,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 27,
+      "code": "mkdir(\"../upload/{$_POST['tag']}\", 0777, True);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\pictures\\upload.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.24,
+      "ml_reasoning": "ML v3 ensemble (prob=0.38, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.38,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 29,
+      "code": "$filename = \"../upload/{$_POST['tag']}/{$_POST['name']}\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\pictures\\upload.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.21,
+      "ml_reasoning": "ML v3 ensemble (prob=0.39, class=suspicious)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.393,
+      "ml_classification": "suspicious"
+    },
+    {
+      "type": "PHAR Deserialization",
+      "severity": "HIGH",
+      "line": 25,
+      "code": "if (!file_exists(\"../upload/{$_POST['tag']}/\"))",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\pictures\\upload.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "PHAR Deserialization",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.88,
+      "ml_reasoning": "ML v3 ensemble (prob=0.94, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.939,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Command Injection",
+      "severity": "HIGH",
+      "line": 11,
+      "code": "exec(\"/bin/cat /usr/share/dict/words | grep \" . $pass, $output, $status);",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\users\\check_pass.php",
+      "confidence": "85%",
+      "source": "$_GET",
+      "sink": "Command Injection",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.97,
+      "ml_reasoning": "ML v3 ensemble (prob=0.98, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.984,
+      "ml_classification": "vulnerable"
+    },
+    {
+      "type": "Cross-Site Scripting",
+      "severity": "HIGH",
+      "line": 27,
+      "code": "$flash['error'] = \"Username '{$_POST['username']}' is already in use.\";",
+      "file": "C:/Users/User/Desktop/vuln_datasets/wackopicko\\website\\users\\register.php",
+      "confidence": "85%",
+      "source": "POST",
+      "sink": "Cross-Site Scripting",
+      "sanitizers": [],
+      "stages": {
+        "pattern": true,
+        "taint": true
+      },
+      "ml_is_tp": true,
+      "ml_confidence": 0.39,
+      "ml_reasoning": "ML v3 ensemble (prob=0.70, class=vulnerable)",
+      "ml_method": "ml_v3",
+      "ml_score": 0.696,
+      "ml_classification": "vulnerable"
+    }
+  ],
+  "skipped_vendor_files": 0,
+  "scan_time_seconds": 0.52,
+  "cross_file_stats": {
+    "include_edges": 45,
+    "global_vars": 40,
+    "namespace_mappings": 7,
+    "cross_file_findings": 0
+  },
+  "ml_fps_eliminated": 0,
+  "scan_mode": "standard"
+}

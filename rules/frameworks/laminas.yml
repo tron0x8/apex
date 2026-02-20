@@ -1,0 +1,52 @@
+name: Laminas
+detect_patterns:
+  - "Laminas\\"
+  - "Zend\\"
+  - "TableGateway"
+  - "laminas/laminas"
+sanitizers:
+  SQL:
+    - "TableGateway"
+    - "->select"
+    - "->insert"
+    - "->update"
+    - "->delete"
+    - "Sql\\Select"
+    - "Sql\\Where"
+    - "->prepareStatementForSqlObject"
+    - "AbstractTableGateway"
+    - "->getSql"
+  XSS:
+    - "->escapeHtml"
+    - "Escaper::escapeHtml"
+    - "->escapeHtmlAttr"
+    - "->escapeJs"
+    - "->escapeCss"
+    - "->escapeUrl"
+    - "Laminas\\Escaper"
+    - "Zend\\Escaper"
+  CSRF:
+    - "Csrf"
+    - "getCsrfValidator"
+    - "csrf_token"
+    - "FormElementManager"
+sources:
+  "$this->params()->fromQuery": GET
+  "$this->params()->fromPost": POST
+  "$this->params()->fromRoute": REQUEST
+  "$request->getQuery": GET
+  "$request->getPost": POST
+sinks:
+  "->query(": SQL_INJECTION
+  "Adapter::query": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "->redirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "HttpClient": SSRF
+  "unserialize": DESERIALIZATION
+safe_patterns:
+  - 'TableGateway\s*\('
+  - '->escapeHtml\s*\('
+  - 'Sql\\Where'

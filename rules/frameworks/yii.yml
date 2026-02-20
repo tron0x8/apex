@@ -1,0 +1,75 @@
+name: Yii
+detect_patterns:
+  - "yii"
+  - "Yii::"
+  - "yii\\"
+  - "yiisoft"
+  - "web/index.php"
+  - "config/web.php"
+  - "composer.json:yiisoft/yii2"
+  - "yii\\base\\Component"
+  - "yii\\web\\Controller"
+sanitizers:
+  SQL:
+    - "->createCommand"
+    - "->queryAll"
+    - "->queryOne"
+    - "->bindValue"
+    - "->bindParam"
+    - "->bindValues"
+    - "ActiveRecord::find"
+    - "->where"
+    - "->andWhere"
+    - "->orWhere"
+    - "->params"
+    - "Yii::$app->db"
+    - "QueryBuilder"
+    - "->addParams"
+    - "ActiveQuery"
+  XSS:
+    - "Html::encode"
+    - "HtmlPurifier::process"
+    - "->textInput"
+    - "->textarea"
+    - "->checkbox"
+    - "Yii::$app->formatter"
+    - "::widget("
+    - "yii\\helpers\\Html"
+    - "->render("
+  CSRF:
+    - "_csrf"
+    - "validateCsrfToken"
+    - "csrfParam"
+    - "enableCsrfValidation"
+    - "getCsrfToken"
+  AUTH:
+    - "Yii::$app->user->identity"
+    - "->can("
+    - "AccessControl"
+    - "->checkAccess"
+sources:
+  "Yii::$app->request->get": GET
+  "Yii::$app->request->post": POST
+  "Yii::$app->request->getBodyParams": POST
+  "Yii::$app->request->getQueryParams": GET
+  "Yii::$app->request->getRawBody": REQUEST
+  "Yii::$app->request->cookies": COOKIE
+  "$_GET": GET
+  "$_POST": POST
+sinks:
+  "->createCommand(": SQL_INJECTION
+  "Yii::$app->db->createCommand": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "system": COMMAND_INJECTION
+  "->redirect": OPEN_REDIRECT
+  "file_get_contents": SSRF
+  "unserialize": DESERIALIZATION
+  "include": FILE_INCLUSION
+  "require": FILE_INCLUSION
+safe_patterns:
+  - '->bindValue\s*\('
+  - '->bindParam\s*\('
+  - '->where\s*\(\s*\['
+  - 'Html::encode\s*\('

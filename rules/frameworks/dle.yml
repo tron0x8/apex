@@ -1,0 +1,41 @@
+name: DLE
+detect_patterns:
+  - "engine/engine.php"
+  - "engine/data/dbconfig.php"
+  - "DataLife Engine"
+  - "$member_id"
+  - "dle_"
+sanitizers:
+  SQL:
+    - "$db->safesql"
+    - "->safesql"
+    - "intval"
+    - "(int)"
+  XSS:
+    - "htmlspecialchars"
+    - "strip_tags"
+    - "dle_xss_clean"
+  AUTH:
+    - "$member_id['user_group']"
+    - "$is_logged"
+    - "check_xss"
+sources:
+  "$_GET": GET
+  "$_POST": POST
+  "$_REQUEST": REQUEST
+  "$_COOKIE": COOKIE
+sinks:
+  "$db->query": SQL_INJECTION
+  "eval": CODE_INJECTION
+  "exec": COMMAND_INJECTION
+  "shell_exec": COMMAND_INJECTION
+  "system": COMMAND_INJECTION
+  "include": FILE_INCLUSION
+  "require": FILE_INCLUSION
+  "file_get_contents": SSRF
+  "unserialize": DESERIALIZATION
+  "header": OPEN_REDIRECT
+safe_patterns:
+  - '$db->safesql\('
+  - '\$member_id\s*\[\s*[''"]user_group'
+  - 'intval\s*\('

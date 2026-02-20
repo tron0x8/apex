@@ -1,0 +1,255 @@
+# which args carry taint through php builtins
+# str_replace($search, $replace, $subject) - only $subject (arg 2) propagates
+propagators:
+  - name: str_replace
+    propagates_from: [2]
+  - name: str_ireplace
+    propagates_from: [2]
+  - name: substr
+    propagates_from: [0]
+  - name: substr_replace
+    propagates_from: [0]
+  - name: strtolower
+    propagates_from: [0]
+  - name: strtoupper
+    propagates_from: [0]
+  - name: ucfirst
+    propagates_from: [0]
+  - name: lcfirst
+    propagates_from: [0]
+  - name: ucwords
+    propagates_from: [0]
+  - name: trim
+    propagates_from: [0]
+  - name: ltrim
+    propagates_from: [0]
+  - name: rtrim
+    propagates_from: [0]
+  - name: nl2br
+    propagates_from: [0]
+  - name: wordwrap
+    propagates_from: [0]
+  - name: chunk_split
+    propagates_from: [0]
+  - name: str_pad
+    propagates_from: [0]
+  - name: str_repeat
+    propagates_from: [0]
+  - name: strrev
+    propagates_from: [0]
+  - name: str_rot13
+    propagates_from: [0]
+  - name: base64_decode
+    propagates_from: [0]
+  - name: base64_encode
+    propagates_from: [0]
+  - name: urldecode
+    propagates_from: [0]
+  - name: rawurldecode
+    propagates_from: [0]
+  - name: html_entity_decode
+    propagates_from: [0]
+  - name: stripslashes
+    propagates_from: [0]
+  - name: stripcslashes
+    propagates_from: [0]
+  - name: mb_substr
+    propagates_from: [0]
+  - name: mb_strtolower
+    propagates_from: [0]
+  - name: mb_strtoupper
+    propagates_from: [0]
+  - name: mb_convert_encoding
+    propagates_from: [0]
+  - name: mb_convert_case
+    propagates_from: [0]
+  - name: iconv
+    propagates_from: [2]
+  - name: sprintf
+    propagates_from: [1, 2, 3, 4, 5]
+  - name: vsprintf
+    propagates_from: [1]
+  - name: implode
+    propagates_from: [1]
+  - name: join
+    propagates_from: [1]
+  - name: explode
+    propagates_from: [1]
+  - name: preg_replace
+    propagates_from: [2]
+  - name: preg_split
+    propagates_from: [1]
+  - name: preg_replace_callback
+    propagates_from: [2]
+  - name: json_decode
+    propagates_from: [0]
+  - name: json_encode
+    propagates_from: [0]
+  - name: serialize
+    propagates_from: [0]
+  - name: gzinflate
+    propagates_from: [0]
+  - name: gzuncompress
+    propagates_from: [0]
+  - name: gzdecode
+    propagates_from: [0]
+  - name: convert_uudecode
+    propagates_from: [0]
+  - name: hex2bin
+    propagates_from: [0]
+  - name: pack
+    propagates_from: [1, 2, 3]
+  - name: unpack
+    propagates_from: [1]
+
+  # Array functions that propagate taint
+  - name: array_pop
+    propagates_from: [0]
+  - name: array_shift
+    propagates_from: [0]
+  - name: array_values
+    propagates_from: [0]
+  - name: array_unique
+    propagates_from: [0]
+  - name: array_reverse
+    propagates_from: [0]
+  - name: array_slice
+    propagates_from: [0]
+  - name: array_splice
+    propagates_from: [0]
+  - name: array_merge
+    propagates_from: [0, 1, 2, 3]
+  - name: array_combine
+    propagates_from: [1]
+  - name: array_column
+    propagates_from: [0]
+  - name: array_chunk
+    propagates_from: [0]
+  - name: array_filter
+    propagates_from: [0]
+  - name: array_map
+    propagates_from: [1]
+  - name: array_flip
+    propagates_from: [0]
+  - name: current
+    propagates_from: [0]
+  - name: next
+    propagates_from: [0]
+  - name: prev
+    propagates_from: [0]
+  - name: reset
+    propagates_from: [0]
+  - name: end
+    propagates_from: [0]
+  - name: compact
+    propagates_from: [0, 1, 2, 3]
+
+  # Type conversion that sanitizes
+  - name: intval
+    propagates_from: [0]
+    sanitizes: [SQL, XSS, COMMAND, CODE, FILE_PATH, FILE_INCLUDE, NOSQL]
+  - name: floatval
+    propagates_from: [0]
+    sanitizes: [SQL, XSS, COMMAND, CODE, FILE_PATH, NOSQL]
+  - name: boolval
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND, CODE, FILE_PATH, FILE_INCLUDE, NOSQL]
+  - name: settype
+    propagates_from: []
+  - name: number_format
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND]
+  - name: abs
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND]
+  - name: ceil
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND]
+  - name: floor
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND]
+  - name: round
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND]
+  - name: min
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND]
+  - name: max
+    propagates_from: []
+    sanitizes: [SQL, XSS, COMMAND]
+
+  # Functions that return clean data
+  - name: count
+    propagates_from: []
+  - name: sizeof
+    propagates_from: []
+  - name: strlen
+    propagates_from: []
+  - name: mb_strlen
+    propagates_from: []
+  - name: strpos
+    propagates_from: []
+  - name: strrpos
+    propagates_from: []
+  - name: stripos
+    propagates_from: []
+  - name: array_key_exists
+    propagates_from: []
+  - name: in_array
+    propagates_from: []
+  - name: array_search
+    propagates_from: []
+  - name: is_numeric
+    propagates_from: []
+  - name: is_int
+    propagates_from: []
+  - name: is_string
+    propagates_from: []
+  - name: is_array
+    propagates_from: []
+  - name: is_object
+    propagates_from: []
+  - name: is_bool
+    propagates_from: []
+  - name: is_null
+    propagates_from: []
+  - name: isset
+    propagates_from: []
+  - name: empty
+    propagates_from: []
+  - name: md5
+    propagates_from: []
+  - name: sha1
+    propagates_from: []
+  - name: hash
+    propagates_from: []
+  - name: crc32
+    propagates_from: []
+  - name: password_hash
+    propagates_from: []
+  - name: password_verify
+    propagates_from: []
+  - name: array_keys
+    propagates_from: []
+  - name: date
+    propagates_from: []
+  - name: time
+    propagates_from: []
+  - name: strtotime
+    propagates_from: []
+  - name: microtime
+    propagates_from: []
+  - name: gettype
+    propagates_from: []
+  - name: get_class
+    propagates_from: []
+  - name: class_exists
+    propagates_from: []
+  - name: function_exists
+    propagates_from: []
+  - name: defined
+    propagates_from: []
+  - name: var_export
+    propagates_from: [0]
+  - name: print_r
+    propagates_from: [0]

@@ -1,0 +1,493 @@
+
+comment_patterns:
+  - name: single_line_comment
+    category: comment
+    pattern: '^\s*(?://|#)'
+    applies_to: []
+    description: "Code in single-line comment"
+
+  - name: block_comment
+    category: comment
+    pattern: '^\s*\*'
+    applies_to: []
+    description: "Code in block comment"
+
+  - name: phpdoc
+    category: comment
+    pattern: '^\s*\*\s*@(?:param|return|var|throws|see)'
+    applies_to: []
+    description: "PHPDoc annotation"
+
+dead_code_patterns:
+  - name: after_return
+    category: dead_code
+    pattern: '^\s*(?:return|exit|die)\s*[;(]'
+    applies_to: []
+    description: "Code after return/exit/die"
+
+  - name: after_throw
+    category: dead_code
+    pattern: '^\s*throw\s+new\s+'
+    applies_to: []
+    description: "Code after throw"
+
+html_context:
+  - name: outside_php_tags
+    category: html
+    pattern: '^\s*<(?!php|%)'
+    applies_to: [XSS]
+    description: "HTML outside PHP tags"
+
+  - name: html_comment
+    category: html
+    pattern: '<!--'
+    applies_to: [XSS]
+    description: "Inside HTML comment"
+
+safe_path_patterns:
+  - name: vendor_dir
+    category: safe_path
+    pattern: '(?:^|/)vendor/'
+    applies_to: []
+    description: "Vendor/library code"
+
+  - name: test_dir
+    category: safe_path
+    pattern: '(?:^|/)(?:test|tests|spec|__tests__)/'
+    applies_to: []
+    description: "Test code"
+
+  - name: example_dir
+    category: safe_path
+    pattern: '(?:^|/)(?:example|examples|sample|demo)/'
+    applies_to: []
+    description: "Example/demo code"
+
+  - name: doc_dir
+    category: safe_path
+    pattern: '(?:^|/)(?:doc|docs|documentation)/'
+    applies_to: []
+    description: "Documentation"
+
+prepared_statement_patterns:
+  - name: pdo_prepare
+    category: prepared_stmt
+    pattern: '->prepare\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "PDO prepared statement"
+
+  - name: bind_param
+    category: prepared_stmt
+    pattern: '->bind(?:Param|Value)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "Parameter binding"
+
+  - name: placeholder_question
+    category: prepared_stmt
+    pattern: '\?\s*[,\)]'
+    applies_to: [SQL_INJECTION]
+    description: "Placeholder ? in query"
+
+  - name: placeholder_named
+    category: prepared_stmt
+    pattern: ':\w+\s*[,\)]'
+    applies_to: [SQL_INJECTION]
+    description: "Named placeholder :param"
+
+  - name: wpdb_prepare
+    category: prepared_stmt
+    pattern: '\$wpdb->prepare\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "WordPress prepared statement"
+
+  - name: format_specifier
+    category: prepared_stmt
+    pattern: '%[dsfb]\b'
+    applies_to: [SQL_INJECTION]
+    description: "Format specifier in query"
+
+  - name: doctrine_parameter
+    category: prepared_stmt
+    pattern: '->setParameter\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "Doctrine parameter binding"
+
+  - name: pdo_execute
+    category: prepared_stmt
+    pattern: '->execute\s*\(\s*\['
+    applies_to: [SQL_INJECTION]
+    description: "PDO execute with array binding"
+
+  - name: pdo_execute_named
+    category: prepared_stmt
+    pattern: '->execute\s*\(\s*array\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "PDO execute with array"
+
+  - name: eloquent_where
+    category: prepared_stmt
+    pattern: '->where\s*\(\s*[''"][^''"]+[''"]'
+    applies_to: [SQL_INJECTION]
+    description: "Eloquent where clause"
+
+  - name: query_builder_where
+    category: prepared_stmt
+    pattern: '->(?:where|andWhere|orWhere)\s*\(\s*\['
+    applies_to: [SQL_INJECTION]
+    description: "Query builder array syntax"
+
+  - name: active_record
+    category: prepared_stmt
+    pattern: '->(?:find|findBy|findOneBy|findAll)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "Active record find methods"
+
+  - name: ci_query_builder
+    category: prepared_stmt
+    pattern: '\$this->db->(?:where|get|insert|update|delete)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "CodeIgniter query builder"
+
+type_cast_patterns:
+  - name: intval_cast
+    category: type_cast
+    pattern: '(?:intval|floatval|abs)\s*\('
+    applies_to: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    description: "Integer/float cast function"
+
+  - name: explicit_cast
+    category: type_cast
+    pattern: '\((?:int|integer|float|double|bool|boolean)\)\s*\$'
+    applies_to: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    description: "Explicit type cast"
+
+  - name: ctype_check
+    category: type_cast
+    pattern: 'ctype_(?:digit|alnum|alpha)\s*\('
+    applies_to: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    description: "ctype validation"
+
+  - name: is_numeric_check
+    category: type_cast
+    pattern: 'is_(?:numeric|int|integer|float|double)\s*\('
+    applies_to: [SQL_INJECTION, XSS]
+    description: "Type checking function"
+
+  - name: sprintf_int
+    category: type_cast
+    pattern: 'sprintf\s*\([^)]*%d'
+    applies_to: [SQL_INJECTION]
+    description: "sprintf with integer format"
+
+  - name: number_format
+    category: type_cast
+    pattern: 'number_format\s*\('
+    applies_to: [SQL_INJECTION, XSS]
+    description: "number_format function"
+
+validation_patterns:
+  - name: filter_var
+    category: validation
+    pattern: 'filter_var\s*\('
+    applies_to: [SQL_INJECTION, XSS, SSRF]
+    description: "filter_var validation"
+
+  - name: filter_input
+    category: validation
+    pattern: 'filter_input\s*\('
+    applies_to: [SQL_INJECTION, XSS]
+    description: "filter_input validation"
+
+  - name: preg_match_whitelist
+    category: validation
+    pattern: 'preg_match\s*\(\s*[''"].*?\[\^'
+    applies_to: [SQL_INJECTION, XSS, COMMAND_INJECTION, CODE_INJECTION]
+    description: "Regex whitelist validation"
+
+  - name: in_array_check
+    category: validation
+    pattern: 'in_array\s*\('
+    applies_to: [FILE_INCLUSION, OPEN_REDIRECT]
+    description: "in_array whitelist check"
+
+  - name: laravel_validate
+    category: validation
+    pattern: '\$request->validate\s*\('
+    applies_to: [SQL_INJECTION, XSS, COMMAND_INJECTION]
+    description: "Laravel validation"
+
+  - name: symfony_assert
+    category: validation
+    pattern: '@Assert\\'
+    applies_to: [SQL_INJECTION, XSS]
+    description: "Symfony assertion"
+
+auth_check_patterns:
+  - name: session_auth
+    category: auth_check
+    pattern: '\$_SESSION\s*\[\s*[''"](?:user|admin|logged|auth)'
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Session-based auth check"
+
+  - name: auth_function
+    category: auth_check
+    pattern: '(?:is_?admin|is_?logged|check_?auth|is_?authenticated)\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Auth check function"
+
+  - name: permission_check
+    category: auth_check
+    pattern: '(?:has_?permission|can|check_?access|authorize)\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Permission check"
+
+  - name: wp_current_user_can
+    category: auth_check
+    pattern: 'current_user_can\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "WordPress capability check"
+
+  - name: laravel_gate
+    category: auth_check
+    pattern: 'Gate::(?:allows|denies|check)\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Laravel Gate check"
+
+orm_patterns:
+  - name: eloquent_model
+    category: orm
+    pattern: '(?:Model|Eloquent)::(?:find|where|create|update)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "Eloquent ORM method"
+
+  - name: doctrine_dql
+    category: orm
+    pattern: '(?:createQueryBuilder|createQuery|DQL)'
+    applies_to: [SQL_INJECTION]
+    description: "Doctrine DQL"
+
+  - name: active_record_pattern
+    category: orm
+    pattern: '->(?:save|create|update_attributes|destroy)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "Active Record pattern"
+
+cms_safe_patterns:
+  - name: admin_panel_check
+    category: cms_safe
+    pattern: '(?:admin_panel|is_admin_area|backend)'
+    applies_to: [INFO_DISCLOSURE]
+    description: "Admin panel context"
+
+  - name: debug_guard
+    category: cms_safe
+    pattern: '(?:DEBUG|debug|WP_DEBUG|APP_DEBUG)\s*(?:===?\s*(?:true|false)|&&|\|\|)'
+    applies_to: [INFO_DISCLOSURE]
+    description: "Debug flag guard"
+
+  - name: error_handler
+    category: cms_safe
+    pattern: '(?:set_error_handler|set_exception_handler|register_shutdown_function)\s*\('
+    applies_to: [INFO_DISCLOSURE]
+    description: "Custom error handler"
+
+  - name: log_context
+    category: cms_safe
+    pattern: '(?:->log|error_log|syslog|Logger)\s*\('
+    applies_to: [INFO_DISCLOSURE]
+    description: "Logging context"
+
+  - name: cache_context
+    category: cms_safe
+    pattern: '(?:cache|Cache|redis|memcache)\s*(?:->|::)\s*(?:get|set|put|has|remember)\s*\('
+    applies_to: [WEAK_CRYPTO, RACE_CONDITION]
+    description: "Caching context"
+
+  - name: internal_function
+    category: cms_safe
+    pattern: '(?:private|protected)\s+(?:static\s+)?function\s+'
+    applies_to: [SSRF]
+    description: "Internal/private function"
+
+framework_safe_patterns:
+  - name: laravel_validated
+    category: framework
+    pattern: '\$request->validated\s*\('
+    applies_to: [SQL_INJECTION, XSS, COMMAND_INJECTION, MASS_ASSIGNMENT]
+    description: "Laravel validated input"
+
+  - name: laravel_authorize
+    category: framework
+    pattern: '\$this->authorize\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Laravel authorization"
+
+  - name: laravel_middleware
+    category: framework
+    pattern: 'middleware\s*\(\s*[''"]auth'
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Laravel auth middleware"
+
+  - name: symfony_param_converter
+    category: framework
+    pattern: '@ParamConverter'
+    applies_to: [SQL_INJECTION, IDOR]
+    description: "Symfony ParamConverter"
+
+  - name: symfony_security
+    category: framework
+    pattern: '@IsGranted\s*\('
+    applies_to: [AUTH_BYPASS, IDOR]
+    description: "Symfony security annotation"
+
+  - name: ci_active_record
+    category: framework
+    pattern: '\$this->db->(?:where|get|insert|update)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "CodeIgniter Active Record"
+
+  - name: yii_active_record
+    category: framework
+    pattern: '::find\(\)->(?:where|andWhere)\s*\('
+    applies_to: [SQL_INJECTION]
+    description: "Yii Active Record"
+
+  - name: cakephp_orm
+    category: framework
+    pattern: '->find\s*\(\s*[''"]all[''"]'
+    applies_to: [SQL_INJECTION]
+    description: "CakePHP ORM find"
+
+ssl_context_patterns:
+  - name: dev_environment
+    category: ssl_context
+    pattern: '(?:dev|development|local|test|staging|sandbox)'
+    applies_to: [SSL_TLS_MISCONFIG]
+    description: "Development environment context"
+
+  - name: docker_internal
+    category: ssl_context
+    pattern: '(?:localhost|127\.0\.0\.1|::1|docker|container)'
+    applies_to: [SSL_TLS_MISCONFIG]
+    description: "Internal/docker connection"
+
+cookie_context_patterns:
+  - name: cookie_options_array
+    category: cookie_context
+    pattern: 'session_set_cookie_params\s*\(\s*\['
+    applies_to: [INSECURE_COOKIE]
+    description: "PHP 7.3+ cookie options array"
+
+  - name: session_strict_mode
+    category: cookie_context
+    pattern: 'session\.use_strict_mode\s*=\s*(?:1|true|on)'
+    applies_to: [SESSION_FIXATION]
+    description: "Session strict mode enabled"
+
+constant_patterns:
+  - name: constant_string_only
+    category: constant
+    pattern: '(?:echo|print)\s+[''"][^$]+[''"]'
+    applies_to: [XSS]
+    description: "Output of constant string only"
+
+  - name: static_file_path
+    category: constant
+    pattern: '(?:include|require)(?:_once)?\s*[\(]?\s*[''"][^$]+[''"]'
+    applies_to: [FILE_INCLUSION]
+    description: "Static file path (no variables)"
+
+  - name: config_constant
+    category: constant
+    pattern: '(?:define|const)\s+\w+\s*=\s*[''"][^$]+[''"]'
+    applies_to: [HARDCODED_CREDS]
+    description: "Configuration constant"
+
+migration_patterns:
+  - name: migration_file
+    category: migration
+    pattern: '(?:Migration|migration|migrate|schema|CreateTable|AlterTable)'
+    applies_to: [SQL_INJECTION]
+    description: "Database migration file"
+
+  - name: seeder_file
+    category: migration
+    pattern: '(?:Seeder|Factory|factory|seed)'
+    applies_to: [SQL_INJECTION, HARDCODED_CREDS]
+    description: "Database seeder/factory"
+
+  - name: fixture_file
+    category: migration
+    pattern: '(?:fixture|Fixture|mock|Mock|stub|Stub)'
+    applies_to: [SQL_INJECTION, HARDCODED_CREDS, WEAK_CRYPTO]
+    description: "Test fixture/mock"
+
+crypto_context_patterns:
+  - name: bcrypt_hash
+    category: crypto
+    pattern: 'password_hash\s*\('
+    applies_to: [WEAK_CRYPTO]
+    description: "Already using password_hash"
+
+  - name: argon2_hash
+    category: crypto
+    pattern: 'PASSWORD_ARGON2'
+    applies_to: [WEAK_CRYPTO]
+    description: "Using Argon2 hashing"
+
+  - name: sodium_crypto
+    category: crypto
+    pattern: 'sodium_crypto_'
+    applies_to: [WEAK_CRYPTO, INSECURE_RANDOM]
+    description: "Using libsodium"
+
+  - name: random_bytes_usage
+    category: crypto
+    pattern: 'random_bytes\s*\('
+    applies_to: [INSECURE_RANDOM]
+    description: "Using CSPRNG"
+
+deserialization_safe_patterns:
+  - name: allowed_classes_false
+    category: deser_safe
+    pattern: 'allowed_classes.*false'
+    applies_to: [DESERIALIZATION]
+    description: "Restricted deserialization"
+
+  - name: allowed_classes_list
+    category: deser_safe
+    pattern: 'allowed_classes.*\['
+    applies_to: [DESERIALIZATION]
+    description: "Whitelist deserialization"
+
+  - name: json_alternative
+    category: deser_safe
+    pattern: 'json_decode\s*\('
+    applies_to: [DESERIALIZATION]
+    description: "Using JSON instead of serialize"
+
+permission_context_patterns:
+  - name: installer_context
+    category: permission_context
+    pattern: '(?:install|setup|installer|Setup)'
+    applies_to: [PERMISSION_ISSUES]
+    description: "Installer context"
+
+  - name: cache_directory
+    category: permission_context
+    pattern: '(?:cache|tmp|temp|upload)/'
+    applies_to: [PERMISSION_ISSUES]
+    description: "Cache/temp directory"
+
+nosql_safe_patterns:
+  - name: mongodb_type_check
+    category: nosql_safe
+    pattern: '(?:is_string|is_int|is_numeric|ctype_)\s*\('
+    applies_to: [NOSQL_INJECTION]
+    description: "Type check before NoSQL operation"
+
+  - name: mongodb_operator_filter
+    category: nosql_safe
+    pattern: 'array_filter.*\$(?!where)'
+    applies_to: [NOSQL_INJECTION]
+    description: "Filtering MongoDB operators"
